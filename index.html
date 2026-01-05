@@ -3,701 +3,528 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER TRACKER</title>
+    <title>PPL CYBER V2.0</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <!-- Google Fonts: Orbitron for Sci-Fi look -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --neon-blue: #00f3ff;
-            --neon-green: #0aff00;
             --neon-red: #ff0055;
-            --neon-purple: #bc13fe;
-            --bg-dark: #05050a;
-            --glass: rgba(20, 20, 35, 0.7);
+            --neon-amber: #ffaa00;
+            --bg-dark: #030305;
+            --glass: rgba(10, 15, 30, 0.85);
         }
 
         body {
             background-color: var(--bg-dark);
             color: #e2e8f0;
             font-family: 'Rajdhani', sans-serif;
-            -webkit-tap-highlight-color: transparent;
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(188, 19, 254, 0.05) 0%, transparent 40%);
-            background-attachment: fixed;
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow: hidden; /* Prevent pull-to-refresh on mobile */
         }
 
-        .font-cyber {
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        /* Custom Scrollbar */
+        .font-cyber { font-family: 'Orbitron', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Neon Glow Effects */
-        .glow-text-blue { text-shadow: 0 0 10px rgba(0, 243, 255, 0.7); }
-        .glow-text-green { text-shadow: 0 0 10px rgba(10, 255, 0, 0.7); }
-        .glow-border-blue { box-shadow: 0 0 15px rgba(0, 243, 255, 0.3), inset 0 0 5px rgba(0, 243, 255, 0.1); }
         
-        .glass-panel {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
+        .cyber-border {
+            position: relative;
+            background: rgba(5, 5, 10, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
         }
 
         .cyber-input {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid #334155;
             color: var(--neon-blue);
             font-family: 'Orbitron', sans-serif;
-            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            transition: all 0.2s;
         }
         .cyber-input:focus {
             border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
             outline: none;
         }
 
-        .btn-cyber {
-            background: linear-gradient(90deg, rgba(0,243,255,0.1) 0%, rgba(0,243,255,0.2) 100%);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s;
+        /* Strict Lock Overlay Animation */
+        @keyframes lockdown {
+            0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+            100% { background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
         }
-        .btn-cyber::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0,243,255,0.4), transparent);
-            transition: 0.5s;
-        }
-        .btn-cyber:hover::before { left: 100%; }
-        .btn-cyber:active { transform: scale(0.98); }
+        .lock-active { animation: lockdown 0.3s forwards; }
 
-        .btn-start {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-            font-weight: 900;
-            letter-spacing: 2px;
-        }
+        .muscle-bar-bg { background: rgba(255,255,255,0.1); }
+        .muscle-bar-fill { box-shadow: 0 0 10px currentColor; transition: width 1s ease-in-out; }
 
-        /* Animations */
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-        .scanline-effect::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 255, 255, 0.02) 51%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 99;
-        }
     </style>
 </head>
-<body class="scanline-effect">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- DATA PROGRAM (Revised with Recovery Hours) ---
+        // --- DEFINISI OTOT & PROGRAM ---
+        const MUSCLE_GROUPS = {
+            CHEST: 'Dada', BACK: 'Punggung', LEGS: 'Kaki', 
+            SHOULDERS: 'Bahu', ARMS: 'Lengan', CARDIO: 'Jantung'
+        };
+
         const PROGRAM_DATA = {
             1: {
                 name: "PUSH: STRENGTH",
-                target: "Bench Naik, Triceps Kuat",
-                recoveryHours: 48, // Heavy Compound
+                muscles: ['CHEST', 'SHOULDERS', 'ARMS'], // Triceps included in Arms
                 exercises: [
-                    { id: 'p1_1', name: 'Incline Bench Machine', sets: 5, reps: '4', weight: '85-90', unit: 'kg' },
-                    { id: 'p1_2', name: 'Flat Barbell Bench Press', sets: 4, reps: '5', weight: '70-80', unit: 'kg' },
-                    { id: 'p1_3', name: 'Seated Shoulder Press', sets: 3, reps: '6-8', weight: '40-55', unit: 'kg' },
-                    { id: 'p1_4', name: 'Chest Fly / Pec Deck', sets: 3, reps: '12', weight: '45-60', unit: 'kg' },
-                    { id: 'p1_5', name: 'Triceps Pushdown (Cable)', sets: 3, reps: '10-12', weight: '30-40', unit: 'kg' }
+                    { id: 'p1_1', name: 'Incline Bench Machine', sets: 5, targetReps: '4', targetWeight: '85-90', unit: 'kg' },
+                    { id: 'p1_2', name: 'Flat Barbell Bench Press', sets: 4, targetReps: '5', targetWeight: '70-80', unit: 'kg' },
+                    { id: 'p1_3', name: 'Seated Shoulder Press', sets: 3, targetReps: '6-8', targetWeight: '40-55', unit: 'kg' },
+                    { id: 'p1_4', name: 'Chest Fly / Pec Deck', sets: 3, targetReps: '12', targetWeight: '45-60', unit: 'kg' },
+                    { id: 'p1_5', name: 'Triceps Pushdown', sets: 3, targetReps: '10-12', targetWeight: '30-40', unit: 'kg' }
                 ]
             },
             2: {
                 name: "PULL: HYPERTROPHY",
-                target: "Back Tebal & Lebar",
-                recoveryHours: 48, // Heavy Compound Back
+                muscles: ['BACK', 'ARMS', 'SHOULDERS'], // Rear delts, Biceps
                 exercises: [
-                    { id: 'p2_1', name: 'Lat Pulldown / Pull Up', sets: 4, reps: '6-8', weight: '65-80', unit: 'kg' },
-                    { id: 'p2_2', name: 'Chest-Supported Row', sets: 4, reps: '6-8', weight: '60-80', unit: 'kg' },
-                    { id: 'p2_3', name: 'Seated Cable Row', sets: 3, reps: '8-10', weight: '55-70', unit: 'kg' },
-                    { id: 'p2_4', name: 'Face Pull', sets: 3, reps: '12-15', weight: '20-30', unit: 'kg' },
-                    { id: 'p2_5', name: 'EZ Bar Curl', sets: 3, reps: '8-10', weight: '25-35', unit: 'kg (Total)' }
+                    { id: 'p2_1', name: 'Lat Pulldown', sets: 4, targetReps: '6-8', targetWeight: '65-80', unit: 'kg' },
+                    { id: 'p2_2', name: 'Chest-Supported Row', sets: 4, targetReps: '6-8', targetWeight: '60-80', unit: 'kg' },
+                    { id: 'p2_3', name: 'Seated Cable Row', sets: 3, targetReps: '8-10', targetWeight: '55-70', unit: 'kg' },
+                    { id: 'p2_4', name: 'Face Pull', sets: 3, targetReps: '12-15', targetWeight: '20-30', unit: 'kg' },
+                    { id: 'p2_5', name: 'EZ Bar Curl', sets: 3, targetReps: '8-10', targetWeight: '25-35', unit: 'kg' }
                 ]
             },
             3: {
                 name: "LEGS: STRENGTH",
-                target: "Kaki Kuat, HNP Safe",
-                recoveryHours: 48, // Heavy Legs
+                muscles: ['LEGS'],
                 exercises: [
-                    { id: 'p3_1', name: 'Leg Press', sets: 4, reps: '8-10', weight: '180-240', unit: 'kg' },
-                    { id: 'p3_2', name: 'Bulgarian Split Squat', sets: 3, reps: '8', weight: '22-26', unit: 'kg (DB)' },
-                    { id: 'p3_3', name: 'Deadlift (Controlled)', sets: 4, reps: '4', weight: '120-130', unit: 'kg', note: 'MAX 155kg (PR Only)' },
-                    { id: 'p3_4', name: 'Seated / Lying Leg Curl', sets: 3, reps: '10-12', weight: '35-50', unit: 'kg' },
-                    { id: 'p3_5', name: 'Standing Calf Raise', sets: 4, reps: '12-15', weight: '70-100', unit: 'kg' }
+                    { id: 'p3_1', name: 'Leg Press', sets: 4, targetReps: '8-10', targetWeight: '180-240', unit: 'kg' },
+                    { id: 'p3_2', name: 'Bulgarian Split Squat', sets: 3, targetReps: '8', targetWeight: '22-26', unit: 'kg (DB)' },
+                    { id: 'p3_3', name: 'Deadlift', sets: 4, targetReps: '4', targetWeight: '120-130', unit: 'kg' },
+                    { id: 'p3_4', name: 'Leg Curl', sets: 3, targetReps: '10-12', targetWeight: '35-50', unit: 'kg' },
+                    { id: 'p3_5', name: 'Calf Raise', sets: 4, targetReps: '12-15', targetWeight: '70-100', unit: 'kg' }
                 ]
             },
-            4: {
-                name: "SYSTEM RECHARGE",
-                type: "rest",
-                recoveryHours: 24, // Active Recovery / Rest
-                target: "CNS & Joint Recovery",
-                checklist: [
-                    "Active Recovery: Jalan/Sepeda (20-30 min)",
-                    "Mobility: Pinggul & Thoracic",
-                    "Core: McGill Big 3 (Light)",
-                    "Sleep: 7-8 Jam Berkualitas"
-                ]
-            },
+            4: { name: "REST / RECOVERY", type: "rest", muscles: ['CARDIO'] }, // Active recovery
             5: {
                 name: "UPPER: VOLUME",
-                target: "Growth & Pump",
-                recoveryHours: 24, // Small Muscles / Pump (As requested)
+                muscles: ['CHEST', 'BACK', 'SHOULDERS', 'ARMS'],
                 exercises: [
-                    { id: 'p5_1', name: 'Incline Bench Machine', sets: 4, reps: '8', weight: '75-80', unit: 'kg' },
-                    { id: 'p5_2', name: 'Cable Row', sets: 3, reps: '10', weight: '55-70', unit: 'kg' },
-                    { id: 'p5_3', name: 'Chest Fly Machine', sets: 3, reps: '12', weight: '45-60', unit: 'kg' },
-                    { id: 'p5_4', name: 'Lateral Raise (DB)', sets: 4, reps: '15', weight: '10-12', unit: 'kg' },
-                    { id: 'p5_5', name: 'Overhead Triceps Ext', sets: 3, reps: '12', weight: '25-35', unit: 'kg' },
-                    { id: 'p5_6', name: 'EZ Bar / Machine Curl', sets: 3, reps: '12', weight: '20-30', unit: 'kg' }
+                    { id: 'p5_1', name: 'Incline Bench Machine', sets: 4, targetReps: '8', targetWeight: '75-80', unit: 'kg' },
+                    { id: 'p5_2', name: 'Cable Row', sets: 3, targetReps: '10', targetWeight: '55-70', unit: 'kg' },
+                    { id: 'p5_3', name: 'Chest Fly Machine', sets: 3, targetReps: '12', targetWeight: '45-60', unit: 'kg' },
+                    { id: 'p5_4', name: 'Lateral Raise', sets: 4, targetReps: '15', targetWeight: '10-12', unit: 'kg' },
+                    { id: 'p5_5', name: 'Overhead Triceps Ext', sets: 3, targetReps: '12', targetWeight: '25-35', unit: 'kg' },
+                    { id: 'p5_6', name: 'EZ Bar Curl', sets: 3, targetReps: '12', targetWeight: '20-30', unit: 'kg' }
                 ]
             },
             6: {
                 name: "LOWER: HYPERTROPHY",
-                target: "Size & Conditioning",
-                recoveryHours: 48, // Legs
+                muscles: ['LEGS'],
                 exercises: [
-                    { id: 'p6_1', name: 'Hack / Pendulum Squat', sets: 4, reps: '10', weight: '60-100', unit: 'kg (Plate)' },
-                    { id: 'p6_2', name: 'Hip Thrust', sets: 3, reps: '8-10', weight: '90-120', unit: 'kg' },
-                    { id: 'p6_3', name: 'RDL (Strict Form)', sets: 3, reps: '8', weight: '90-100', unit: 'kg' },
-                    { id: 'p6_4', name: 'Leg Extension / Step Up', sets: 3, reps: '12', weight: '35-50', unit: 'kg' },
-                    { id: 'p6_5', name: 'Seated Calf Raise', sets: 4, reps: '15', weight: '40-60', unit: 'kg' }
+                    { id: 'p6_1', name: 'Hack Squat', sets: 4, targetReps: '10', targetWeight: '60-100', unit: 'kg' },
+                    { id: 'p6_2', name: 'Hip Thrust', sets: 3, targetReps: '8-10', targetWeight: '90-120', unit: 'kg' },
+                    { id: 'p6_3', name: 'RDL', sets: 3, targetReps: '8', targetWeight: '90-100', unit: 'kg' },
+                    { id: 'p6_4', name: 'Leg Extension', sets: 3, targetReps: '12', targetWeight: '35-50', unit: 'kg' },
+                    { id: 'p6_5', name: 'Seated Calf Raise', sets: 4, targetReps: '15', targetWeight: '40-60', unit: 'kg' }
                 ]
             },
-            0: { // Sunday
-                name: "OFF / ZONE 2",
-                type: "rest",
-                recoveryHours: 24, // Active Recovery
-                target: "Opsional Cardio",
-                checklist: [
-                    "Cardio Zone 2 (30-40 Menit)",
-                    "Total Body Stretching",
-                    "Meal Prep Minggu Depan"
-                ]
-            }
+            0: { name: "OFF / CARDIO", type: "rest", muscles: ['CARDIO'] }
         };
 
         const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
 
-        // --- COMPONENTS ---
-
+        // --- HELPER HOOKS ---
         const useWakeLock = () => {
             const wakeLock = useRef(null);
-            const requestWakeLock = async () => {
+            const request = async () => {
                 if ('wakeLock' in navigator) {
-                    try {
-                        wakeLock.current = await navigator.wakeLock.request('screen');
-                    } catch (err) { console.error(err); }
+                    try { wakeLock.current = await navigator.wakeLock.request('screen'); } catch(e){}
                 }
             };
-            const releaseWakeLock = async () => {
-                if (wakeLock.current) {
-                    await wakeLock.current.release();
-                    wakeLock.current = null;
-                }
-            };
+            const release = async () => { if(wakeLock.current) await wakeLock.current.release(); };
             useEffect(() => {
-                document.addEventListener('visibilitychange', async () => {
-                    if (wakeLock.current !== null && document.visibilityState === 'visible') {
-                        await requestWakeLock();
-                    }
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') request();
                 });
-                return () => releaseWakeLock();
+                request();
+                return () => release();
             }, []);
-            return { requestWakeLock, releaseWakeLock };
         };
 
+        // --- MAIN APP ---
         const App = () => {
             const [view, setView] = useState('dashboard');
-            const [history, setHistory] = useState([]);
-            // Auto detect day
             const [activeDay, setActiveDay] = useState(new Date().getDay());
-            const [streak, setStreak] = useState(0);
+            // Format: { CHEST: timestamp, LEGS: timestamp }
+            const [muscleHistory, setMuscleHistory] = useState({});
+            const [workoutHistory, setWorkoutHistory] = useState([]);
 
             useEffect(() => {
-                const savedHistory = localStorage.getItem('ppl_cyber_history');
-                
-                if (savedHistory) {
-                    const parsed = JSON.parse(savedHistory);
-                    setHistory(parsed);
-                    setStreak(parsed.length);
-                }
+                const savedMuscles = localStorage.getItem('ppl_v2_muscles');
+                const savedHistory = localStorage.getItem('ppl_v2_history');
+                if (savedMuscles) setMuscleHistory(JSON.parse(savedMuscles));
+                if (savedHistory) setWorkoutHistory(JSON.parse(savedHistory));
             }, []);
 
-            const saveHistory = (newSession) => {
-                const updated = [newSession, ...history];
-                setHistory(updated);
-                localStorage.setItem('ppl_cyber_history', JSON.stringify(updated));
-                setStreak(prev => prev + 1);
-            };
+            const saveSession = (sessionData, musclesTrained) => {
+                // 1. Save Workout Log
+                const newHistory = [sessionData, ...workoutHistory];
+                setWorkoutHistory(newHistory);
+                localStorage.setItem('ppl_v2_history', JSON.stringify(newHistory));
 
-            const toggleFullScreen = () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch((e) => console.log(e));
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                }
+                // 2. Update Muscle Recovery Timestamps (Reset to NOW)
+                const now = Date.now();
+                const newMuscleState = { ...muscleHistory };
+                musclesTrained.forEach(m => {
+                    newMuscleState[m] = now;
+                });
+                setMuscleHistory(newMuscleState);
+                localStorage.setItem('ppl_v2_muscles', JSON.stringify(newMuscleState));
+
+                setView('dashboard');
             };
 
             return (
-                <div className="min-h-screen pb-24 relative overflow-hidden">
-                    {/* Background Decor */}
-                    <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-                        <div className="absolute top-1/4 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl"></div>
-                        <div className="absolute bottom-1/4 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
-                    </div>
-
-                    {/* Top HUD */}
-                    <div className="relative z-50 flex justify-between items-center p-4 glass-panel mb-4">
+                <div className="min-h-screen text-slate-200 pb-20 selection:bg-cyan-500 selection:text-black">
+                    {/* Header */}
+                    <header className="p-4 border-b border-slate-800 bg-black/50 backdrop-blur sticky top-0 z-10 flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <div className="w-2 h-8 bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>
-                            <div>
-                                <h1 className="text-xl font-black font-cyber text-white tracking-widest glow-text-blue">PPL.OS</h1>
-                                <div className="text-[10px] text-cyan-400 tracking-[0.2em] uppercase">System Online</div>
-                            </div>
+                            <i data-lucide="cpu" className="text-cyan-400"></i>
+                            <span className="font-cyber font-bold text-lg tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></span>
                         </div>
-                        <button onClick={toggleFullScreen} className="p-2 border border-cyan-900 rounded bg-black/50 text-cyan-400">
-                            <i data-lucide="maximize" className="w-5 h-5"></i>
-                        </button>
-                    </div>
+                        <div className="text-xs font-mono text-slate-500">V2.0.1 BUILD</div>
+                    </header>
 
-                    <div className="relative z-10">
-                        {view === 'dashboard' && <Dashboard 
-                            activeDay={activeDay} 
-                            setActiveDay={setActiveDay}
-                            startWorkout={() => setView('workout')} 
-                            streak={streak}
-                            history={history}
-                        />}
-                        {view === 'workout' && <ActiveWorkout 
-                            dayId={activeDay} 
-                            onFinish={(session) => { saveHistory(session); setView('dashboard'); }}
-                            onCancel={() => setView('dashboard')}
-                            history={history}
-                        />}
-                        {view === 'history' && <HistoryView history={history} onBack={() => setView('dashboard')} />}
-                    </div>
-
-                    {/* Bottom Nav */}
-                    {view === 'dashboard' && (
-                        <nav className="fixed bottom-0 left-0 right-0 glass-panel flex justify-around p-4 z-50 border-t border-cyan-900/50">
-                            <NavBtn icon="cpu" label="DASHBOARD" active={true} onClick={() => setView('dashboard')} />
-                            <NavBtn icon="database" label="LOGS" onClick={() => setView('history')} />
-                        </nav>
-                    )}
+                    {view === 'dashboard' && <Dashboard 
+                        activeDay={activeDay} 
+                        setActiveDay={setActiveDay} 
+                        startWorkout={() => setView('workout')}
+                        muscleHistory={muscleHistory}
+                        history={workoutHistory}
+                    />}
+                    
+                    {view === 'workout' && <WorkoutSession 
+                        dayId={activeDay} 
+                        onFinish={saveSession}
+                        onAbort={() => setView('dashboard')}
+                        lastLog={workoutHistory.find(h => h.programId == activeDay)}
+                    />}
                 </div>
             );
         };
 
-        const NavBtn = ({ icon, label, active, onClick }) => (
-            <button onClick={onClick} className={`flex flex-col items-center gap-1 ${active ? 'text-cyan-400 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]' : 'text-slate-600'}`}>
-                <i data-lucide={icon} className="w-6 h-6"></i>
-                <span className="text-[10px] font-cyber tracking-widest">{label}</span>
-            </button>
-        );
-
-        const Dashboard = ({ activeDay, setActiveDay, startWorkout, streak, history }) => {
-            const todayIndex = new Date().getDay();
+        // --- DASHBOARD: MUSCLE MATRIX ---
+        const Dashboard = ({ activeDay, setActiveDay, startWorkout, muscleHistory, history }) => {
             const program = PROGRAM_DATA[activeDay];
             const isRest = program.type === 'rest';
-            
-            // --- AUTO RECOVERY LOGIC ---
-            const [recoveryState, setRecoveryState] = useState({ score: 100, label: "READY", color: "text-white" });
 
-            useEffect(() => {
-                const calculateRecovery = () => {
-                    if (history.length === 0) {
-                        setRecoveryState({ score: 100, label: "SYSTEM OPTIMAL", color: "text-cyan-400", timeStr: "" });
-                        return;
-                    }
+            // Calculate Recovery for specific muscle
+            const getRecovery = (muscleName) => {
+                const lastTrained = muscleHistory[muscleName];
+                if (!lastTrained) return 100;
 
-                    const lastSession = history[0]; // Assuming newest is first
-                    const lastProgram = PROGRAM_DATA[lastSession.programId];
-                    if (!lastProgram) return;
+                // Logic: Large muscles 48h, Small/Cardio 24h
+                const recoveryTime = (muscleName === 'LEGS' || muscleName === 'BACK' || muscleName === 'CHEST') ? 48 : 24;
+                const hoursPassed = (Date.now() - lastTrained) / (1000 * 60 * 60);
+                
+                if (hoursPassed >= recoveryTime) return 100;
+                return Math.floor((hoursPassed / recoveryTime) * 100);
+            };
 
-                    const requiredHours = lastProgram.recoveryHours || 24;
-                    const lastTime = new Date(lastSession.date).getTime();
-                    const now = Date.now();
-                    const diffHours = (now - lastTime) / (1000 * 60 * 60);
-
-                    if (diffHours >= requiredHours) {
-                        setRecoveryState({ score: 100, label: "SYSTEM RESTORED", color: "text-cyan-400", timeStr: "READY" });
-                    } else {
-                        const remaining = requiredHours - diffHours;
-                        const score = Math.floor((diffHours / requiredHours) * 100);
-                        const rHours = Math.floor(remaining);
-                        const rMins = Math.floor((remaining - rHours) * 60);
-                        
-                        setRecoveryState({ 
-                            score: score, 
-                            label: "REPAIRING...", 
-                            color: "text-yellow-400",
-                            timeStr: `-${rHours}h ${rMins}m`
-                        });
-                    }
-                };
-
-                calculateRecovery();
-                const interval = setInterval(calculateRecovery, 60000); // Update every min
-                return () => clearInterval(interval);
-            }, [history]);
-
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [activeDay]);
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
             return (
-                <div className="px-4 space-y-6">
-                    {/* Date Selector */}
-                    <div className="flex items-center justify-between bg-black/40 border border-slate-800 rounded-lg p-2 backdrop-blur-sm">
-                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)} className="p-2 text-slate-400 hover:text-white"><i data-lucide="chevron-left"></i></button>
+                <div className="p-4 space-y-6">
+                    {/* Day Selector */}
+                    <div className="flex justify-between items-center cyber-border rounded-lg p-3">
+                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><i data-lucide="chevron-left"></i></button>
                         <div className="text-center">
-                            <div className="text-[10px] text-slate-500 tracking-widest font-cyber uppercase">
-                                {activeDay === todayIndex ? <span className="text-green-400 animate-pulse">● DETECTED: TODAY</span> : "SIMULATION MODE"}
+                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">
+                                {activeDay === new Date().getDay() ? "TODAY'S PROTOCOL" : "PREVIEW MODE"}
                             </div>
-                            <div className="text-xl font-bold font-cyber text-white glow-text-blue">{DAYS_MAP[activeDay]}</div>
+                            <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
                         </div>
-                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)} className="p-2 text-slate-400 hover:text-white"><i data-lucide="chevron-right"></i></button>
+                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><i data-lucide="chevron-right"></i></button>
                     </div>
 
-                    {/* Mission Card */}
-                    <div className={`relative p-1 rounded-2xl overflow-hidden ${isRest ? 'glow-border-green' : 'glow-border-blue'}`}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-purple-500/20"></div>
-                        <div className="relative bg-black/80 p-6 rounded-xl backdrop-blur-xl border border-white/10">
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h2 className="text-2xl font-black font-cyber italic text-white leading-none mb-1">{program.name}</h2>
-                                    <p className="text-sm text-slate-400 font-mono">{program.target}</p>
-                                </div>
-                                <div className={`p-2 rounded border ${isRest ? 'border-green-500 text-green-400' : 'border-cyan-500 text-cyan-400'}`}>
-                                    <i data-lucide={isRest ? "battery-charging" : "crosshair"} className="w-6 h-6"></i>
-                                </div>
-                            </div>
+                    {/* Muscle Status Matrix (The new "Body Recovery") */}
+                    <div className="cyber-border rounded-xl p-4 bg-black/40">
+                        <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
+                            <i data-lucide="activity" className="text-cyan-400 w-4 h-4"></i>
+                            <h3 className="font-cyber text-sm text-white tracking-widest">BIOMETRIC RECOVERY MATRIX</h3>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                            {Object.entries(MUSCLE_GROUPS).map(([key, label]) => {
+                                const percentage = getRecovery(key);
+                                let color = "text-cyan-400";
+                                let barColor = "bg-cyan-400";
+                                if (percentage < 40) { color = "text-red-500"; barColor = "bg-red-500"; }
+                                else if (percentage < 90) { color = "text-amber-400"; barColor = "bg-amber-400"; }
 
-                            {isRest ? (
-                                <div className="space-y-3 mt-4">
-                                    <div className="text-xs font-cyber text-green-400 uppercase tracking-wider mb-2 border-b border-green-900 pb-1">Recovery Protocol</div>
-                                    {program.checklist.map((item, idx) => (
-                                        <label key={idx} className="flex items-center gap-3 p-3 bg-green-900/10 border border-green-900/30 rounded cursor-pointer hover:bg-green-900/20 transition">
-                                            <input type="checkbox" className="accent-green-500 w-4 h-4" />
-                                            <span className="text-sm text-slate-300">{item}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            ) : (
-                                <button onClick={startWorkout} className="w-full btn-start py-4 rounded-lg mt-4 font-cyber text-lg uppercase clip-path-polygon hover:brightness-110 transition-all">
-                                    INITIALIZE WORKOUT
-                                </button>
-                            )}
+                                return (
+                                    <div key={key} className="space-y-1">
+                                        <div className="flex justify-between text-xs font-mono">
+                                            <span className="text-slate-400">{label}</span>
+                                            <span className={`font-bold ${color}`}>{percentage}%</span>
+                                        </div>
+                                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                            <div className={`h-full ${barColor} shadow-[0_0_8px_currentColor]`} style={{ width: `${percentage}%` }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* Stats HUD */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-black/60 border border-slate-800 p-4 rounded-xl relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-cyan-500/5 group-hover:bg-cyan-500/10 transition"></div>
-                            <div className="relative z-10">
-                                <div className="text-[10px] text-slate-500 font-cyber mb-1">STREAK COUNT</div>
-                                <div className="text-3xl font-bold text-white font-cyber">{streak}</div>
-                                <div className="w-full h-1 bg-slate-800 mt-2 rounded overflow-hidden">
-                                    <div className="h-full bg-cyan-500 w-1/3"></div>
-                                </div>
-                            </div>
+                    {/* Workout Card */}
+                    <div className="cyber-border rounded-xl p-5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                            <i data-lucide={isRest ? "coffee" : "dumbbell"} width={80} height={80}></i>
+                        </div>
+                        <h2 className="text-2xl font-cyber font-black text-white italic">{program.name}</h2>
+                        <div className="text-xs text-slate-400 mt-1 font-mono mb-6">
+                            TARGET: {program.muscles ? program.muscles.map(m => MUSCLE_GROUPS[m]).join(' + ') : 'Recovery'}
                         </div>
 
-                        <div className="bg-black/60 border border-slate-800 p-4 rounded-xl">
-                            <div className="flex justify-between items-center mb-2">
-                                <div className="text-[10px] text-slate-500 font-cyber">SYSTEM REPAIR</div>
-                                <div className={`text-xs font-bold font-mono ${recoveryState.color}`}>{recoveryState.score}%</div>
+                        {!isRest ? (
+                            <button onClick={startWorkout} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 transition-all hover:tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.5)]">
+                                <i data-lucide="play-circle" className="w-5 h-5"></i>
+                                INITIATE SEQUENCE
+                            </button>
+                        ) : (
+                            <div className="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm font-mono text-center">
+                                SYSTEM COOLING DOWN...
                             </div>
-                            
-                            {/* Recovery Bar */}
-                            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-2">
-                                <div 
-                                    className={`h-full transition-all duration-1000 ${recoveryState.score < 100 ? 'bg-yellow-500 animate-pulse' : 'bg-cyan-400'}`}
-                                    style={{ width: `${recoveryState.score}%` }}
-                                ></div>
-                            </div>
-
-                            <div className="flex justify-between items-end">
-                                <span className={`text-[10px] font-cyber tracking-widest ${recoveryState.color}`}>{recoveryState.label}</span>
-                                <span className="text-xs font-mono font-bold text-white">{recoveryState.timeStr}</span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        const ActiveWorkout = ({ dayId, onFinish, onCancel, history }) => {
-            const { requestWakeLock } = useWakeLock();
+        // --- WORKOUT SESSION: THE COMPLEX LOGIC ---
+        const WorkoutSession = ({ dayId, onFinish, onAbort, lastLog }) => {
+            useWakeLock();
             const program = PROGRAM_DATA[dayId];
-            const [startTime] = useState(Date.now());
-            const [timer, setTimer] = useState(0);
-            const [exerciseData, setExerciseData] = useState({});
-            const [restTimer, setRestTimer] = useState(0);
+            const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
+            const [currentSetIdx, setCurrentSetIdx] = useState(0);
+            
+            // State untuk input saat ini
+            const [inputWeight, setInputWeight] = useState('');
+            const [inputReps, setInputReps] = useState('');
+            
+            // State untuk Lock Rest
             const [isResting, setIsResting] = useState(false);
-            const [completedSets, setCompletedSets] = useState(0);
+            const [restTimer, setRestTimer] = useState(0);
 
-            const totalSets = program.exercises.reduce((acc, ex) => acc + ex.sets, 0);
-            const progress = Math.round((completedSets / totalSets) * 100);
+            // Menyimpan data yang sudah selesai
+            // Format: { exId: [ {weight, reps}, ... ] }
+            const [sessionResults, setSessionResults] = useState({});
 
-            useEffect(() => { requestWakeLock(); }, []);
+            const currentExercise = program.exercises[currentExerciseIdx];
+            const isLastExercise = currentExerciseIdx === program.exercises.length - 1;
+            const isLastSet = currentSetIdx === currentExercise.sets - 1;
 
-            useEffect(() => {
-                const interval = setInterval(() => setTimer(Math.floor((Date.now() - startTime) / 1000)), 1000);
-                return () => clearInterval(interval);
-            }, []);
-
+            // Timer logika
             useEffect(() => {
                 let interval;
                 if (isResting && restTimer > 0) {
-                    interval = setInterval(() => setRestTimer(t => t - 1), 1000);
-                } else if (restTimer === 0) {
+                    interval = setInterval(() => setRestTimer(prev => prev - 1), 1000);
+                } else if (isResting && restTimer === 0) {
+                    // Unlock
                     setIsResting(false);
                 }
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
 
-            // Init Data
-            useEffect(() => {
-                const initialData = {};
-                program.exercises.forEach(ex => {
-                    let lastWeight = '';
-                    // Find latest history for this specific exercise across all sessions
-                    // Better logic: loop history to find last occurrence of this program
-                    const lastSession = history.find(h => h.programId === dayId.toString());
-                    if (lastSession && lastSession.exercises[ex.id]) {
-                         lastWeight = lastSession.exercises[ex.id][0]?.weight || '';
+            // Handler: Check Set (Selesai Set)
+            const handleCheckSet = () => {
+                if (!inputWeight || !inputReps) return alert("INPUT DATA REQUIRED!");
+
+                // Simpan data
+                const exId = currentExercise.id;
+                const newResults = { ...sessionResults };
+                if (!newResults[exId]) newResults[exId] = [];
+                newResults[exId].push({ weight: inputWeight, reps: inputReps });
+                setSessionResults(newResults);
+
+                // Jika ini set terakhir dari exercise ini
+                if (isLastSet) {
+                    // Jika ini exercise terakhir dari semua
+                    if (isLastExercise) {
+                        finishWorkout(newResults);
+                    } else {
+                        // Pindah ke exercise berikutnya
+                        // Trigger rest dulu sebelum pindah alat? Biasanya iya.
+                        triggerRest(() => {
+                            setCurrentExerciseIdx(prev => prev + 1);
+                            setCurrentSetIdx(0);
+                            setInputWeight('');
+                            setInputReps('');
+                        });
                     }
-                    initialData[ex.id] = Array(ex.sets).fill({ weight: lastWeight, reps: '', completed: false });
-                });
-                setExerciseData(initialData);
-            }, []);
-
-            const updateSet = (exId, setIdx, field, value) => {
-                const newData = { ...exerciseData };
-                newData[exId][setIdx] = { ...newData[exId][setIdx], [field]: value };
-                setExerciseData(newData);
-            };
-
-            const toggleSetComplete = (exId, setIdx) => {
-                const newData = { ...exerciseData };
-                const isComplete = !newData[exId][setIdx].completed;
-                newData[exId][setIdx].completed = isComplete;
-                setExerciseData(newData);
-                
-                setCompletedSets(prev => isComplete ? prev + 1 : prev - 1);
-
-                if (isComplete) {
-                    setRestTimer(90);
-                    setIsResting(true);
+                } else {
+                    // Pindah ke set berikutnya dalam exercise yang sama
+                    triggerRest(() => {
+                        setCurrentSetIdx(prev => prev + 1);
+                        // Biarkan weight/reps terisi untuk set berikutnya (convenience)
+                    });
                 }
             };
 
-            const formatTime = (seconds) => {
-                const m = Math.floor(seconds / 60);
-                const s = seconds % 60;
-                return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+            const triggerRest = (callback) => {
+                setRestTimer(90); // 1.5 menit = 90 detik
+                setIsResting(true);
+                // Kita jalankan callback (state update untuk next set) segera, 
+                // tapi layar tertutup overlay lock.
+                callback();
+            };
+
+            const finishWorkout = (finalResults) => {
+                const sessionData = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    programId: dayId,
+                    exercises: finalResults
+                };
+                onFinish(sessionData, program.muscles);
+            };
+
+            const formatTime = (s) => {
+                const min = Math.floor(s / 60);
+                const sec = s % 60;
+                return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+            };
+
+            // Cari history beban terakhir untuk latihan ini (Auto-fill suggestion)
+            const getLastLogWeight = () => {
+                if (!lastLog || !lastLog.exercises[currentExercise.id]) return null;
+                // Ambil set pertama dari sesi terakhir
+                return lastLog.exercises[currentExercise.id][0].weight;
             };
 
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
             return (
-                <div className="flex flex-col h-screen w-full fixed top-0 left-0 bg-black z-[100]">
-                    {/* Header HUD */}
-                    <div className="flex justify-between items-center p-4 border-b border-slate-800 bg-slate-900/50 backdrop-blur">
-                        <div>
-                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest uppercase mb-1">Active Mission</div>
-                            <h2 className="text-white font-bold font-cyber leading-none">{program.name}</h2>
+                <div className="h-screen flex flex-col relative">
+                    
+                    {/* STRICT LOCK OVERLAY */}
+                    {isResting && (
+                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white lock-active">
+                            <div className="text-center space-y-4">
+                                <div className="text-cyan-400 animate-pulse">
+                                    <i data-lucide="lock" width={64} height={64} className="mx-auto"></i>
+                                </div>
+                                <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">SYSTEM LOCKED</h1>
+                                <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Cooling Down Muscle Fibers</p>
+                                
+                                <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50">
+                                    {formatTime(restTimer)}
+                                </div>
+
+                                <div className="w-64 h-2 bg-slate-800 rounded-full overflow-hidden mt-4">
+                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(restTimer/90)*100}%` }}></div>
+                                </div>
+                                
+                                <p className="text-[10px] text-slate-500 mt-8">DO NOT SKIP RECOVERY</p>
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-2xl font-mono font-bold text-white glow-text-blue">{formatTime(timer)}</div>
-                            <div className="text-[10px] text-slate-400 font-cyber uppercase">Duration</div>
+                    )}
+
+                    {/* TOP BAR: PROGRESS */}
+                    <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                        <button onClick={onAbort} className="text-red-500 text-xs font-bold font-cyber border border-red-900 px-2 py-1 rounded">ABORT</button>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] text-slate-500 font-cyber">EXERCISE</span>
+                            <span className="text-cyan-400 font-bold">{currentExerciseIdx + 1} <span className="text-slate-500">/</span> {program.exercises.length}</span>
                         </div>
                     </div>
 
-                    {/* Progress Line */}
-                    <div className="w-full h-1 bg-slate-800">
-                        <div className="h-full bg-cyan-400 transition-all duration-500 shadow-[0_0_10px_#22d3ee]" style={{ width: `${progress}%` }}></div>
-                    </div>
+                    {/* MAIN CONTENT */}
+                    <div className="flex-1 p-6 flex flex-col justify-center">
+                        
+                        {/* Exercise Title Card */}
+                        <div className="mb-8 text-center">
+                            <div className="text-cyan-400 text-xs font-cyber tracking-[0.3em] uppercase mb-2">Current Target</div>
+                            <h2 className="text-3xl font-black text-white leading-tight font-cyber">{currentExercise.name}</h2>
+                            <div className="mt-2 text-slate-400 text-sm font-mono">
+                                {currentExercise.sets} Sets × {currentExercise.targetReps} Reps
+                            </div>
+                            <div className="mt-1 text-xs text-amber-500 font-bold">
+                                Target: {currentExercise.targetWeight} {currentExercise.unit}
+                            </div>
+                            {getLastLogWeight() && (
+                                <div className="mt-2 inline-block px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400">
+                                    Last Session: {getLastLogWeight()} {currentExercise.unit}
+                                </div>
+                            )}
+                        </div>
 
-                    {/* Scrollable Exercises */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-40 no-scrollbar">
-                        {program.exercises.map((ex) => (
-                            <div key={ex.id} className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-600 to-purple-600 rounded-xl opacity-20 blur group-hover:opacity-40 transition"></div>
-                                <div className="relative bg-black border border-slate-800 rounded-xl p-4">
-                                    <div className="flex justify-between items-start mb-4 border-b border-slate-800 pb-2">
-                                        <div>
-                                            <h3 className="font-bold text-white font-cyber text-lg">{ex.name}</h3>
-                                            <div className="text-xs text-slate-400 font-mono mt-1">
-                                                Target: <span className="text-cyan-400">{ex.sets} x {ex.reps}</span> <span className="text-slate-500">|</span> Range: <span className="text-purple-400">{ex.weight} {ex.unit}</span>
-                                            </div>
-                                            {ex.note && <div className="text-[10px] text-red-400 font-bold mt-1 uppercase tracking-wider animate-pulse">⚠️ {ex.note}</div>}
-                                        </div>
-                                    </div>
+                        {/* INPUT CARD */}
+                        <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
+                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
+                                SET {currentSetIdx + 1}
+                            </div>
 
-                                    <div className="space-y-3">
-                                        <div className="grid grid-cols-12 gap-2 text-[10px] text-slate-500 font-cyber uppercase tracking-wider text-center">
-                                            <div className="col-span-1">#</div>
-                                            <div className="col-span-4">KG</div>
-                                            <div className="col-span-4">Reps</div>
-                                            <div className="col-span-3">Status</div>
-                                        </div>
-                                        {Array.from({ length: ex.sets }).map((_, idx) => {
-                                            const set = exerciseData[ex.id]?.[idx] || {};
-                                            return (
-                                                <div key={idx} className={`grid grid-cols-12 gap-2 items-center ${set.completed ? 'opacity-40 grayscale transition duration-500' : ''}`}>
-                                                    <div className="col-span-1 text-center font-mono text-slate-500 text-xs">{idx + 1}</div>
-                                                    <div className="col-span-4">
-                                                        <input 
-                                                            type="number" 
-                                                            placeholder={ex.weight.split('-')[0]}
-                                                            value={set.weight || ''}
-                                                            onChange={(e) => updateSet(ex.id, idx, 'weight', e.target.value)}
-                                                            className="w-full cyber-input p-2 rounded text-center text-sm font-bold"
-                                                        />
-                                                    </div>
-                                                    <div className="col-span-4">
-                                                        <input 
-                                                            type="number" 
-                                                            placeholder={ex.reps.split('-')[0]}
-                                                            value={set.reps || ''}
-                                                            onChange={(e) => updateSet(ex.id, idx, 'reps', e.target.value)}
-                                                            className="w-full cyber-input p-2 rounded text-center text-sm font-bold"
-                                                        />
-                                                    </div>
-                                                    <div className="col-span-3">
-                                                        <button 
-                                                            onClick={() => toggleSetComplete(ex.id, idx)}
-                                                            className={`w-full h-10 rounded flex items-center justify-center border transition-all ${
-                                                                set.completed 
-                                                                ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' 
-                                                                : 'bg-slate-800 border-slate-700 hover:border-slate-500 text-slate-400'
-                                                            }`}
-                                                        >
-                                                            <i data-lucide="check" className="w-4 h-4"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
+                            <div className="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight ({currentExercise.unit})</label>
+                                    <input 
+                                        type="number" 
+                                        value={inputWeight}
+                                        onChange={e => setInputWeight(e.target.value)}
+                                        placeholder={currentExercise.targetWeight.split('-')[0]}
+                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                        autoFocus
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps Completed</label>
+                                    <input 
+                                        type="number" 
+                                        value={inputReps}
+                                        onChange={e => setInputReps(e.target.value)}
+                                        placeholder={currentExercise.targetReps.split('-')[0]}
+                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                    />
                                 </div>
                             </div>
-                        ))}
-                    </div>
 
-                    {/* Bottom Controls */}
-                    <div className="absolute bottom-0 left-0 w-full glass-panel border-t border-cyan-900/50 p-4">
-                        {isResting ? (
-                            <div className="flex items-center justify-between mb-2 p-3 rounded bg-cyan-900/20 border border-cyan-500/30">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></div>
-                                    <div>
-                                        <div className="text-[10px] text-cyan-200 font-cyber uppercase tracking-wider">Resting</div>
-                                        <div className="text-2xl font-mono font-bold text-white leading-none">{formatTime(restTimer)}</div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => setRestTimer(t => t + 30)} className="px-3 py-1 text-xs border border-slate-600 rounded text-slate-300 hover:text-white">+30s</button>
-                                    <button onClick={() => setRestTimer(0)} className="px-3 py-1 text-xs bg-cyan-900/50 text-cyan-400 border border-cyan-700 rounded hover:bg-cyan-800/50">SKIP</button>
-                                </div>
-                            </div>
-                        ) : null}
-
-                        <div className="grid grid-cols-4 gap-2">
-                            <button onClick={onCancel} className="col-span-1 py-3 rounded border border-red-900/50 text-red-500 font-cyber text-xs hover:bg-red-900/10">ABORT</button>
+                            {/* CHECK BUTTON */}
                             <button 
-                                onClick={() => onFinish({
-                                    id: Date.now(),
-                                    date: new Date().toISOString(),
-                                    programName: program.name,
-                                    programId: dayId.toString(),
-                                    duration: timer,
-                                    exercises: exerciseData
-                                })} 
-                                className="col-span-3 btn-cyber bg-cyan-500 text-black font-bold font-cyber py-3 rounded hover:brightness-125 transition"
+                                onClick={handleCheckSet}
+                                className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
                             >
-                                MISSION COMPLETE
+                                <i data-lucide="check-circle-2" className="w-6 h-6"></i>
+                                COMPLETE SET & REST
                             </button>
                         </div>
-                    </div>
-                </div>
-            );
-        };
 
-        const HistoryView = ({ history, onBack }) => {
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
-            return (
-                <div className="p-4 space-y-4">
-                    <div className="flex items-center gap-4 mb-6">
-                        <button onClick={onBack} className="p-2 border border-slate-700 rounded hover:border-cyan-500 transition"><i data-lucide="arrow-left" className="w-5 h-5 text-slate-400"></i></button>
-                        <h2 className="text-xl font-bold font-cyber text-white">MISSION LOGS</h2>
-                    </div>
-                    
-                    {history.length === 0 ? (
-                        <div className="text-center py-20 opacity-50">
-                            <i data-lucide="folder-x" className="w-16 h-16 mx-auto mb-4 text-slate-600"></i>
-                            <p className="font-cyber text-slate-500">NO DATA FOUND</p>
-                        </div>
-                    ) : (
-                        history.map((session) => (
-                            <div key={session.id} className="bg-black/40 border border-slate-800 rounded-lg p-4 hover:border-cyan-500/50 transition duration-300">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <div className="text-cyan-400 font-cyber text-sm font-bold">{session.programName}</div>
-                                        <div className="text-[10px] text-slate-500 font-mono mt-1">
-                                            {new Date(session.date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="text-lg font-mono text-white">{Math.floor(session.duration / 60)}<span className="text-xs text-slate-500">m</span></div>
-                                    </div>
-                                </div>
-                                <div className="w-full h-[1px] bg-slate-800 my-2"></div>
-                                <div className="text-[10px] text-slate-400 font-mono uppercase">
-                                    Total Tonnage: <span className="text-white font-bold">
-                                        {Object.values(session.exercises).flat().reduce((acc, curr) => acc + (curr.completed ? (parseFloat(curr.weight||0) * parseFloat(curr.reps||0)) : 0), 0).toLocaleString()} KG
-                                    </span>
-                                </div>
+                        {/* Upcoming Peek */}
+                        {!isLastSet && (
+                            <div className="mt-6 text-center opacity-50">
+                                <p className="text-[10px] text-slate-500 uppercase">UP NEXT</p>
+                                <p className="text-xs text-slate-300 font-mono">Set {currentSetIdx + 2}</p>
                             </div>
-                        ))
-                    )}
+                        )}
+                        {isLastSet && !isLastExercise && (
+                            <div className="mt-6 text-center opacity-50">
+                                <p className="text-[10px] text-slate-500 uppercase">NEXT EXERCISE</p>
+                                <p className="text-xs text-slate-300 font-mono">{program.exercises[currentExerciseIdx + 1].name}</p>
+                            </div>
+                        )}
+                        
+                    </div>
                 </div>
             );
         };
@@ -707,4 +534,3 @@
     </script>
 </body>
 </html>
-
