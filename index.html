@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER COMMANDER V3.1</title>
+    <title>PPL CYBER COMMANDER V3.2</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -518,7 +518,7 @@
                         onFinish({
                             id: Date.now(),
                             date: new Date().toISOString(),
-                            programName: "CUSTOM MISSION", // Or use template name if needed
+                            programName: "CUSTOM MISSION", 
                             duration: duration,
                             exercises: newResults 
                         });
@@ -546,7 +546,6 @@
 
             return (
                 <div className="flex-1 flex flex-col relative pb-20 overflow-hidden">
-                    {/* LOCK SCREEN */}
                     {isResting && (
                         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
                             <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
@@ -597,7 +596,6 @@
             const [expandedId, setExpandedId] = useState(null);
 
             const formatDuration = (sec) => {
-                if(!sec) return "00:00";
                 const m = Math.floor(sec / 60);
                 const s = sec % 60;
                 return `${m}m ${s}s`;
@@ -623,18 +621,11 @@
                     ) : (
                         history.map((session) => {
                             const isExpanded = expandedId === session.id;
-                            // Calculate volume from array structure
-                            let totalVolume = 0;
                             let totalSets = 0;
                             
                             if (Array.isArray(session.exercises)) {
                                 session.exercises.forEach(ex => {
-                                    if(ex.sets) {
-                                        totalSets += ex.sets.length;
-                                        ex.sets.forEach(s => {
-                                            totalVolume += (parseFloat(s.weight||0) * parseFloat(s.reps||0));
-                                        });
-                                    }
+                                    if(ex.sets) totalSets += ex.sets.length;
                                 });
                             }
 
@@ -656,9 +647,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <div className="text-xs font-bold text-white">{totalVolume.toLocaleString()} KG</div>
-                                            <div className="text-[10px] text-slate-500">{totalSets} SETS</div>
+                                        <div className="text-right flex flex-col items-end">
+                                            <div className="text-xs font-bold text-white">{totalSets} SETS</div>
+                                            <div className="text-[10px] text-slate-500 text-cyan-400">DETAILS <Icon name="chevron-down" size={10} className="inline"/></div>
                                         </div>
                                     </div>
 
@@ -726,5 +717,4 @@
     </script>
 </body>
 </html>
-
 
