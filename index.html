@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER V2.0</title>
+    <title>PPL CYBER V2.2</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Menggunakan versi spesifik Lucide untuk stabilitas -->
     <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -19,7 +18,7 @@
             --neon-red: #ff0055;
             --neon-amber: #ffaa00;
             --bg-dark: #030305;
-            --glass: rgba(10, 15, 30, 0.85);
+            --glass: rgba(10, 15, 30, 0.95);
         }
 
         body {
@@ -30,7 +29,7 @@
                 linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
-            overflow: hidden;
+            overflow: hidden; /* App-like feel, scroll handles inside components */
         }
 
         .font-cyber { font-family: 'Orbitron', sans-serif; }
@@ -66,13 +65,16 @@
         .muscle-bar-bg { background: rgba(255,255,255,0.1); }
         .muscle-bar-fill { box-shadow: 0 0 10px currentColor; transition: width 1s ease-in-out; }
         
-        /* Animasi error */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
         .animate-shake { animation: shake 0.3s ease-in-out; }
+
+        /* Smooth expand animation */
+        .expand-enter { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.3s ease-out; }
+        .expand-enter-active { max-height: 1000px; opacity: 1; }
     </style>
 </head>
 <body>
@@ -81,7 +83,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- DEFINISI OTOT & PROGRAM ---
+        // --- DATA ---
         const MUSCLE_GROUPS = {
             CHEST: 'Dada', BACK: 'Punggung', LEGS: 'Kaki', 
             SHOULDERS: 'Bahu', ARMS: 'Lengan', CARDIO: 'Jantung'
@@ -150,59 +152,45 @@
 
         const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
 
-        // --- ICON COMPONENT (FIXED & SAFE) ---
+        // --- COMPONENTS ---
         const Icon = ({ name, size = 20, className = "" }) => {
             const containerRef = useRef(null);
-
             useEffect(() => {
                 if (!window.lucide) return;
-
-                // Konversi kebab-case ke PascalCase (misal: chevron-left -> ChevronLeft)
-                const iconName = name
-                    .split('-')
-                    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-                    .join('');
-
+                const iconName = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
                 const iconDef = window.lucide.icons[iconName];
-
                 if (iconDef && containerRef.current) {
-                    containerRef.current.innerHTML = ''; // Bersihkan konten lama
-                    
-                    // Gunakan lucide.createElement untuk membuat node SVG
+                    containerRef.current.innerHTML = ''; 
                     const svgElement = window.lucide.createElement(iconDef);
-                    
-                    // Set atribut tambahan
                     svgElement.setAttribute('width', size);
                     svgElement.setAttribute('height', size);
                     if (className) svgElement.setAttribute('class', className);
                     svgElement.setAttribute('stroke-width', '2');
-
-                    // Append ke container (Manual DOM manipulation di dalam ref aman untuk React)
                     containerRef.current.appendChild(svgElement);
-                } else {
-                    console.warn(`Icon not found: ${iconName}`);
                 }
             }, [name, size, className]);
-
             return <span ref={containerRef} className="inline-flex items-center justify-center align-middle" />;
         };
 
-        // --- HELPER HOOKS ---
         const useWakeLock = () => {
             const wakeLock = useRef(null);
             const request = async () => {
-                if ('wakeLock' in navigator) {
-                    try { wakeLock.current = await navigator.wakeLock.request('screen'); } catch(e){}
-                }
+                if ('wakeLock' in navigator) { try { wakeLock.current = await navigator.wakeLock.request('screen'); } catch(e){} }
             };
-            const release = async () => { if(wakeLock.current) await wakeLock.current.release(); };
             useEffect(() => {
-                document.addEventListener('visibilitychange', () => {
-                    if (document.visibilityState === 'visible') request();
-                });
+                document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') request(); });
                 request();
-                return () => release();
+                return () => { if(wakeLock.current) wakeLock.current.release(); };
             }, []);
+        };
+
+        const useTime = () => {
+            const [time, setTime] = useState(new Date());
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
+            return time;
         };
 
         // --- MAIN APP ---
@@ -211,6 +199,7 @@
             const [activeDay, setActiveDay] = useState(new Date().getDay());
             const [muscleHistory, setMuscleHistory] = useState({});
             const [workoutHistory, setWorkoutHistory] = useState([]);
+            const time = useTime();
 
             useEffect(() => {
                 const savedMuscles = localStorage.getItem('ppl_v2_muscles');
@@ -235,72 +224,113 @@
                 setView('dashboard');
             };
 
+            const toggleFullScreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(e => console.log(e));
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            };
+
             return (
-                <div className="min-h-screen text-slate-200 pb-20 selection:bg-cyan-500 selection:text-black">
+                <div className="h-screen flex flex-col text-slate-200 selection:bg-cyan-500 selection:text-black bg-black">
                     {/* Header */}
-                    <header className="p-4 border-b border-slate-800 bg-black/50 backdrop-blur sticky top-0 z-10 flex justify-between items-center">
+                    <header className="flex-none p-4 border-b border-slate-800 bg-slate-900/90 backdrop-blur z-20 flex justify-between items-center shadow-lg">
                         <div className="flex items-center gap-2">
                             <Icon name="cpu" className="text-cyan-400" />
-                            <span className="font-cyber font-bold text-lg tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></span>
+                            <div>
+                                <h1 className="font-cyber font-bold text-lg leading-none tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></h1>
+                                <div className="text-[10px] text-slate-500 font-mono">SYS.ONLINE</div>
+                            </div>
                         </div>
-                        <div className="text-xs font-mono text-slate-500">V2.1.2 STABLE</div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-right">
+                                <div className="font-mono text-xl font-bold text-white leading-none">
+                                    {time.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}
+                                </div>
+                                <div className="text-[10px] text-slate-500 font-mono">
+                                    {time.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'})}
+                                </div>
+                            </div>
+                            <button onClick={toggleFullScreen} className="p-2 border border-cyan-900/30 rounded bg-black/50 text-cyan-400 hover:bg-cyan-900/20">
+                                <Icon name="maximize" size={18} />
+                            </button>
+                        </div>
                     </header>
 
-                    {view === 'dashboard' && <Dashboard 
-                        activeDay={activeDay} 
-                        setActiveDay={setActiveDay} 
-                        startWorkout={() => setView('workout')}
-                        muscleHistory={muscleHistory}
-                        history={workoutHistory}
-                    />}
-                    
-                    {view === 'workout' && <WorkoutSession 
-                        dayId={activeDay} 
-                        onFinish={saveSession}
-                        onAbort={() => setView('dashboard')}
-                        lastLog={workoutHistory.find(h => h.programId == activeDay)}
-                    />}
+                    {/* Content Area - Scrollable */}
+                    <main className="flex-1 overflow-y-auto relative no-scrollbar pb-20">
+                        {view === 'dashboard' && <Dashboard 
+                            activeDay={activeDay} 
+                            setActiveDay={setActiveDay} 
+                            startWorkout={() => setView('workout')}
+                            muscleHistory={muscleHistory}
+                        />}
+                        
+                        {view === 'workout' && <WorkoutSession 
+                            dayId={activeDay} 
+                            onFinish={saveSession}
+                            onAbort={() => setView('dashboard')}
+                            lastLog={workoutHistory.find(h => h.programId == activeDay)}
+                        />}
+
+                        {view === 'history' && <HistoryView 
+                            history={workoutHistory} 
+                            onBack={() => setView('dashboard')}
+                        />}
+                    </main>
+
+                    {/* Bottom Nav */}
+                    {view !== 'workout' && (
+                        <nav className="flex-none border-t border-slate-800 bg-black/90 backdrop-blur p-4 z-20 flex justify-around absolute bottom-0 w-full">
+                            <NavBtn icon="layout-dashboard" label="HOME" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
+                            <div className="w-px bg-slate-800 h-8 self-center"></div>
+                            <NavBtn icon="history" label="RECORDS" active={view === 'history'} onClick={() => setView('history')} />
+                        </nav>
+                    )}
                 </div>
             );
         };
 
+        const NavBtn = ({ icon, label, active, onClick }) => (
+            <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-cyan-400 scale-110 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'text-slate-600'}`}>
+                <Icon name={icon} size={24} />
+                <span className="text-[10px] font-cyber tracking-widest">{label}</span>
+            </button>
+        );
+
         // --- DASHBOARD ---
-        const Dashboard = ({ activeDay, setActiveDay, startWorkout, muscleHistory, history }) => {
+        const Dashboard = ({ activeDay, setActiveDay, startWorkout, muscleHistory }) => {
             const program = PROGRAM_DATA[activeDay];
             const isRest = program.type === 'rest';
 
             const getRecovery = (muscleName) => {
                 const lastTrained = muscleHistory[muscleName];
                 if (!lastTrained) return 100;
-
                 const recoveryTime = (muscleName === 'LEGS' || muscleName === 'BACK' || muscleName === 'CHEST') ? 48 : 24;
                 const hoursPassed = (Date.now() - lastTrained) / (1000 * 60 * 60);
-                
                 if (hoursPassed >= recoveryTime) return 100;
                 return Math.floor((hoursPassed / recoveryTime) * 100);
             };
 
             return (
-                <div className="p-4 space-y-6">
-                    {/* Day Selector */}
-                    <div className="flex justify-between items-center cyber-border rounded-lg p-3">
-                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)} className="p-2"><Icon name="chevron-left" /></button>
+                <div className="p-4 space-y-6 pb-24">
+                    <div className="flex justify-between items-center cyber-border rounded-lg p-3 bg-black/40">
+                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)} className="p-2 hover:text-cyan-400"><Icon name="chevron-left" /></button>
                         <div className="text-center">
                             <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">
                                 {activeDay === new Date().getDay() ? "TODAY'S PROTOCOL" : "PREVIEW MODE"}
                             </div>
                             <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
                         </div>
-                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)} className="p-2"><Icon name="chevron-right" /></button>
+                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)} className="p-2 hover:text-cyan-400"><Icon name="chevron-right" /></button>
                     </div>
 
-                    {/* Muscle Status Matrix */}
                     <div className="cyber-border rounded-xl p-4 bg-black/40">
                         <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
                             <Icon name="activity" className="text-cyan-400 w-4 h-4" />
-                            <h3 className="font-cyber text-sm text-white tracking-widest">BIOMETRIC RECOVERY MATRIX</h3>
+                            <h3 className="font-cyber text-sm text-white tracking-widest">BIOMETRIC RECOVERY</h3>
                         </div>
-                        
                         <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                             {Object.entries(MUSCLE_GROUPS).map(([key, label]) => {
                                 const percentage = getRecovery(key);
@@ -308,7 +338,6 @@
                                 let barColor = "bg-cyan-400";
                                 if (percentage < 40) { color = "text-red-500"; barColor = "bg-red-500"; }
                                 else if (percentage < 90) { color = "text-amber-400"; barColor = "bg-amber-400"; }
-
                                 return (
                                     <div key={key} className="space-y-1">
                                         <div className="flex justify-between text-xs font-mono">
@@ -324,7 +353,6 @@
                         </div>
                     </div>
 
-                    {/* Workout Card */}
                     <div className="cyber-border rounded-xl p-5 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
                             <Icon name={isRest ? "coffee" : "dumbbell"} size={80} />
@@ -333,7 +361,6 @@
                         <div className="text-xs text-slate-400 mt-1 font-mono mb-6">
                             TARGET: {program.muscles ? program.muscles.map(m => MUSCLE_GROUPS[m]).join(' + ') : 'Recovery'}
                         </div>
-
                         {!isRest ? (
                             <button onClick={startWorkout} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 transition-all hover:tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.5)]">
                                 <Icon name="play-circle" className="w-5 h-5" />
@@ -349,23 +376,120 @@
             );
         };
 
+        // --- HISTORY VIEW (NEW & IMPROVED) ---
+        const HistoryView = ({ history, onBack }) => {
+            const [expandedId, setExpandedId] = useState(null);
+
+            const formatDuration = (sec) => {
+                if(!sec) return "00:00";
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                return `${m}m ${s}s`;
+            };
+
+            const toggleExpand = (id) => {
+                setExpandedId(expandedId === id ? null : id);
+            };
+
+            return (
+                <div className="p-4 space-y-4 pb-24">
+                    <div className="flex items-center gap-2 mb-6">
+                        <h2 className="text-xl font-cyber font-bold text-white tracking-wider">MISSION LOGS</h2>
+                        <div className="h-px bg-slate-800 flex-1"></div>
+                        <span className="text-xs font-mono text-cyan-400">{history.length} ENTRIES</span>
+                    </div>
+
+                    {history.length === 0 ? (
+                        <div className="text-center py-20 opacity-50 flex flex-col items-center">
+                            <Icon name="folder-x" size={48} className="text-slate-600 mb-4" />
+                            <p className="font-cyber text-slate-500">NO DATA FOUND</p>
+                        </div>
+                    ) : (
+                        history.map((session) => {
+                            const isExpanded = expandedId === session.id;
+                            const totalVolume = Object.values(session.exercises).flat().reduce((acc, curr) => acc + (parseFloat(curr.weight||0) * parseFloat(curr.reps||0)), 0);
+                            const totalSets = Object.values(session.exercises).flat().length;
+                            const dateObj = new Date(session.date);
+
+                            return (
+                                <div key={session.id} className={`cyber-border rounded-lg overflow-hidden transition-all duration-300 ${isExpanded ? 'bg-black/60 border-cyan-500/50' : 'bg-black/30'}`}>
+                                    {/* Summary Header - Click to Expand */}
+                                    <div onClick={() => toggleExpand(session.id)} className="p-4 cursor-pointer flex justify-between items-center active:bg-white/5">
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-slate-900 p-3 rounded text-cyan-400">
+                                                <div className="font-bold font-mono text-lg leading-none">{dateObj.getDate()}</div>
+                                                <div className="text-[10px] uppercase font-mono">{dateObj.toLocaleDateString('id-ID', {month:'short'})}</div>
+                                            </div>
+                                            <div>
+                                                <div className="font-cyber font-bold text-white text-sm">{session.programName || "WORKOUT"}</div>
+                                                <div className="flex gap-3 text-[10px] text-slate-400 font-mono mt-1">
+                                                    <span className="flex items-center gap-1"><Icon name="clock" size={10}/> {dateObj.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
+                                                    <span className="flex items-center gap-1"><Icon name="timer" size={10}/> {formatDuration(session.duration)}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-xs font-bold text-white">{totalVolume.toLocaleString()} KG</div>
+                                            <div className="text-[10px] text-slate-500">{totalSets} SETS</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Detailed View - Expandable */}
+                                    {isExpanded && (
+                                        <div className="border-t border-slate-800 bg-black/40 p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                                            {/* Get Exercise Names from Program Data logic or just store name in history? 
+                                                Currently we stored raw data by ID. Let's try to map names if possible, 
+                                                or ideally we should store names in history. 
+                                                *Correction*: The current save logic stores `exercises` as object {exId: []}. 
+                                                We need to fetch names from PROGRAM_DATA based on session.programId.
+                                            */}
+                                            <div className="space-y-4">
+                                                {Object.entries(session.exercises).map(([exId, sets]) => {
+                                                    // Find exercise Name
+                                                    const prog = PROGRAM_DATA[session.programId];
+                                                    const exName = prog?.exercises.find(e => e.id === exId)?.name || "Unknown Exercise";
+                                                    
+                                                    return (
+                                                        <div key={exId} className="text-sm">
+                                                            <div className="text-cyan-400 font-bold mb-1 text-xs uppercase tracking-wide">{exName}</div>
+                                                            <div className="grid grid-cols-4 gap-2 text-[10px] font-mono text-slate-500 mb-1 border-b border-slate-800 pb-1">
+                                                                <div>SET</div><div>KG</div><div>REPS</div>
+                                                            </div>
+                                                            {sets.map((set, idx) => (
+                                                                <div key={idx} className="grid grid-cols-4 gap-2 text-xs font-mono text-slate-300 py-1">
+                                                                    <div className="text-slate-500">{idx + 1}</div>
+                                                                    <div>{set.weight}</div>
+                                                                    <div>{set.reps}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })
+                    )}
+                </div>
+            );
+        };
+
         // --- WORKOUT SESSION ---
         const WorkoutSession = ({ dayId, onFinish, onAbort, lastLog }) => {
             useWakeLock();
             const program = PROGRAM_DATA[dayId];
+            const [startTime] = useState(Date.now());
             const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
-            
             const [isSetupMode, setIsSetupMode] = useState(true);
             const [plannedSets, setPlannedSets] = useState(program.exercises[0].sets);
-
             const [currentSetIdx, setCurrentSetIdx] = useState(0);
             const [inputWeight, setInputWeight] = useState('');
             const [inputReps, setInputReps] = useState('');
             const [isResting, setIsResting] = useState(false);
             const [restTimer, setRestTimer] = useState(0);
             const [sessionResults, setSessionResults] = useState({});
-            
-            // Error Message State
             const [errorMsg, setErrorMsg] = useState('');
 
             const currentExercise = program.exercises[currentExerciseIdx];
@@ -380,30 +504,14 @@
 
             useEffect(() => {
                 let interval;
-                if (isResting && restTimer > 0) {
-                    interval = setInterval(() => setRestTimer(prev => prev - 1), 1000);
-                } else if (isResting && restTimer === 0) {
-                    setIsResting(false);
-                }
+                if (isResting && restTimer > 0) interval = setInterval(() => setRestTimer(p => p - 1), 1000);
+                else if (isResting && restTimer === 0) setIsResting(false);
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
 
-            const handleConfirmSets = () => {
-                if (plannedSets < 1) {
-                    setErrorMsg("MINIMUM 1 SET REQUIRED");
-                    return;
-                }
-                setIsSetupMode(false);
-                setErrorMsg('');
-            };
-
             const handleCheckSet = () => {
-                if (!inputWeight || !inputReps) {
-                    setErrorMsg("DATA ENTRY REQUIRED");
-                    return;
-                }
+                if (!inputWeight || !inputReps) { setErrorMsg("DATA ENTRY REQUIRED"); return; }
                 setErrorMsg('');
-
                 const exId = currentExercise.id;
                 const newResults = { ...sessionResults };
                 if (!newResults[exId]) newResults[exId] = [];
@@ -412,174 +520,92 @@
 
                 if (isLastSet) {
                     if (isLastExercise) {
-                        finishWorkout(newResults);
+                        const durationSec = Math.floor((Date.now() - startTime) / 1000);
+                        const sessionData = {
+                            id: Date.now(),
+                            date: new Date().toISOString(),
+                            programId: dayId,
+                            programName: program.name,
+                            duration: durationSec,
+                            exercises: newResults
+                        };
+                        onFinish(sessionData, program.muscles);
                     } else {
                         triggerRest(() => {
-                            setCurrentExerciseIdx(prev => prev + 1);
+                            setCurrentExerciseIdx(p => p + 1);
                             setCurrentSetIdx(0);
                             setInputWeight('');
                             setInputReps('');
                         });
                     }
                 } else {
-                    triggerRest(() => {
-                        setCurrentSetIdx(prev => prev + 1);
-                    });
+                    triggerRest(() => setCurrentSetIdx(p => p + 1));
                 }
             };
 
-            const triggerRest = (callback) => {
-                setRestTimer(90); 
-                setIsResting(true);
-                callback();
-            };
-
-            const finishWorkout = (finalResults) => {
-                const sessionData = {
-                    id: Date.now(),
-                    date: new Date().toISOString(),
-                    programId: dayId,
-                    exercises: finalResults
-                };
-                onFinish(sessionData, program.muscles);
-            };
-
-            const formatTime = (s) => {
-                const min = Math.floor(s / 60);
-                const sec = s % 60;
-                return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-            };
+            const triggerRest = (cb) => { setRestTimer(90); setIsResting(true); cb(); };
+            const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+            const getLastLogWeight = () => lastLog?.exercises[currentExercise.id]?.[0]?.weight || null;
 
             return (
-                <div className="h-screen flex flex-col relative">
-                    
-                    {/* STRICT LOCK OVERLAY */}
+                <div className="h-full flex flex-col relative pb-20">
+                    {/* REST LOCK */}
                     {isResting && (
-                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white lock-active">
-                            <div className="text-center space-y-4">
-                                <div className="text-cyan-400 animate-pulse">
-                                    <Icon name="lock" size={64} className="mx-auto" />
-                                </div>
-                                <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">SYSTEM LOCKED</h1>
-                                <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Cooling Down Muscle Fibers</p>
-                                
-                                <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50">
-                                    {formatTime(restTimer)}
-                                </div>
-
-                                <div className="w-64 h-2 bg-slate-800 rounded-full overflow-hidden mt-4">
-                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(restTimer/90)*100}%` }}></div>
-                                </div>
-                                
-                                <p className="text-[10px] text-slate-500 mt-8">DO NOT SKIP RECOVERY</p>
-                            </div>
+                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
+                            <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
+                            <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">LOCKED</h1>
+                            <p className="text-xs font-mono text-slate-400 uppercase mb-6">Cooling Down...</p>
+                            <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50">{formatTime(restTimer)}</div>
+                            <div className="w-64 h-2 bg-slate-800 rounded-full overflow-hidden mt-4"><div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(restTimer/90)*100}%` }}></div></div>
                         </div>
                     )}
 
-                    {/* TOP BAR: PROGRESS */}
-                    <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    {/* Progress Bar */}
+                    <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center sticky top-0 z-10">
                         <button onClick={onAbort} className="text-red-500 text-xs font-bold font-cyber border border-red-900 px-2 py-1 rounded">ABORT</button>
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-slate-500 font-cyber">EXERCISE</span>
-                            <span className="text-cyan-400 font-bold">{currentExerciseIdx + 1} <span className="text-slate-500">/</span> {program.exercises.length}</span>
-                        </div>
+                        <div className="text-[10px] text-slate-500 font-cyber">EXERCISE <span className="text-cyan-400 font-bold ml-1">{currentExerciseIdx + 1} / {program.exercises.length}</span></div>
                     </div>
 
-                    {/* MAIN CONTENT */}
-                    <div className="flex-1 p-6 flex flex-col justify-center">
-                        
+                    <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
                         <div className="mb-8 text-center">
                             <div className="text-cyan-400 text-xs font-cyber tracking-[0.3em] uppercase mb-2">Current Target</div>
                             <h2 className="text-3xl font-black text-white leading-tight font-cyber">{currentExercise.name}</h2>
-                            <div className="mt-2 text-slate-400 text-sm font-mono">
-                                Target: {currentExercise.targetWeight} {currentExercise.unit}
-                            </div>
+                            <div className="mt-2 text-slate-400 text-sm font-mono">Target: {currentExercise.targetWeight} {currentExercise.unit}</div>
+                            {getLastLogWeight() && <div className="mt-2 inline-block px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400">Last: {getLastLogWeight()} {currentExercise.unit}</div>}
                         </div>
 
                         {isSetupMode ? (
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
                                 <div className="text-center mb-6">
-                                    <div className="mx-auto text-cyan-400 mb-2 flex justify-center">
-                                        <Icon name="settings-2" size={32} />
-                                    </div>
-                                    <h3 className="text-xl font-cyber font-bold text-white">SET CONFIGURATION</h3>
-                                    <p className="text-xs text-slate-400 mt-1">Adjust total sets for this session</p>
+                                    <div className="mx-auto text-cyan-400 mb-2 flex justify-center"><Icon name="settings-2" size={32} /></div>
+                                    <h3 className="text-xl font-cyber font-bold text-white">SET CONFIG</h3>
+                                    <p className="text-xs text-slate-400 mt-1">Adjust total sets</p>
                                 </div>
-                                
-                                <div className="mb-6">
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block text-center">Total Sets Planned</label>
-                                    <div className="flex items-center justify-center gap-4">
-                                        <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="minus" /></button>
-                                        <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">
-                                            {plannedSets}
-                                        </div>
-                                        <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="plus" /></button>
-                                    </div>
+                                <div className="mb-6 flex items-center justify-center gap-4">
+                                    <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="minus" /></button>
+                                    <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">{plannedSets}</div>
+                                    <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="plus" /></button>
                                 </div>
-
-                                <button 
-                                    onClick={handleConfirmSets}
-                                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold py-4 rounded-xl flex items-center justify-center gap-2"
-                                >
-                                    CONFIRM & START
-                                </button>
+                                <button onClick={() => plannedSets < 1 ? setErrorMsg("MIN 1 SET") : setIsSetupMode(false)} className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold py-4 rounded-xl">START</button>
                                 {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
                         ) : (
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in slide-in-from-bottom-4 duration-300">
-                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
-                                    SET {currentSetIdx + 1} <span className="text-cyan-500 mx-1">/</span> {plannedSets}
-                                </div>
-
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">SET {currentSetIdx + 1} <span className="text-cyan-500 mx-1">/</span> {plannedSets}</div>
                                 <div className="grid grid-cols-2 gap-4 mt-4">
                                     <div>
                                         <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight ({currentExercise.unit})</label>
-                                        <input 
-                                            type="number" 
-                                            value={inputWeight}
-                                            onChange={e => setInputWeight(e.target.value)}
-                                            placeholder={currentExercise.targetWeight.split('-')[0]}
-                                            className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
-                                            autoFocus
-                                        />
+                                        <input type="number" value={inputWeight} onChange={e => setInputWeight(e.target.value)} placeholder={currentExercise.targetWeight.split('-')[0]} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" autoFocus />
                                     </div>
                                     <div>
-                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps Completed</label>
-                                        <input 
-                                            type="number" 
-                                            value={inputReps}
-                                            onChange={e => setInputReps(e.target.value)}
-                                            placeholder={currentExercise.targetReps.split('-')[0]}
-                                            className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
-                                        />
+                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps</label>
+                                        <input type="number" value={inputReps} onChange={e => setInputReps(e.target.value)} placeholder={currentExercise.targetReps.split('-')[0]} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
                                     </div>
                                 </div>
-
-                                <button 
-                                    onClick={handleCheckSet}
-                                    className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
-                                >
-                                    <Icon name="check-circle-2" className="w-6 h-6" />
-                                    COMPLETE SET & REST
-                                </button>
-                                
+                                <button onClick={handleCheckSet} className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"><Icon name="check-circle-2" className="w-6 h-6" /> COMPLETE SET</button>
                                 {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
                         )}
-
-                        {!isSetupMode && !isLastSet && (
-                            <div className="mt-6 text-center opacity-50">
-                                <p className="text-[10px] text-slate-500 uppercase">UP NEXT</p>
-                                <p className="text-xs text-slate-300 font-mono">Set {currentSetIdx + 2}</p>
-                            </div>
-                        )}
-                        {!isSetupMode && isLastSet && !isLastExercise && (
-                            <div className="mt-6 text-center opacity-50">
-                                <p className="text-[10px] text-slate-500 uppercase">NEXT EXERCISE</p>
-                                <p className="text-xs text-slate-300 font-mono">{program.exercises[currentExerciseIdx + 1].name}</p>
-                            </div>
-                        )}
-                        
                     </div>
                 </div>
             );
