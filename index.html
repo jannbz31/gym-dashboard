@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER COMMANDER V3.2</title>
+    <title>PPL CYBER - GYM BRO EDITION</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -20,7 +20,7 @@
             --neon-amber: #ffaa00;
             --neon-green: #00ff9d;
             --bg-dark: #020204;
-            --panel-bg: rgba(10, 15, 25, 0.9);
+            --panel-bg: rgba(15, 20, 30, 0.95);
         }
 
         body {
@@ -66,19 +66,21 @@
             outline: none;
         }
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
+        @keyframes lockdown {
+            0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+            100% { background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
         }
-        .scan-overlay {
-            position: fixed; top: 0; left: 0; w: 100%; h: 100%; pointer-events: none; z-index: 9999;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.2) 51%);
-            background-size: 100% 4px;
-            opacity: 0.3;
-        }
+        .lock-active { animation: lockdown 0.3s forwards; }
 
         @keyframes pulse-red { 0% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);} 70% {box-shadow: 0 0 0 10px rgba(255, 0, 85, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);} }
         .animate-pulse-red { animation: pulse-red 2s infinite; }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
     </style>
 </head>
 <body>
@@ -91,7 +93,7 @@
         // --- DATABASE & KONFIGURASI ---
         const MUSCLE_CONFIG = {
             CHEST: { label: 'Dada', recoveryRate: 15 }, 
-            BACK: { label: 'Punggung', recoveryRate: 15 },
+            BACK: { label: 'Sayap/Punggung', recoveryRate: 15 },
             LEGS: { label: 'Kaki', recoveryRate: 12 }, 
             SHOULDERS: { label: 'Bahu', recoveryRate: 18 },
             ARMS: { label: 'Lengan', recoveryRate: 20 },
@@ -124,13 +126,13 @@
         ];
 
         const SCHEDULE_TEMPLATE = {
-            1: { name: "PUSH: STRENGTH", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_bench_flat', 'ex_ohp_seat', 'ex_pec_deck', 'ex_tri_push'] },
-            2: { name: "PULL: HYPERTROPHY", type: "PULL", defaultEx: ['ex_lat_pull', 'ex_row_supp', 'ex_cab_row', 'ex_face_pull', 'ex_curl_ez'] },
-            3: { name: "LEGS: STRENGTH", type: "LEGS", defaultEx: ['ex_leg_press', 'ex_lunge', 'ex_deadlift', 'ex_leg_curl', 'ex_calf'] },
-            4: { name: "REST / ACTIVE", type: "REST", defaultEx: [] },
-            5: { name: "UPPER: VOLUME", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_cab_row', 'ex_pec_deck', 'ex_lat_raise', 'ex_tri_push', 'ex_curl_ez'] },
-            6: { name: "LOWER: HYPERTROPHY", type: "LEGS", defaultEx: ['ex_squat_hack', 'ex_hip_thrust', 'ex_rdl', 'ex_leg_ext', 'ex_calf'] },
-            0: { name: "OFF / CARDIO", type: "REST", defaultEx: [] }
+            1: { name: "PUSH DAY (BERAT)", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_bench_flat', 'ex_ohp_seat', 'ex_pec_deck', 'ex_tri_push'] },
+            2: { name: "PULL DAY (OTOT JADI)", type: "PULL", defaultEx: ['ex_lat_pull', 'ex_row_supp', 'ex_cab_row', 'ex_face_pull', 'ex_curl_ez'] },
+            3: { name: "LEG DAY (JANGAN SKIP)", type: "LEGS", defaultEx: ['ex_leg_press', 'ex_lunge', 'ex_deadlift', 'ex_leg_curl', 'ex_calf'] },
+            4: { name: "REST DAY / SANTAI", type: "REST", defaultEx: [] },
+            5: { name: "UPPER BODY (PUMP)", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_cab_row', 'ex_pec_deck', 'ex_lat_raise', 'ex_tri_push', 'ex_curl_ez'] },
+            6: { name: "LOWER BODY (GEBUK KAKI)", type: "LEGS", defaultEx: ['ex_squat_hack', 'ex_hip_thrust', 'ex_rdl', 'ex_leg_ext', 'ex_calf'] },
+            0: { name: "LIBUR / CARDIO TIPIS", type: "REST", defaultEx: [] }
         };
 
         const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
@@ -234,7 +236,7 @@
                     <header className="flex-none h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur flex items-center justify-between px-4 z-20">
                         <div className="flex items-center gap-2 text-cyan-400">
                             <Icon name="activity" />
-                            <span className="font-cyber font-bold tracking-widest text-white">CYBER<span className="text-cyan-400">COMMANDER</span></span>
+                            <span className="font-cyber font-bold tracking-widest text-white">CYBER<span className="text-cyan-400">PPL</span></span>
                         </div>
                         <div className="flex items-center gap-3">
                             <button onClick={() => setView('settings')} className="p-2 bg-slate-800 rounded border border-slate-700 text-xs font-mono text-cyan-400">
@@ -293,9 +295,9 @@
                     {/* BOTTOM NAV */}
                     {view !== 'active_session' && (
                         <nav className="flex-none border-t border-slate-800 bg-black/95 backdrop-blur p-4 z-20 flex justify-around absolute bottom-0 w-full pb-6">
-                            <NavBtn icon="layout-dashboard" label="COMMAND" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
+                            <NavBtn icon="layout-dashboard" label="MARKAS" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
                             <div className="w-px bg-slate-800 h-8 self-center"></div>
-                            <NavBtn icon="history" label="LOGS" active={view === 'history'} onClick={() => setView('history')} />
+                            <NavBtn icon="history" label="RIWAYAT" active={view === 'history'} onClick={() => setView('history')} />
                         </nav>
                     )}
                 </div>
@@ -317,7 +319,7 @@
                 const hoursPassed = (now - data.lastUpdate) / (1000 * 60 * 60);
                 const currentFatigue = Math.max(0, data.fatiguePoints - (hoursPassed * rate));
                 const recoveryPct = Math.min(100, Math.max(0, 100 - (currentFatigue / 10))); 
-                let timeString = "READY";
+                let timeString = "SIAP TEMPUR";
                 if (recoveryPct < 100) {
                     const hoursNeeded = currentFatigue / rate;
                     const h = Math.floor(hoursNeeded);
@@ -335,7 +337,7 @@
                     <div className="flex justify-between items-center cyber-border rounded p-3">
                         <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><Icon name="chevron-left" /></button>
                         <div className="text-center">
-                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">PROTOCOL</div>
+                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">JADWAL HARI INI</div>
                             <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
                         </div>
                         <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><Icon name="chevron-right" /></button>
@@ -343,7 +345,7 @@
 
                     <div className="cyber-border rounded p-4 bg-black/60">
                         <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
-                            <span className="font-cyber text-sm text-cyan-400">BIO-SYSTEM STATUS</span>
+                            <span className="font-cyber text-sm text-cyan-400">KONDISI OTOT</span>
                             <Icon name="activity" size={16} className="text-cyan-400 animate-pulse" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -373,16 +375,16 @@
                         <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="dumbbell" size={100}/></div>
                         <h2 className="text-2xl font-cyber font-black text-white italic">{template.name}</h2>
                         <div className="text-xs text-slate-400 mt-2 mb-6 font-mono max-w-[70%]">
-                            RECOMMENDED: {template.defaultEx.length} TACTICAL EXERCISES
+                            REKOMENDASI: {template.defaultEx.length} JENIS LATIHAN
                         </div>
                         
                         {template.type === 'REST' ? (
                             <div className="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-center font-mono text-sm">
-                                RECOVERY PROTOCOL ACTIVE
+                                WAKTUNYA RECOVERY, BRO
                             </div>
                         ) : (
                             <button onClick={onStartBuild} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(8,145,178,0.5)]">
-                                <Icon name="settings-2" size={18}/> CONFIGURE LOADOUT
+                                <Icon name="settings-2" size={18}/> ATUR LATIHAN
                             </button>
                         )}
                     </div>
@@ -420,7 +422,7 @@
                 <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
                     <div className="p-4 border-b border-slate-800 bg-black flex justify-between items-center">
                         <button onClick={onBack} className="text-slate-400"><Icon name="arrow-left"/></button>
-                        <h2 className="font-cyber text-white">TACTICAL LOADOUT</h2>
+                        <h2 className="font-cyber text-white">PERSIAPAN LATIHAN</h2>
                         <div className="w-6"></div>
                     </div>
 
@@ -429,7 +431,7 @@
                             <div key={idx} className="bg-slate-800 rounded p-3 flex justify-between items-center border border-slate-700">
                                 <div>
                                     <div className="font-bold text-white text-sm">{ex.name}</div>
-                                    <div className="text-[10px] text-cyan-400 font-mono">REC: {calculateRec(ex.id)} KG</div>
+                                    <div className="text-[10px] text-cyan-400 font-mono">SARAN: {calculateRec(ex.id)} KG</div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="flex items-center bg-black rounded px-2 py-1">
@@ -443,20 +445,20 @@
                         ))}
 
                         <button onClick={() => setIsAdding(true)} className="w-full py-3 border border-dashed border-slate-600 text-slate-400 rounded hover:border-cyan-500 hover:text-cyan-500 transition">
-                            + ADD EXERCISE
+                            + TAMBAH GERAKAN
                         </button>
                     </div>
 
                     <div className="p-4 bg-black border-t border-slate-800">
                         <button onClick={onLaunch} className="w-full bg-cyan-600 text-black font-cyber font-bold py-4 rounded shadow-[0_0_15px_cyan]">
-                            ENGAGE MISSION
+                            GASKAN LATIHAN
                         </button>
                     </div>
 
                     {isAdding && (
                         <div className="absolute inset-0 bg-black/95 z-50 flex flex-col">
                             <div className="p-4 border-b border-slate-800 flex justify-between">
-                                <span className="font-cyber">DATABASE</span>
+                                <span className="font-cyber">DAFTAR LATIHAN</span>
                                 <button onClick={() => setIsAdding(false)}><Icon name="x"/></button>
                             </div>
                             <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -484,9 +486,30 @@
             const [restTimer, setRestTimer] = useState(0);
             const [results, setResults] = useState([]);
 
+            // State buat mode setup (tanya mau berapa set)
+            const [isSetupMode, setIsSetupMode] = useState(true);
+            const [plannedSets, setPlannedSets] = useState(draft[0].plannedSets);
+            const [errorMsg, setErrorMsg] = useState('');
+
             const currentEx = draft[exIndex];
             const isLastEx = exIndex === draft.length - 1;
-            const isLastSet = setIndex === currentEx.plannedSets - 1;
+            const isLastSet = setIndex === plannedSets - 1;
+
+            // Reset setiap ganti exercise
+            useEffect(() => {
+                setIsSetupMode(true);
+                setPlannedSets(draft[exIndex].plannedSets);
+                setSetIndex(0);
+                setInputWeight('');
+                setInputReps('');
+                setErrorMsg('');
+            }, [exIndex]);
+
+            // Auto-fill Rec Weight saat exercise berubah
+            useEffect(() => {
+                const rec = calculateRec(currentEx.id);
+                if (rec > 0) setInputWeight(rec);
+            }, [currentEx]);
 
             useEffect(() => {
                 let interval;
@@ -495,13 +518,21 @@
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
 
-            useEffect(() => {
-                const rec = calculateRec(currentEx.id);
-                if (rec > 0) setInputWeight(rec);
-            }, [currentEx]);
+            const handleConfirmSets = () => {
+                if (plannedSets < 1) {
+                    setErrorMsg("MINIMAL 1 SET DONG");
+                    return;
+                }
+                setIsSetupMode(false);
+                setErrorMsg('');
+            };
 
             const handleCheck = () => {
-                if(!inputWeight || !inputReps) return;
+                if(!inputWeight || !inputReps) {
+                    setErrorMsg("ISI DULU BOSQU");
+                    return;
+                }
+                setErrorMsg('');
 
                 const newResults = [...results];
                 let exEntry = newResults.find(r => r.id === currentEx.id);
@@ -518,15 +549,13 @@
                         onFinish({
                             id: Date.now(),
                             date: new Date().toISOString(),
-                            programName: "CUSTOM MISSION", 
+                            programName: "LATIHAN HARI INI", 
                             duration: duration,
                             exercises: newResults 
                         });
                     } else {
                         triggerRest(() => {
                             setExIndex(prev => prev + 1);
-                            setSetIndex(0);
-                            setInputReps('');
                         });
                     }
                 } else {
@@ -546,47 +575,70 @@
 
             return (
                 <div className="flex-1 flex flex-col relative pb-20 overflow-hidden">
+                    {/* LOCK SCREEN */}
                     {isResting && (
                         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
                             <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
-                            <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">LOCKED</h1>
+                            <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">ISTIRAHAT</h1>
+                            <p className="text-xs font-mono text-slate-400 uppercase mb-6">Napas dulu bro...</p>
                             <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50 mt-4">{formatTime(restTimer)}</div>
-                            <button onClick={() => setIsResting(false)} className="mt-8 px-4 py-2 border border-slate-600 rounded text-xs font-mono hover:bg-white/10">SKIP REST</button>
+                            <button onClick={() => setIsResting(false)} className="mt-8 px-4 py-2 border border-slate-600 rounded text-xs font-mono hover:bg-white/10">HAJAR LANGSUNG</button>
+                            <p className="text-[10px] text-slate-500 mt-4">Sabar, biar otot tumbuh maksimal</p>
                         </div>
                     )}
 
                     <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-                        <button onClick={onAbort} className="text-red-500 text-xs font-bold border border-red-900 px-2 py-1 rounded">ABORT</button>
-                        <div className="text-[10px] text-slate-500 font-cyber">EXERCISE <span className="text-cyan-400 font-bold ml-1">{exIndex + 1} / {draft.length}</span></div>
+                        <button onClick={onAbort} className="text-red-500 text-xs font-bold border border-red-900 px-2 py-1 rounded">BATAL</button>
+                        <div className="text-[10px] text-slate-500 font-cyber">LATIHAN KE <span className="text-cyan-400 font-bold ml-1">{exIndex + 1} / {draft.length}</span></div>
                     </div>
 
                     <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
                         <div className="mb-8 text-center">
-                            <div className="text-cyan-400 text-xs font-cyber tracking-widest mb-2">TARGET LOCKED</div>
+                            <div className="text-cyan-400 text-xs font-cyber tracking-widest mb-2">TARGET SEKARANG</div>
                             <h2 className="text-3xl font-black text-white font-cyber leading-tight">{currentEx.name}</h2>
-                            <div className="mt-2 text-amber-500 text-sm font-mono font-bold">REC LOAD: {calculateRec(currentEx.id)} KG</div>
+                            <div className="mt-2 text-amber-500 text-sm font-mono font-bold">SARAN BEBAN: {calculateRec(currentEx.id)} KG</div>
                         </div>
 
-                        <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
-                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
-                                SET {setIndex + 1} / {currentEx.plannedSets}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight (KG)</label>
-                                    <input type="number" value={inputWeight} onChange={e => setInputWeight(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                        {/* MODE SETUP JUMLAH SET */}
+                        {isSetupMode ? (
+                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
+                                <div className="text-center mb-6">
+                                    <div className="mx-auto text-cyan-400 mb-2 flex justify-center"><Icon name="settings-2" size={32} /></div>
+                                    <h3 className="text-xl font-cyber font-bold text-white">ATUR SET</h3>
+                                    <p className="text-xs text-slate-400 mt-1">Mau main berapa set hari ini?</p>
                                 </div>
-                                <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps</label>
-                                    <input type="number" value={inputReps} onChange={e => setInputReps(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                                <div className="mb-6 flex items-center justify-center gap-4">
+                                    <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="minus" /></button>
+                                    <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">{plannedSets}</div>
+                                    <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="plus" /></button>
                                 </div>
+                                <button onClick={handleConfirmSets} className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold py-4 rounded-xl">GAS!</button>
+                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
+                        ) : (
+                            /* MODE INPUT SET */
+                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
+                                    SET KE {setIndex + 1} DARI {plannedSets}
+                                </div>
 
-                            <button onClick={handleCheck} className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] flex items-center justify-center gap-2">
-                                <Icon name="check-circle-2" /> COMPLETE SET
-                            </button>
-                        </div>
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Beban (KG)</label>
+                                        <input type="number" value={inputWeight} onChange={e => setInputWeight(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Repetisi</label>
+                                        <input type="number" value={inputReps} onChange={e => setInputReps(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                                    </div>
+                                </div>
+
+                                <button onClick={handleCheck} className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] flex items-center justify-center gap-2">
+                                    <Icon name="check-circle-2" /> KELAR SET
+                                </button>
+                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -608,15 +660,15 @@
             return (
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                     <div className="flex items-center gap-2 mb-6">
-                        <h2 className="text-xl font-cyber font-bold text-white tracking-wider">MISSION LOGS</h2>
+                        <h2 className="text-xl font-cyber font-bold text-white tracking-wider">RIWAYAT NGE-GYM</h2>
                         <div className="h-px bg-slate-800 flex-1"></div>
-                        <span className="text-xs font-mono text-cyan-400">{history.length} ENTRIES</span>
+                        <span className="text-xs font-mono text-cyan-400">{history.length} SESI</span>
                     </div>
 
                     {history.length === 0 ? (
                         <div className="text-center py-20 opacity-50 flex flex-col items-center">
                             <Icon name="folder-x" size={48} className="text-slate-600 mb-4" />
-                            <p className="font-cyber text-slate-500">NO DATA FOUND</p>
+                            <p className="font-cyber text-slate-500">BELUM ADA LATIHAN, YUK GAS!</p>
                         </div>
                     ) : (
                         history.map((session) => {
@@ -640,7 +692,7 @@
                                                 <div className="text-[10px] uppercase font-mono">{dateObj.toLocaleDateString('id-ID', {month:'short'})}</div>
                                             </div>
                                             <div>
-                                                <div className="font-cyber font-bold text-white text-sm">{session.programName || "MISSION"}</div>
+                                                <div className="font-cyber font-bold text-white text-sm">{session.programName || "LATIHAN"}</div>
                                                 <div className="flex gap-3 text-[10px] text-slate-400 font-mono mt-1">
                                                     <span className="flex items-center gap-1"><Icon name="clock" size={10}/> {dateObj.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
                                                     <span className="flex items-center gap-1"><Icon name="timer" size={10}/> {formatDuration(session.duration)}</span>
@@ -649,7 +701,7 @@
                                         </div>
                                         <div className="text-right flex flex-col items-end">
                                             <div className="text-xs font-bold text-white">{totalSets} SETS</div>
-                                            <div className="text-[10px] text-slate-500 text-cyan-400">DETAILS <Icon name="chevron-down" size={10} className="inline"/></div>
+                                            <div className="text-[10px] text-slate-500 text-cyan-400">DETAIL <Icon name="chevron-down" size={10} className="inline"/></div>
                                         </div>
                                     </div>
 
@@ -659,11 +711,11 @@
                                                 {session.exercises.map((ex) => (
                                                     <div key={ex.id} className="text-sm">
                                                         <div className="text-cyan-400 font-bold mb-1 text-xs uppercase tracking-wide">{ex.name}</div>
-                                                        <div className="grid grid-cols-4 gap-2 text-[10px] font-mono text-slate-500 mb-1 border-b border-slate-800 pb-1">
+                                                        <div className="grid grid-cols-3 gap-2 text-[10px] font-mono text-slate-500 mb-1 border-b border-slate-800 pb-1">
                                                             <div>SET</div><div>KG</div><div>REPS</div>
                                                         </div>
                                                         {ex.sets.map((set, idx) => (
-                                                            <div key={idx} className="grid grid-cols-4 gap-2 text-xs font-mono text-slate-300 py-1">
+                                                            <div key={idx} className="grid grid-cols-3 gap-2 text-xs font-mono text-slate-300 py-1">
                                                                 <div className="text-slate-500">{idx + 1}</div>
                                                                 <div>{set.weight}</div>
                                                                 <div>{set.reps}</div>
@@ -687,25 +739,25 @@
             return (
                 <div className="absolute inset-0 bg-black/95 z-50 flex items-center justify-center p-6">
                     <div className="w-full max-w-sm cyber-border bg-slate-900 p-6 rounded-xl">
-                        <h2 className="text-xl font-cyber text-white mb-4">SYSTEM CALIBRATION</h2>
-                        <p className="text-xs text-slate-400 mb-6">Enter your 1 Rep Max (1RM) Bench Press. The system will auto-calculate ratios for other muscle groups.</p>
+                        <h2 className="text-xl font-cyber text-white mb-4">KALIBRASI KEKUATAN</h2>
+                        <p className="text-xs text-slate-400 mb-6">Masukin rekor 1x angkat (1RM) Bench Press lo. Nanti gue itungin estimasi beban buat latihan lain.</p>
                         
                         <label className="text-xs text-cyan-400 font-bold mb-2 block">BENCH PRESS 1RM (KG)</label>
                         <input type="number" value={val} onChange={e => setVal(e.target.value)} className="w-full cyber-input p-3 rounded mb-6 text-xl" />
                         
                         <div className="grid grid-cols-2 gap-2">
                             <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">EST. SQUAT</div>
+                                <div className="text-[10px] text-slate-500">ESTIMASI SQUAT</div>
                                 <div className="text-white font-mono">{(val * 1.3).toFixed(1)} KG</div>
                             </div>
                             <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">EST. DEADLIFT</div>
+                                <div className="text-[10px] text-slate-500">ESTIMASI DEADLIFT</div>
                                 <div className="text-white font-mono">{(val * 1.5).toFixed(1)} KG</div>
                             </div>
                         </div>
 
                         <button onClick={() => { setProfile({...profile, bench1RM: val}); onClose(); }} className="w-full mt-6 bg-cyan-600 py-3 rounded font-bold text-black font-cyber">
-                            SAVE CONFIG
+                            SIMPAN
                         </button>
                     </div>
                 </div>
