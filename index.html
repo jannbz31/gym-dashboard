@@ -9,7 +9,8 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Menggunakan versi spesifik Lucide untuk stabilitas -->
+    <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -29,7 +30,7 @@
                 linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
             background-size: 30px 30px;
-            overflow: hidden; /* Prevent pull-to-refresh on mobile */
+            overflow: hidden;
         }
 
         .font-cyber { font-family: 'Orbitron', sans-serif; }
@@ -56,7 +57,6 @@
             outline: none;
         }
 
-        /* Strict Lock Overlay Animation */
         @keyframes lockdown {
             0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
             100% { background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
@@ -65,7 +65,14 @@
 
         .muscle-bar-bg { background: rgba(255,255,255,0.1); }
         .muscle-bar-fill { box-shadow: 0 0 10px currentColor; transition: width 1s ease-in-out; }
-
+        
+        /* Animasi error */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
     </style>
 </head>
 <body>
@@ -83,7 +90,7 @@
         const PROGRAM_DATA = {
             1: {
                 name: "PUSH: STRENGTH",
-                muscles: ['CHEST', 'SHOULDERS', 'ARMS'], // Triceps included in Arms
+                muscles: ['CHEST', 'SHOULDERS', 'ARMS'], 
                 exercises: [
                     { id: 'p1_1', name: 'Incline Bench Machine', sets: 5, targetReps: '4', targetWeight: '85-90', unit: 'kg' },
                     { id: 'p1_2', name: 'Flat Barbell Bench Press', sets: 4, targetReps: '5', targetWeight: '70-80', unit: 'kg' },
@@ -94,7 +101,7 @@
             },
             2: {
                 name: "PULL: HYPERTROPHY",
-                muscles: ['BACK', 'ARMS', 'SHOULDERS'], // Rear delts, Biceps
+                muscles: ['BACK', 'ARMS', 'SHOULDERS'], 
                 exercises: [
                     { id: 'p2_1', name: 'Lat Pulldown', sets: 4, targetReps: '6-8', targetWeight: '65-80', unit: 'kg' },
                     { id: 'p2_2', name: 'Chest-Supported Row', sets: 4, targetReps: '6-8', targetWeight: '60-80', unit: 'kg' },
@@ -114,7 +121,7 @@
                     { id: 'p3_5', name: 'Calf Raise', sets: 4, targetReps: '12-15', targetWeight: '70-100', unit: 'kg' }
                 ]
             },
-            4: { name: "REST / RECOVERY", type: "rest", muscles: ['CARDIO'] }, // Active recovery
+            4: { name: "REST / RECOVERY", type: "rest", muscles: ['CARDIO'] }, 
             5: {
                 name: "UPPER: VOLUME",
                 muscles: ['CHEST', 'BACK', 'SHOULDERS', 'ARMS'],
@@ -143,6 +150,43 @@
 
         const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
 
+        // --- ICON COMPONENT (FIXED & SAFE) ---
+        const Icon = ({ name, size = 20, className = "" }) => {
+            const containerRef = useRef(null);
+
+            useEffect(() => {
+                if (!window.lucide) return;
+
+                // Konversi kebab-case ke PascalCase (misal: chevron-left -> ChevronLeft)
+                const iconName = name
+                    .split('-')
+                    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                    .join('');
+
+                const iconDef = window.lucide.icons[iconName];
+
+                if (iconDef && containerRef.current) {
+                    containerRef.current.innerHTML = ''; // Bersihkan konten lama
+                    
+                    // Gunakan lucide.createElement untuk membuat node SVG
+                    const svgElement = window.lucide.createElement(iconDef);
+                    
+                    // Set atribut tambahan
+                    svgElement.setAttribute('width', size);
+                    svgElement.setAttribute('height', size);
+                    if (className) svgElement.setAttribute('class', className);
+                    svgElement.setAttribute('stroke-width', '2');
+
+                    // Append ke container (Manual DOM manipulation di dalam ref aman untuk React)
+                    containerRef.current.appendChild(svgElement);
+                } else {
+                    console.warn(`Icon not found: ${iconName}`);
+                }
+            }, [name, size, className]);
+
+            return <span ref={containerRef} className="inline-flex items-center justify-center align-middle" />;
+        };
+
         // --- HELPER HOOKS ---
         const useWakeLock = () => {
             const wakeLock = useRef(null);
@@ -165,7 +209,6 @@
         const App = () => {
             const [view, setView] = useState('dashboard');
             const [activeDay, setActiveDay] = useState(new Date().getDay());
-            // Format: { CHEST: timestamp, LEGS: timestamp }
             const [muscleHistory, setMuscleHistory] = useState({});
             const [workoutHistory, setWorkoutHistory] = useState([]);
 
@@ -177,12 +220,10 @@
             }, []);
 
             const saveSession = (sessionData, musclesTrained) => {
-                // 1. Save Workout Log
                 const newHistory = [sessionData, ...workoutHistory];
                 setWorkoutHistory(newHistory);
                 localStorage.setItem('ppl_v2_history', JSON.stringify(newHistory));
 
-                // 2. Update Muscle Recovery Timestamps (Reset to NOW)
                 const now = Date.now();
                 const newMuscleState = { ...muscleHistory };
                 musclesTrained.forEach(m => {
@@ -199,10 +240,10 @@
                     {/* Header */}
                     <header className="p-4 border-b border-slate-800 bg-black/50 backdrop-blur sticky top-0 z-10 flex justify-between items-center">
                         <div className="flex items-center gap-2">
-                            <i data-lucide="cpu" className="text-cyan-400"></i>
+                            <Icon name="cpu" className="text-cyan-400" />
                             <span className="font-cyber font-bold text-lg tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></span>
                         </div>
-                        <div className="text-xs font-mono text-slate-500">V2.1.0 CONFIG</div>
+                        <div className="text-xs font-mono text-slate-500">V2.1.2 STABLE</div>
                     </header>
 
                     {view === 'dashboard' && <Dashboard 
@@ -223,17 +264,15 @@
             );
         };
 
-        // --- DASHBOARD: MUSCLE MATRIX ---
+        // --- DASHBOARD ---
         const Dashboard = ({ activeDay, setActiveDay, startWorkout, muscleHistory, history }) => {
             const program = PROGRAM_DATA[activeDay];
             const isRest = program.type === 'rest';
 
-            // Calculate Recovery for specific muscle
             const getRecovery = (muscleName) => {
                 const lastTrained = muscleHistory[muscleName];
                 if (!lastTrained) return 100;
 
-                // Logic: Large muscles 48h, Small/Cardio 24h
                 const recoveryTime = (muscleName === 'LEGS' || muscleName === 'BACK' || muscleName === 'CHEST') ? 48 : 24;
                 const hoursPassed = (Date.now() - lastTrained) / (1000 * 60 * 60);
                 
@@ -241,26 +280,24 @@
                 return Math.floor((hoursPassed / recoveryTime) * 100);
             };
 
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
-
             return (
                 <div className="p-4 space-y-6">
                     {/* Day Selector */}
                     <div className="flex justify-between items-center cyber-border rounded-lg p-3">
-                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><i data-lucide="chevron-left"></i></button>
+                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)} className="p-2"><Icon name="chevron-left" /></button>
                         <div className="text-center">
                             <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">
                                 {activeDay === new Date().getDay() ? "TODAY'S PROTOCOL" : "PREVIEW MODE"}
                             </div>
                             <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
                         </div>
-                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><i data-lucide="chevron-right"></i></button>
+                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)} className="p-2"><Icon name="chevron-right" /></button>
                     </div>
 
-                    {/* Muscle Status Matrix (The new "Body Recovery") */}
+                    {/* Muscle Status Matrix */}
                     <div className="cyber-border rounded-xl p-4 bg-black/40">
                         <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
-                            <i data-lucide="activity" className="text-cyan-400 w-4 h-4"></i>
+                            <Icon name="activity" className="text-cyan-400 w-4 h-4" />
                             <h3 className="font-cyber text-sm text-white tracking-widest">BIOMETRIC RECOVERY MATRIX</h3>
                         </div>
                         
@@ -290,7 +327,7 @@
                     {/* Workout Card */}
                     <div className="cyber-border rounded-xl p-5 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
-                            <i data-lucide={isRest ? "coffee" : "dumbbell"} width={80} height={80}></i>
+                            <Icon name={isRest ? "coffee" : "dumbbell"} size={80} />
                         </div>
                         <h2 className="text-2xl font-cyber font-black text-white italic">{program.name}</h2>
                         <div className="text-xs text-slate-400 mt-1 font-mono mb-6">
@@ -299,7 +336,7 @@
 
                         {!isRest ? (
                             <button onClick={startWorkout} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 transition-all hover:tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.5)]">
-                                <i data-lucide="play-circle" className="w-5 h-5"></i>
+                                <Icon name="play-circle" className="w-5 h-5" />
                                 INITIATE SEQUENCE
                             </button>
                         ) : (
@@ -312,100 +349,88 @@
             );
         };
 
-        // --- WORKOUT SESSION: THE COMPLEX LOGIC ---
+        // --- WORKOUT SESSION ---
         const WorkoutSession = ({ dayId, onFinish, onAbort, lastLog }) => {
             useWakeLock();
             const program = PROGRAM_DATA[dayId];
             const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
             
-            // NEW: Mode Setup Set (Sebelum mulai set input)
             const [isSetupMode, setIsSetupMode] = useState(true);
             const [plannedSets, setPlannedSets] = useState(program.exercises[0].sets);
 
             const [currentSetIdx, setCurrentSetIdx] = useState(0);
-            
-            // State untuk input saat ini
             const [inputWeight, setInputWeight] = useState('');
             const [inputReps, setInputReps] = useState('');
-            
-            // State untuk Lock Rest
             const [isResting, setIsResting] = useState(false);
             const [restTimer, setRestTimer] = useState(0);
-
-            // Menyimpan data yang sudah selesai
-            // Format: { exId: [ {weight, reps}, ... ] }
             const [sessionResults, setSessionResults] = useState({});
+            
+            // Error Message State
+            const [errorMsg, setErrorMsg] = useState('');
 
             const currentExercise = program.exercises[currentExerciseIdx];
             const isLastExercise = currentExerciseIdx === program.exercises.length - 1;
-            // Gunakan plannedSets yang baru diinput user, bukan default program
             const isLastSet = currentSetIdx === plannedSets - 1;
 
-            // Reset setup mode setiap ganti exercise
             useEffect(() => {
                 setIsSetupMode(true);
                 setPlannedSets(program.exercises[currentExerciseIdx].sets);
+                setErrorMsg('');
             }, [currentExerciseIdx]);
 
-            // Timer logika
             useEffect(() => {
                 let interval;
                 if (isResting && restTimer > 0) {
                     interval = setInterval(() => setRestTimer(prev => prev - 1), 1000);
                 } else if (isResting && restTimer === 0) {
-                    // Unlock
                     setIsResting(false);
                 }
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
 
-            // Handler: Confirm Sets (Setup Mode)
             const handleConfirmSets = () => {
-                if (plannedSets < 1) return alert("Min 1 set!");
+                if (plannedSets < 1) {
+                    setErrorMsg("MINIMUM 1 SET REQUIRED");
+                    return;
+                }
                 setIsSetupMode(false);
+                setErrorMsg('');
             };
 
-            // Handler: Check Set (Selesai Set)
             const handleCheckSet = () => {
-                if (!inputWeight || !inputReps) return alert("INPUT DATA REQUIRED!");
+                if (!inputWeight || !inputReps) {
+                    setErrorMsg("DATA ENTRY REQUIRED");
+                    return;
+                }
+                setErrorMsg('');
 
-                // Simpan data
                 const exId = currentExercise.id;
                 const newResults = { ...sessionResults };
                 if (!newResults[exId]) newResults[exId] = [];
                 newResults[exId].push({ weight: inputWeight, reps: inputReps });
                 setSessionResults(newResults);
 
-                // Jika ini set terakhir dari exercise ini
                 if (isLastSet) {
-                    // Jika ini exercise terakhir dari semua
                     if (isLastExercise) {
                         finishWorkout(newResults);
                     } else {
-                        // Pindah ke exercise berikutnya
-                        // Trigger rest dulu sebelum pindah alat?
                         triggerRest(() => {
                             setCurrentExerciseIdx(prev => prev + 1);
                             setCurrentSetIdx(0);
                             setInputWeight('');
                             setInputReps('');
-                            // isSetupMode akan di-reset oleh useEffect
                         });
                     }
                 } else {
-                    // Pindah ke set berikutnya dalam exercise yang sama
                     triggerRest(() => {
                         setCurrentSetIdx(prev => prev + 1);
-                        // Biarkan weight/reps terisi untuk set berikutnya (convenience)
                     });
                 }
             };
 
             const triggerRest = (callback) => {
-                setRestTimer(90); // 1.5 menit = 90 detik
+                setRestTimer(90); 
                 setIsResting(true);
-                // Kita jalankan callback (state update untuk next set) segera, 
-                // tapi layar tertutup overlay lock.
                 callback();
             };
 
@@ -425,15 +450,6 @@
                 return `${min}:${sec < 10 ? '0' : ''}${sec}`;
             };
 
-            // Cari history beban terakhir untuk latihan ini (Auto-fill suggestion)
-            const getLastLogWeight = () => {
-                if (!lastLog || !lastLog.exercises[currentExercise.id]) return null;
-                // Ambil set pertama dari sesi terakhir
-                return lastLog.exercises[currentExercise.id][0].weight;
-            };
-
-            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
-
             return (
                 <div className="h-screen flex flex-col relative">
                     
@@ -442,7 +458,7 @@
                         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white lock-active">
                             <div className="text-center space-y-4">
                                 <div className="text-cyan-400 animate-pulse">
-                                    <i data-lucide="lock" width={64} height={64} className="mx-auto"></i>
+                                    <Icon name="lock" size={64} className="mx-auto" />
                                 </div>
                                 <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">SYSTEM LOCKED</h1>
                                 <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Cooling Down Muscle Fibers</p>
@@ -472,7 +488,6 @@
                     {/* MAIN CONTENT */}
                     <div className="flex-1 p-6 flex flex-col justify-center">
                         
-                        {/* Exercise Title Card */}
                         <div className="mb-8 text-center">
                             <div className="text-cyan-400 text-xs font-cyber tracking-[0.3em] uppercase mb-2">Current Target</div>
                             <h2 className="text-3xl font-black text-white leading-tight font-cyber">{currentExercise.name}</h2>
@@ -481,11 +496,12 @@
                             </div>
                         </div>
 
-                        {/* MODE: SET CONFIGURATION */}
                         {isSetupMode ? (
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
                                 <div className="text-center mb-6">
-                                    <i data-lucide="settings-2" className="w-8 h-8 mx-auto text-cyan-400 mb-2"></i>
+                                    <div className="mx-auto text-cyan-400 mb-2 flex justify-center">
+                                        <Icon name="settings-2" size={32} />
+                                    </div>
                                     <h3 className="text-xl font-cyber font-bold text-white">SET CONFIGURATION</h3>
                                     <p className="text-xs text-slate-400 mt-1">Adjust total sets for this session</p>
                                 </div>
@@ -493,11 +509,11 @@
                                 <div className="mb-6">
                                     <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block text-center">Total Sets Planned</label>
                                     <div className="flex items-center justify-center gap-4">
-                                        <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><i data-lucide="minus"></i></button>
+                                        <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="minus" /></button>
                                         <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">
                                             {plannedSets}
                                         </div>
-                                        <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><i data-lucide="plus"></i></button>
+                                        <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="plus" /></button>
                                     </div>
                                 </div>
 
@@ -507,9 +523,9 @@
                                 >
                                     CONFIRM & START
                                 </button>
+                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
                         ) : (
-                            /* MODE: INPUT DATA */
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in slide-in-from-bottom-4 duration-300">
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
                                     SET {currentSetIdx + 1} <span className="text-cyan-500 mx-1">/</span> {plannedSets}
@@ -539,18 +555,18 @@
                                     </div>
                                 </div>
 
-                                {/* CHECK BUTTON */}
                                 <button 
                                     onClick={handleCheckSet}
                                     className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
                                 >
-                                    <i data-lucide="check-circle-2" className="w-6 h-6"></i>
+                                    <Icon name="check-circle-2" className="w-6 h-6" />
                                     COMPLETE SET & REST
                                 </button>
+                                
+                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
                         )}
 
-                        {/* Upcoming Peek */}
                         {!isSetupMode && !isLastSet && (
                             <div className="mt-6 text-center opacity-50">
                                 <p className="text-[10px] text-slate-500 uppercase">UP NEXT</p>
