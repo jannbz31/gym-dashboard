@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER COMMANDER V3.0</title>
+    <title>PPL CYBER V2.0</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -18,9 +17,8 @@
             --neon-blue: #00f3ff;
             --neon-red: #ff0055;
             --neon-amber: #ffaa00;
-            --neon-green: #00ff9d;
-            --bg-dark: #020204;
-            --panel-bg: rgba(10, 15, 25, 0.9);
+            --bg-dark: #030305;
+            --glass: rgba(10, 15, 30, 0.85);
         }
 
         body {
@@ -28,10 +26,10 @@
             color: #e2e8f0;
             font-family: 'Rajdhani', sans-serif;
             background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
-            background-size: 20px 20px;
-            /* overflow: hidden; removed to let app container handle it */
+                linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+            background-size: 30px 30px;
+            overflow: hidden; /* Prevent pull-to-refresh on mobile */
         }
 
         .font-cyber { font-family: 'Orbitron', sans-serif; }
@@ -39,22 +37,13 @@
         
         .cyber-border {
             position: relative;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 243, 255, 0.15);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        .cyber-border::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px;
-            border-top: 2px solid var(--neon-blue); border-left: 2px solid var(--neon-blue);
-        }
-        .cyber-border::after {
-            content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
-            border-bottom: 2px solid var(--neon-blue); border-right: 2px solid var(--neon-blue);
+            background: rgba(5, 5, 10, 0.6);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
         }
 
         .cyber-input {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid #334155;
             color: var(--neon-blue);
             font-family: 'Orbitron', sans-serif;
@@ -63,573 +52,478 @@
         }
         .cyber-input:focus {
             border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
             outline: none;
         }
 
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
+        /* Strict Lock Overlay Animation */
+        @keyframes lockdown {
+            0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
+            100% { background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
         }
-        .scan-overlay {
-            position: fixed; top: 0; left: 0; w: 100%; h: 100%; pointer-events: none; z-index: 9999;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.2) 51%);
-            background-size: 100% 4px;
-            opacity: 0.3;
-        }
+        .lock-active { animation: lockdown 0.3s forwards; }
 
-        @keyframes pulse-red { 0% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);} 70% {box-shadow: 0 0 0 10px rgba(255, 0, 85, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);} }
-        .animate-pulse-red { animation: pulse-red 2s infinite; }
+        .muscle-bar-bg { background: rgba(255,255,255,0.1); }
+        .muscle-bar-fill { box-shadow: 0 0 10px currentColor; transition: width 1s ease-in-out; }
+
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <div class="scan-overlay"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
+        const { useState, useEffect, useRef } = React;
 
-        // --- DATABASE & KONFIGURASI ---
-        
-        // 1. Muscle Groups & Recovery Constants
-        const MUSCLE_CONFIG = {
-            CHEST: { label: 'Dada', recoveryRate: 15 }, 
-            BACK: { label: 'Punggung', recoveryRate: 15 },
-            LEGS: { label: 'Kaki', recoveryRate: 12 }, // Kaki butuh waktu lama
-            SHOULDERS: { label: 'Bahu', recoveryRate: 18 },
-            ARMS: { label: 'Lengan', recoveryRate: 20 },
-            CARDIO: { label: 'Jantung', recoveryRate: 30 }
+        // --- DEFINISI OTOT & PROGRAM ---
+        const MUSCLE_GROUPS = {
+            CHEST: 'Dada', BACK: 'Punggung', LEGS: 'Kaki', 
+            SHOULDERS: 'Bahu', ARMS: 'Lengan', CARDIO: 'Jantung'
         };
 
-        // 2. Exercise Database (Pool)
-        const EXERCISE_DB = [
-            // PUSH
-            { id: 'ex_bench_flat', name: 'Flat Bench Press (Barbell)', type: 'PUSH', muscles: ['CHEST', 'SHOULDERS', 'ARMS'], ratio: 1.0, intensity: 0.8 },
-            { id: 'ex_bench_inc_mach', name: 'Incline Bench Machine', type: 'PUSH', muscles: ['CHEST', 'SHOULDERS'], ratio: 0.85, intensity: 0.75 },
-            { id: 'ex_ohp_seat', name: 'Seated Shoulder Press', type: 'PUSH', muscles: ['SHOULDERS', 'ARMS'], ratio: 0.60, intensity: 0.75 },
-            { id: 'ex_pec_deck', name: 'Pec Deck / Fly', type: 'PUSH', muscles: ['CHEST'], ratio: 0.40, intensity: 0.65 },
-            { id: 'ex_tri_push', name: 'Triceps Pushdown', type: 'PUSH', muscles: ['ARMS'], ratio: 0.35, intensity: 0.70 },
-            { id: 'ex_dips', name: 'Dips (Weighted)', type: 'PUSH', muscles: ['CHEST', 'ARMS'], ratio: 0.9, intensity: 0.8 },
-            { id: 'ex_lat_raise', name: 'Lateral Raise', type: 'PUSH', muscles: ['SHOULDERS'], ratio: 0.15, intensity: 0.6 },
-            
-            // PULL
-            { id: 'ex_lat_pull', name: 'Lat Pulldown', type: 'PULL', muscles: ['BACK', 'ARMS'], ratio: 0.85, intensity: 0.75 },
-            { id: 'ex_row_supp', name: 'Chest-Supported Row', type: 'PULL', muscles: ['BACK'], ratio: 0.80, intensity: 0.75 },
-            { id: 'ex_cab_row', name: 'Seated Cable Row', type: 'PULL', muscles: ['BACK'], ratio: 0.75, intensity: 0.75 },
-            { id: 'ex_face_pull', name: 'Face Pull', type: 'PULL', muscles: ['SHOULDERS', 'BACK'], ratio: 0.30, intensity: 0.65 },
-            { id: 'ex_curl_ez', name: 'EZ Bar Curl', type: 'PULL', muscles: ['ARMS'], ratio: 0.35, intensity: 0.70 },
-            { id: 'ex_pull_up', name: 'Pull Up', type: 'PULL', muscles: ['BACK', 'ARMS'], ratio: 0.9, intensity: 0.8 },
-            
-            // LEGS
-            { id: 'ex_squat_hack', name: 'Hack Squat', type: 'LEGS', muscles: ['LEGS'], ratio: 1.3, intensity: 0.8 },
-            { id: 'ex_leg_press', name: 'Leg Press', type: 'LEGS', muscles: ['LEGS'], ratio: 2.5, intensity: 0.8 },
-            { id: 'ex_deadlift', name: 'Deadlift', type: 'LEGS', muscles: ['LEGS', 'BACK'], ratio: 1.5, intensity: 0.85 },
-            { id: 'ex_lunge', name: 'Lunges (DB)', type: 'LEGS', muscles: ['LEGS'], ratio: 0.4, intensity: 0.7 },
-            { id: 'ex_leg_ext', name: 'Leg Extension', type: 'LEGS', muscles: ['LEGS'], ratio: 0.5, intensity: 0.7 },
-            { id: 'ex_leg_curl', name: 'Leg Curl', type: 'LEGS', muscles: ['LEGS'], ratio: 0.45, intensity: 0.7 },
-            { id: 'ex_calf', name: 'Calf Raise', type: 'LEGS', muscles: ['LEGS'], ratio: 0.8, intensity: 0.7 },
-            { id: 'ex_rdl', name: 'Romanian Deadlift', type: 'LEGS', muscles: ['LEGS', 'BACK'], ratio: 1.1, intensity: 0.75 },
-            { id: 'ex_hip_thrust', name: 'Hip Thrust', type: 'LEGS', muscles: ['LEGS'], ratio: 1.6, intensity: 0.8 }
-        ];
-
-        // 3. Default Schedule Templates (Reference IDs)
-        const SCHEDULE_TEMPLATE = {
-            1: { name: "PUSH: STRENGTH", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_bench_flat', 'ex_ohp_seat', 'ex_pec_deck', 'ex_tri_push'] },
-            2: { name: "PULL: HYPERTROPHY", type: "PULL", defaultEx: ['ex_lat_pull', 'ex_row_supp', 'ex_cab_row', 'ex_face_pull', 'ex_curl_ez'] },
-            3: { name: "LEGS: STRENGTH", type: "LEGS", defaultEx: ['ex_leg_press', 'ex_lunge', 'ex_deadlift', 'ex_leg_curl', 'ex_calf'] },
-            4: { name: "REST / ACTIVE", type: "REST", defaultEx: [] },
-            5: { name: "UPPER: VOLUME", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_cab_row', 'ex_pec_deck', 'ex_lat_raise', 'ex_tri_push', 'ex_curl_ez'] }, // Mix Push Pull for Upper
-            6: { name: "LOWER: HYPERTROPHY", type: "LEGS", defaultEx: ['ex_squat_hack', 'ex_hip_thrust', 'ex_rdl', 'ex_leg_ext', 'ex_calf'] },
-            0: { name: "OFF / CARDIO", type: "REST", defaultEx: [] }
+        const PROGRAM_DATA = {
+            1: {
+                name: "PUSH: STRENGTH",
+                muscles: ['CHEST', 'SHOULDERS', 'ARMS'], // Triceps included in Arms
+                exercises: [
+                    { id: 'p1_1', name: 'Incline Bench Machine', sets: 5, targetReps: '4', targetWeight: '85-90', unit: 'kg' },
+                    { id: 'p1_2', name: 'Flat Barbell Bench Press', sets: 4, targetReps: '5', targetWeight: '70-80', unit: 'kg' },
+                    { id: 'p1_3', name: 'Seated Shoulder Press', sets: 3, targetReps: '6-8', targetWeight: '40-55', unit: 'kg' },
+                    { id: 'p1_4', name: 'Chest Fly / Pec Deck', sets: 3, targetReps: '12', targetWeight: '45-60', unit: 'kg' },
+                    { id: 'p1_5', name: 'Triceps Pushdown', sets: 3, targetReps: '10-12', targetWeight: '30-40', unit: 'kg' }
+                ]
+            },
+            2: {
+                name: "PULL: HYPERTROPHY",
+                muscles: ['BACK', 'ARMS', 'SHOULDERS'], // Rear delts, Biceps
+                exercises: [
+                    { id: 'p2_1', name: 'Lat Pulldown', sets: 4, targetReps: '6-8', targetWeight: '65-80', unit: 'kg' },
+                    { id: 'p2_2', name: 'Chest-Supported Row', sets: 4, targetReps: '6-8', targetWeight: '60-80', unit: 'kg' },
+                    { id: 'p2_3', name: 'Seated Cable Row', sets: 3, targetReps: '8-10', targetWeight: '55-70', unit: 'kg' },
+                    { id: 'p2_4', name: 'Face Pull', sets: 3, targetReps: '12-15', targetWeight: '20-30', unit: 'kg' },
+                    { id: 'p2_5', name: 'EZ Bar Curl', sets: 3, targetReps: '8-10', targetWeight: '25-35', unit: 'kg' }
+                ]
+            },
+            3: {
+                name: "LEGS: STRENGTH",
+                muscles: ['LEGS'],
+                exercises: [
+                    { id: 'p3_1', name: 'Leg Press', sets: 4, targetReps: '8-10', targetWeight: '180-240', unit: 'kg' },
+                    { id: 'p3_2', name: 'Bulgarian Split Squat', sets: 3, targetReps: '8', targetWeight: '22-26', unit: 'kg (DB)' },
+                    { id: 'p3_3', name: 'Deadlift', sets: 4, targetReps: '4', targetWeight: '120-130', unit: 'kg' },
+                    { id: 'p3_4', name: 'Leg Curl', sets: 3, targetReps: '10-12', targetWeight: '35-50', unit: 'kg' },
+                    { id: 'p3_5', name: 'Calf Raise', sets: 4, targetReps: '12-15', targetWeight: '70-100', unit: 'kg' }
+                ]
+            },
+            4: { name: "REST / RECOVERY", type: "rest", muscles: ['CARDIO'] }, // Active recovery
+            5: {
+                name: "UPPER: VOLUME",
+                muscles: ['CHEST', 'BACK', 'SHOULDERS', 'ARMS'],
+                exercises: [
+                    { id: 'p5_1', name: 'Incline Bench Machine', sets: 4, targetReps: '8', targetWeight: '75-80', unit: 'kg' },
+                    { id: 'p5_2', name: 'Cable Row', sets: 3, targetReps: '10', targetWeight: '55-70', unit: 'kg' },
+                    { id: 'p5_3', name: 'Chest Fly Machine', sets: 3, targetReps: '12', targetWeight: '45-60', unit: 'kg' },
+                    { id: 'p5_4', name: 'Lateral Raise', sets: 4, targetReps: '15', targetWeight: '10-12', unit: 'kg' },
+                    { id: 'p5_5', name: 'Overhead Triceps Ext', sets: 3, targetReps: '12', targetWeight: '25-35', unit: 'kg' },
+                    { id: 'p5_6', name: 'EZ Bar Curl', sets: 3, targetReps: '12', targetWeight: '20-30', unit: 'kg' }
+                ]
+            },
+            6: {
+                name: "LOWER: HYPERTROPHY",
+                muscles: ['LEGS'],
+                exercises: [
+                    { id: 'p6_1', name: 'Hack Squat', sets: 4, targetReps: '10', targetWeight: '60-100', unit: 'kg' },
+                    { id: 'p6_2', name: 'Hip Thrust', sets: 3, targetReps: '8-10', targetWeight: '90-120', unit: 'kg' },
+                    { id: 'p6_3', name: 'RDL', sets: 3, targetReps: '8', targetWeight: '90-100', unit: 'kg' },
+                    { id: 'p6_4', name: 'Leg Extension', sets: 3, targetReps: '12', targetWeight: '35-50', unit: 'kg' },
+                    { id: 'p6_5', name: 'Seated Calf Raise', sets: 4, targetReps: '15', targetWeight: '40-60', unit: 'kg' }
+                ]
+            },
+            0: { name: "OFF / CARDIO", type: "rest", muscles: ['CARDIO'] }
         };
 
         const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
 
-        // --- COMPONENTS ---
-
-        const Icon = ({ name, size = 18, className = "" }) => {
-            const ref = useRef(null);
-            useEffect(() => {
-                if (window.lucide) {
-                    const iconName = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-                    const def = window.lucide.icons[iconName];
-                    if (def && ref.current) {
-                        ref.current.innerHTML = '';
-                        const el = window.lucide.createElement(def);
-                        el.setAttribute('width', size);
-                        el.setAttribute('height', size);
-                        if(className) el.setAttribute('class', className);
-                        ref.current.appendChild(el);
-                    }
+        // --- HELPER HOOKS ---
+        const useWakeLock = () => {
+            const wakeLock = useRef(null);
+            const request = async () => {
+                if ('wakeLock' in navigator) {
+                    try { wakeLock.current = await navigator.wakeLock.request('screen'); } catch(e){}
                 }
-            }, [name, size, className]);
-            return <span ref={ref} className="inline-flex items-center" />;
+            };
+            const release = async () => { if(wakeLock.current) await wakeLock.current.release(); };
+            useEffect(() => {
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') request();
+                });
+                request();
+                return () => release();
+            }, []);
         };
 
-        // --- MAIN APP COMPONENT ---
+        // --- MAIN APP ---
         const App = () => {
             const [view, setView] = useState('dashboard');
             const [activeDay, setActiveDay] = useState(new Date().getDay());
-            
-            // STATE DATA
-            const [userProfile, setUserProfile] = useState({ bench1RM: 60 }); // Default 60kg
-            const [muscleFatigue, setMuscleFatigue] = useState({}); 
-            const [history, setHistory] = useState([]);
-            
-            // STATE FOR WORKOUT BUILDER
-            const [draftWorkout, setDraftWorkout] = useState([]); 
+            // Format: { CHEST: timestamp, LEGS: timestamp }
+            const [muscleHistory, setMuscleHistory] = useState({});
+            const [workoutHistory, setWorkoutHistory] = useState([]);
 
             useEffect(() => {
-                const savedProfile = localStorage.getItem('ppl_v3_profile');
-                const savedFatigue = localStorage.getItem('ppl_v3_fatigue');
-                const savedHistory = localStorage.getItem('ppl_v3_history');
-
-                if (savedProfile) setUserProfile(JSON.parse(savedProfile));
-                if (savedFatigue) setMuscleFatigue(JSON.parse(savedFatigue));
-                if (savedHistory) setHistory(JSON.parse(savedHistory));
+                const savedMuscles = localStorage.getItem('ppl_v2_muscles');
+                const savedHistory = localStorage.getItem('ppl_v2_history');
+                if (savedMuscles) setMuscleHistory(JSON.parse(savedMuscles));
+                if (savedHistory) setWorkoutHistory(JSON.parse(savedHistory));
             }, []);
 
-            // --- LOGIC: CALIBRATION ---
-            const calculateRecWeight = (exerciseId) => {
-                const ex = EXERCISE_DB.find(e => e.id === exerciseId);
-                if (!ex) return 0;
-                const raw = userProfile.bench1RM * ex.ratio * ex.intensity;
-                return Math.round(raw / 2.5) * 2.5; 
-            };
+            const saveSession = (sessionData, musclesTrained) => {
+                // 1. Save Workout Log
+                const newHistory = [sessionData, ...workoutHistory];
+                setWorkoutHistory(newHistory);
+                localStorage.setItem('ppl_v2_history', JSON.stringify(newHistory));
 
-            // --- LOGIC: FATIGUE & RECOVERY ---
-            const updateFatigue = (exercisesDone) => {
+                // 2. Update Muscle Recovery Timestamps (Reset to NOW)
                 const now = Date.now();
-                const newFatigue = { ...muscleFatigue };
-
-                // Decay
-                Object.keys(newFatigue).forEach(muscle => {
-                    const data = newFatigue[muscle];
-                    const hoursPassed = (now - data.lastUpdate) / (1000 * 60 * 60);
-                    const recoveryAmount = hoursPassed * MUSCLE_CONFIG[muscle].recoveryRate;
-                    data.fatiguePoints = Math.max(0, data.fatiguePoints - recoveryAmount);
-                    data.lastUpdate = now;
+                const newMuscleState = { ...muscleHistory };
+                musclesTrained.forEach(m => {
+                    newMuscleState[m] = now;
                 });
+                setMuscleHistory(newMuscleState);
+                localStorage.setItem('ppl_v2_muscles', JSON.stringify(newMuscleState));
 
-                // Add Fatigue
-                exercisesDone.forEach(entry => {
-                    const exDef = EXERCISE_DB.find(e => e.id === entry.id);
-                    if (exDef) {
-                        const volume = entry.sets.reduce((acc, s) => acc + (parseFloat(s.weight)*parseFloat(s.reps)), 0);
-                        const fatigueAdded = volume / 20; 
-                        exDef.muscles.forEach(m => {
-                            if (!newFatigue[m]) newFatigue[m] = { fatiguePoints: 0, lastUpdate: now };
-                            newFatigue[m].fatiguePoints += fatigueAdded;
-                            newFatigue[m].lastUpdate = now;
-                        });
-                    }
-                });
-
-                setMuscleFatigue(newFatigue);
-                localStorage.setItem('ppl_v3_fatigue', JSON.stringify(newFatigue));
-            };
-
-            const handleSaveSession = (sessionData) => {
-                const newHist = [sessionData, ...history];
-                setHistory(newHist);
-                localStorage.setItem('ppl_v3_history', JSON.stringify(newHist));
-                updateFatigue(sessionData.exercises); 
                 setView('dashboard');
             };
 
-            const toggleFullScreen = () => {
-                if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-                else if (document.exitFullscreen) document.exitFullscreen();
-            };
-
-            // FIX: Using fixed inset-0 to ensure it fits mobile viewport and allows scrolling
             return (
-                <div className="fixed inset-0 flex flex-col bg-black text-slate-200 font-sans">
+                <div className="min-h-screen text-slate-200 pb-20 selection:bg-cyan-500 selection:text-black">
                     {/* Header */}
-                    <header className="flex-none h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur flex items-center justify-between px-4 z-20">
-                        <div className="flex items-center gap-2 text-cyan-400">
-                            <Icon name="activity" />
-                            <span className="font-cyber font-bold tracking-widest text-white">CYBER<span className="text-cyan-400">COMMANDER</span></span>
+                    <header className="p-4 border-b border-slate-800 bg-black/50 backdrop-blur sticky top-0 z-10 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                            <i data-lucide="cpu" className="text-cyan-400"></i>
+                            <span className="font-cyber font-bold text-lg tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></span>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => setView('settings')} className="p-2 bg-slate-800 rounded border border-slate-700 text-xs font-mono text-cyan-400">
-                                1RM: {userProfile.bench1RM}KG
-                            </button>
-                            <button onClick={toggleFullScreen}><Icon name="maximize" /></button>
-                        </div>
+                        <div className="text-xs font-mono text-slate-500">V2.0.1 BUILD</div>
                     </header>
 
-                    {/* MAIN CONTAINER: Flex-1, Min-Height-0 for proper scrolling */}
-                    <main className="flex-1 overflow-hidden relative flex flex-col min-h-0">
-                        {view === 'dashboard' && <Dashboard 
-                            activeDay={activeDay} 
-                            setActiveDay={setActiveDay}
-                            muscleFatigue={muscleFatigue}
-                            config={MUSCLE_CONFIG}
-                            onStartBuild={() => {
-                                const template = SCHEDULE_TEMPLATE[activeDay];
-                                const initialDraft = template.defaultEx.map(id => {
-                                    const ex = EXERCISE_DB.find(e => e.id === id);
-                                    return { ...ex, plannedSets: 3 }; 
-                                }).filter(Boolean);
-                                setDraftWorkout(initialDraft);
-                                setView('builder');
-                            }}
-                        />}
-
-                        {view === 'builder' && <WorkoutBuilder 
-                            draft={draftWorkout}
-                            setDraft={setDraftWorkout}
-                            dayType={SCHEDULE_TEMPLATE[activeDay].type}
-                            onLaunch={() => setView('active_session')}
-                            onBack={() => setView('dashboard')}
-                            calculateRec={calculateRecWeight}
-                        />}
-
-                        {view === 'active_session' && <ActiveSession 
-                            draft={draftWorkout}
-                            onFinish={handleSaveSession}
-                            onAbort={() => setView('dashboard')}
-                            calculateRec={calculateRecWeight}
-                        />}
-
-                        {view === 'settings' && <Settings 
-                            profile={userProfile} 
-                            setProfile={p => { setUserProfile(p); localStorage.setItem('ppl_v3_profile', JSON.stringify(p)); }} 
-                            onClose={() => setView('dashboard')} 
-                        />}
-                    </main>
+                    {view === 'dashboard' && <Dashboard 
+                        activeDay={activeDay} 
+                        setActiveDay={setActiveDay} 
+                        startWorkout={() => setView('workout')}
+                        muscleHistory={muscleHistory}
+                        history={workoutHistory}
+                    />}
+                    
+                    {view === 'workout' && <WorkoutSession 
+                        dayId={activeDay} 
+                        onFinish={saveSession}
+                        onAbort={() => setView('dashboard')}
+                        lastLog={workoutHistory.find(h => h.programId == activeDay)}
+                    />}
                 </div>
             );
         };
 
-        // --- SUB-COMPONENTS ---
+        // --- DASHBOARD: MUSCLE MATRIX ---
+        const Dashboard = ({ activeDay, setActiveDay, startWorkout, muscleHistory, history }) => {
+            const program = PROGRAM_DATA[activeDay];
+            const isRest = program.type === 'rest';
 
-        // 1. DASHBOARD
-        const Dashboard = ({ activeDay, setActiveDay, muscleFatigue, config, onStartBuild }) => {
-            const [now, setNow] = useState(Date.now());
+            // Calculate Recovery for specific muscle
+            const getRecovery = (muscleName) => {
+                const lastTrained = muscleHistory[muscleName];
+                if (!lastTrained) return 100;
 
-            useEffect(() => {
-                const interval = setInterval(() => setNow(Date.now()), 1000); 
-                return () => clearInterval(interval);
-            }, []);
-
-            const getRecoveryInfo = (muscle) => {
-                const data = muscleFatigue[muscle] || { fatiguePoints: 0, lastUpdate: Date.now() };
-                const rate = config[muscle].recoveryRate;
-                const hoursPassed = (now - data.lastUpdate) / (1000 * 60 * 60);
-                const currentFatigue = Math.max(0, data.fatiguePoints - (hoursPassed * rate));
-                const recoveryPct = Math.min(100, Math.max(0, 100 - (currentFatigue / 10))); 
-                let timeString = "READY";
-                if (recoveryPct < 100) {
-                    const hoursNeeded = currentFatigue / rate;
-                    const h = Math.floor(hoursNeeded);
-                    const m = Math.floor((hoursNeeded - h) * 60);
-                    const s = Math.floor(((hoursNeeded - h) * 60 - m) * 60);
-                    timeString = `-${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                }
-                return { pct: Math.floor(recoveryPct), time: timeString };
+                // Logic: Large muscles 48h, Small/Cardio 24h
+                const recoveryTime = (muscleName === 'LEGS' || muscleName === 'BACK' || muscleName === 'CHEST') ? 48 : 24;
+                const hoursPassed = (Date.now() - lastTrained) / (1000 * 60 * 60);
+                
+                if (hoursPassed >= recoveryTime) return 100;
+                return Math.floor((hoursPassed / recoveryTime) * 100);
             };
 
-            const template = SCHEDULE_TEMPLATE[activeDay];
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
             return (
-                <div className="flex-1 overflow-y-auto p-4 pb-24 space-y-6">
+                <div className="p-4 space-y-6">
                     {/* Day Selector */}
-                    <div className="flex justify-between items-center cyber-border rounded p-3">
-                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><Icon name="chevron-left" /></button>
+                    <div className="flex justify-between items-center cyber-border rounded-lg p-3">
+                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><i data-lucide="chevron-left"></i></button>
                         <div className="text-center">
-                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">PROTOCOL</div>
+                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">
+                                {activeDay === new Date().getDay() ? "TODAY'S PROTOCOL" : "PREVIEW MODE"}
+                            </div>
                             <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
                         </div>
-                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><Icon name="chevron-right" /></button>
+                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><i data-lucide="chevron-right"></i></button>
                     </div>
 
-                    {/* Bio-System Status */}
-                    <div className="cyber-border rounded p-4 bg-black/60">
-                        <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
-                            <span className="font-cyber text-sm text-cyan-400">BIO-SYSTEM STATUS</span>
-                            <Icon name="activity" size={16} className="text-cyan-400 animate-pulse" />
+                    {/* Muscle Status Matrix (The new "Body Recovery") */}
+                    <div className="cyber-border rounded-xl p-4 bg-black/40">
+                        <div className="flex items-center gap-2 mb-4 border-b border-slate-800 pb-2">
+                            <i data-lucide="activity" className="text-cyan-400 w-4 h-4"></i>
+                            <h3 className="font-cyber text-sm text-white tracking-widest">BIOMETRIC RECOVERY MATRIX</h3>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            {Object.keys(config).map(muscle => {
-                                const info = getRecoveryInfo(muscle);
-                                const isReady = info.pct === 100;
+                        
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                            {Object.entries(MUSCLE_GROUPS).map(([key, label]) => {
+                                const percentage = getRecovery(key);
+                                let color = "text-cyan-400";
+                                let barColor = "bg-cyan-400";
+                                if (percentage < 40) { color = "text-red-500"; barColor = "bg-red-500"; }
+                                else if (percentage < 90) { color = "text-amber-400"; barColor = "bg-amber-400"; }
+
                                 return (
-                                    <div key={muscle} className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-mono">
-                                            <span className="text-slate-400">{config[muscle].label}</span>
-                                            <span className={isReady ? "text-cyan-400" : "text-amber-500"}>{info.time}</span>
+                                    <div key={key} className="space-y-1">
+                                        <div className="flex justify-between text-xs font-mono">
+                                            <span className="text-slate-400">{label}</span>
+                                            <span className={`font-bold ${color}`}>{percentage}%</span>
                                         </div>
-                                        <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                                            <div 
-                                                className={`h-full transition-all duration-500 ${isReady ? 'bg-cyan-400 shadow-[0_0_5px_cyan]' : 'bg-amber-600'}`} 
-                                                style={{width: `${info.pct}%`}}
-                                            ></div>
+                                        <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                            <div className={`h-full ${barColor} shadow-[0_0_8px_currentColor]`} style={{ width: `${percentage}%` }}></div>
                                         </div>
-                                        <div className="text-right text-[10px] font-bold">{info.pct}%</div>
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
 
-                    {/* Mission Brief */}
-                    <div className="cyber-border rounded p-5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="dumbbell" size={100}/></div>
-                        <h2 className="text-2xl font-cyber font-black text-white italic">{template.name}</h2>
-                        <div className="text-xs text-slate-400 mt-2 mb-6 font-mono max-w-[70%]">
-                            RECOMMENDED: {template.defaultEx.length} TACTICAL EXERCISES
+                    {/* Workout Card */}
+                    <div className="cyber-border rounded-xl p-5 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition">
+                            <i data-lucide={isRest ? "coffee" : "dumbbell"} width={80} height={80}></i>
                         </div>
-                        
-                        {template.type === 'REST' ? (
-                            <div className="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-center font-mono text-sm">
-                                RECOVERY PROTOCOL ACTIVE
-                            </div>
-                        ) : (
-                            <button onClick={onStartBuild} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(8,145,178,0.5)]">
-                                <Icon name="settings-2" size={18}/> CONFIGURE LOADOUT
+                        <h2 className="text-2xl font-cyber font-black text-white italic">{program.name}</h2>
+                        <div className="text-xs text-slate-400 mt-1 font-mono mb-6">
+                            TARGET: {program.muscles ? program.muscles.map(m => MUSCLE_GROUPS[m]).join(' + ') : 'Recovery'}
+                        </div>
+
+                        {!isRest ? (
+                            <button onClick={startWorkout} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 transition-all hover:tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.5)]">
+                                <i data-lucide="play-circle" className="w-5 h-5"></i>
+                                INITIATE SEQUENCE
                             </button>
+                        ) : (
+                            <div className="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-sm font-mono text-center">
+                                SYSTEM COOLING DOWN...
+                            </div>
                         )}
                     </div>
                 </div>
             );
         };
 
-        // 2. WORKOUT BUILDER
-        const WorkoutBuilder = ({ draft, setDraft, dayType, onLaunch, onBack, calculateRec }) => {
-            const [isAdding, setIsAdding] = useState(false);
-
-            const removeEx = (idx) => {
-                const newDraft = [...draft];
-                newDraft.splice(idx, 1);
-                setDraft(newDraft);
-            };
-
-            const addEx = (ex) => {
-                setDraft([...draft, { ...ex, plannedSets: 3 }]);
-                setIsAdding(false);
-            };
-
-            const updateSets = (idx, val) => {
-                const newDraft = [...draft];
-                newDraft[idx].plannedSets = Math.max(1, val);
-                setDraft(newDraft);
-            };
-
-            const availableEx = EXERCISE_DB.filter(e => {
-                if (e.type === dayType) return true;
-                if (dayType === 'PUSH' || dayType === 'PULL') return e.muscles.includes('ARMS') || e.muscles.includes('SHOULDERS');
-                return false;
-            });
-
-            return (
-                <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
-                    <div className="p-4 border-b border-slate-800 bg-black flex justify-between items-center">
-                        <button onClick={onBack} className="text-slate-400"><Icon name="arrow-left"/></button>
-                        <h2 className="font-cyber text-white">TACTICAL LOADOUT</h2>
-                        <div className="w-6"></div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {draft.map((ex, idx) => (
-                            <div key={idx} className="bg-slate-800 rounded p-3 flex justify-between items-center border border-slate-700">
-                                <div>
-                                    <div className="font-bold text-white text-sm">{ex.name}</div>
-                                    <div className="text-[10px] text-cyan-400 font-mono">REC: {calculateRec(ex.id)} KG</div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center bg-black rounded px-2 py-1">
-                                        <button onClick={() => updateSets(idx, ex.plannedSets-1)} className="text-slate-500"><Icon name="minus" size={14}/></button>
-                                        <span className="mx-2 font-mono font-bold w-4 text-center">{ex.plannedSets}</span>
-                                        <button onClick={() => updateSets(idx, ex.plannedSets+1)} className="text-cyan-400"><Icon name="plus" size={14}/></button>
-                                    </div>
-                                    <button onClick={() => removeEx(idx)} className="text-red-500"><Icon name="trash-2" size={16}/></button>
-                                </div>
-                            </div>
-                        ))}
-
-                        <button onClick={() => setIsAdding(true)} className="w-full py-3 border border-dashed border-slate-600 text-slate-400 rounded hover:border-cyan-500 hover:text-cyan-500 transition">
-                            + ADD EXERCISE
-                        </button>
-                    </div>
-
-                    <div className="p-4 bg-black border-t border-slate-800">
-                        <button onClick={onLaunch} className="w-full bg-cyan-600 text-black font-cyber font-bold py-4 rounded shadow-[0_0_15px_cyan]">
-                            ENGAGE MISSION
-                        </button>
-                    </div>
-
-                    {/* Add Modal - Fixed Overlay */}
-                    {isAdding && (
-                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col">
-                            <div className="p-4 border-b border-slate-800 flex justify-between">
-                                <span className="font-cyber">DATABASE</span>
-                                <button onClick={() => setIsAdding(false)}><Icon name="x"/></button>
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                                {availableEx.map(ex => (
-                                    <button key={ex.id} onClick={() => addEx(ex)} className="w-full text-left p-3 bg-slate-900 border border-slate-800 rounded hover:border-cyan-500">
-                                        <div className="text-white font-bold text-sm">{ex.name}</div>
-                                        <div className="text-[10px] text-slate-500">{ex.muscles.join(', ')}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        };
-
-        // 3. ACTIVE SESSION
-        const ActiveSession = ({ draft, onFinish, onAbort, calculateRec }) => {
-            const [startTime] = useState(Date.now());
-            const [exIndex, setExIndex] = useState(0);
-            const [setIndex, setSetIndex] = useState(0);
+        // --- WORKOUT SESSION: THE COMPLEX LOGIC ---
+        const WorkoutSession = ({ dayId, onFinish, onAbort, lastLog }) => {
+            useWakeLock();
+            const program = PROGRAM_DATA[dayId];
+            const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
+            const [currentSetIdx, setCurrentSetIdx] = useState(0);
+            
+            // State untuk input saat ini
             const [inputWeight, setInputWeight] = useState('');
             const [inputReps, setInputReps] = useState('');
             
+            // State untuk Lock Rest
             const [isResting, setIsResting] = useState(false);
             const [restTimer, setRestTimer] = useState(0);
-            const [results, setResults] = useState([]);
 
-            const currentEx = draft[exIndex];
-            const isLastEx = exIndex === draft.length - 1;
-            const isLastSet = setIndex === currentEx.plannedSets - 1;
+            // Menyimpan data yang sudah selesai
+            // Format: { exId: [ {weight, reps}, ... ] }
+            const [sessionResults, setSessionResults] = useState({});
 
+            const currentExercise = program.exercises[currentExerciseIdx];
+            const isLastExercise = currentExerciseIdx === program.exercises.length - 1;
+            const isLastSet = currentSetIdx === currentExercise.sets - 1;
+
+            // Timer logika
             useEffect(() => {
                 let interval;
-                if (isResting && restTimer > 0) interval = setInterval(() => setRestTimer(t => t-1), 1000);
-                else if (isResting && restTimer === 0) setIsResting(false);
+                if (isResting && restTimer > 0) {
+                    interval = setInterval(() => setRestTimer(prev => prev - 1), 1000);
+                } else if (isResting && restTimer === 0) {
+                    // Unlock
+                    setIsResting(false);
+                }
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
 
-            useEffect(() => {
-                const rec = calculateRec(currentEx.id);
-                if (rec > 0) setInputWeight(rec);
-            }, [currentEx]);
+            // Handler: Check Set (Selesai Set)
+            const handleCheckSet = () => {
+                if (!inputWeight || !inputReps) return alert("INPUT DATA REQUIRED!");
 
-            const handleCheck = () => {
-                if(!inputWeight || !inputReps) return;
+                // Simpan data
+                const exId = currentExercise.id;
+                const newResults = { ...sessionResults };
+                if (!newResults[exId]) newResults[exId] = [];
+                newResults[exId].push({ weight: inputWeight, reps: inputReps });
+                setSessionResults(newResults);
 
-                const newResults = [...results];
-                let exEntry = newResults.find(r => r.id === currentEx.id);
-                if (!exEntry) {
-                    exEntry = { id: currentEx.id, name: currentEx.name, sets: [] };
-                    newResults.push(exEntry);
-                }
-                exEntry.sets.push({ weight: inputWeight, reps: inputReps });
-                setResults(newResults);
-
+                // Jika ini set terakhir dari exercise ini
                 if (isLastSet) {
-                    if (isLastEx) {
-                        const duration = Math.floor((Date.now() - startTime)/1000);
-                        onFinish({
-                            id: Date.now(),
-                            date: new Date().toISOString(),
-                            programName: "CUSTOM SESSION",
-                            duration: duration,
-                            exercises: newResults 
-                        });
+                    // Jika ini exercise terakhir dari semua
+                    if (isLastExercise) {
+                        finishWorkout(newResults);
                     } else {
+                        // Pindah ke exercise berikutnya
+                        // Trigger rest dulu sebelum pindah alat? Biasanya iya.
                         triggerRest(() => {
-                            setExIndex(prev => prev + 1);
-                            setSetIndex(0);
+                            setCurrentExerciseIdx(prev => prev + 1);
+                            setCurrentSetIdx(0);
+                            setInputWeight('');
                             setInputReps('');
                         });
                     }
                 } else {
+                    // Pindah ke set berikutnya dalam exercise yang sama
                     triggerRest(() => {
-                        setSetIndex(prev => prev + 1);
+                        setCurrentSetIdx(prev => prev + 1);
+                        // Biarkan weight/reps terisi untuk set berikutnya (convenience)
                     });
                 }
             };
 
-            const triggerRest = (cb) => {
-                setRestTimer(90);
+            const triggerRest = (callback) => {
+                setRestTimer(90); // 1.5 menit = 90 detik
                 setIsResting(true);
-                cb();
+                // Kita jalankan callback (state update untuk next set) segera, 
+                // tapi layar tertutup overlay lock.
+                callback();
             };
 
-            const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
+            const finishWorkout = (finalResults) => {
+                const sessionData = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    programId: dayId,
+                    exercises: finalResults
+                };
+                onFinish(sessionData, program.muscles);
+            };
+
+            const formatTime = (s) => {
+                const min = Math.floor(s / 60);
+                const sec = s % 60;
+                return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+            };
+
+            // Cari history beban terakhir untuk latihan ini (Auto-fill suggestion)
+            const getLastLogWeight = () => {
+                if (!lastLog || !lastLog.exercises[currentExercise.id]) return null;
+                // Ambil set pertama dari sesi terakhir
+                return lastLog.exercises[currentExercise.id][0].weight;
+            };
+
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
 
             return (
-                <div className="flex-1 flex flex-col relative pb-20 overflow-hidden">
-                    {/* LOCK SCREEN */}
+                <div className="h-screen flex flex-col relative">
+                    
+                    {/* STRICT LOCK OVERLAY */}
                     {isResting && (
-                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
-                            <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
-                            <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">LOCKED</h1>
-                            <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50 mt-4">{formatTime(restTimer)}</div>
-                            <button onClick={() => setIsResting(false)} className="mt-8 px-4 py-2 border border-slate-600 rounded text-xs font-mono hover:bg-white/10">SKIP REST</button>
+                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center text-white lock-active">
+                            <div className="text-center space-y-4">
+                                <div className="text-cyan-400 animate-pulse">
+                                    <i data-lucide="lock" width={64} height={64} className="mx-auto"></i>
+                                </div>
+                                <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">SYSTEM LOCKED</h1>
+                                <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">Cooling Down Muscle Fibers</p>
+                                
+                                <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50">
+                                    {formatTime(restTimer)}
+                                </div>
+
+                                <div className="w-64 h-2 bg-slate-800 rounded-full overflow-hidden mt-4">
+                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(restTimer/90)*100}%` }}></div>
+                                </div>
+                                
+                                <p className="text-[10px] text-slate-500 mt-8">DO NOT SKIP RECOVERY</p>
+                            </div>
                         </div>
                     )}
 
-                    {/* Header */}
+                    {/* TOP BAR: PROGRESS */}
                     <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-                        <button onClick={onAbort} className="text-red-500 text-xs font-bold border border-red-900 px-2 py-1 rounded">ABORT</button>
-                        <div className="text-[10px] text-slate-500 font-cyber">EXERCISE <span className="text-cyan-400 font-bold ml-1">{exIndex + 1} / {draft.length}</span></div>
+                        <button onClick={onAbort} className="text-red-500 text-xs font-bold font-cyber border border-red-900 px-2 py-1 rounded">ABORT</button>
+                        <div className="flex flex-col items-end">
+                            <span className="text-[10px] text-slate-500 font-cyber">EXERCISE</span>
+                            <span className="text-cyan-400 font-bold">{currentExerciseIdx + 1} <span className="text-slate-500">/</span> {program.exercises.length}</span>
+                        </div>
                     </div>
 
-                    {/* Input Area - Scrollable */}
-                    <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
+                    {/* MAIN CONTENT */}
+                    <div className="flex-1 p-6 flex flex-col justify-center">
+                        
+                        {/* Exercise Title Card */}
                         <div className="mb-8 text-center">
-                            <div className="text-cyan-400 text-xs font-cyber tracking-widest mb-2">TARGET LOCKED</div>
-                            <h2 className="text-3xl font-black text-white font-cyber leading-tight">{currentEx.name}</h2>
-                            <div className="mt-2 text-amber-500 text-sm font-mono font-bold">REC LOAD: {calculateRec(currentEx.id)} KG</div>
+                            <div className="text-cyan-400 text-xs font-cyber tracking-[0.3em] uppercase mb-2">Current Target</div>
+                            <h2 className="text-3xl font-black text-white leading-tight font-cyber">{currentExercise.name}</h2>
+                            <div className="mt-2 text-slate-400 text-sm font-mono">
+                                {currentExercise.sets} Sets × {currentExercise.targetReps} Reps
+                            </div>
+                            <div className="mt-1 text-xs text-amber-500 font-bold">
+                                Target: {currentExercise.targetWeight} {currentExercise.unit}
+                            </div>
+                            {getLastLogWeight() && (
+                                <div className="mt-2 inline-block px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400">
+                                    Last Session: {getLastLogWeight()} {currentExercise.unit}
+                                </div>
+                            )}
                         </div>
 
+                        {/* INPUT CARD */}
                         <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
                             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
-                                SET {setIndex + 1} / {currentEx.plannedSets}
+                                SET {currentSetIdx + 1}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4 mt-4">
                                 <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight (KG)</label>
-                                    <input type="number" value={inputWeight} onChange={e => setInputWeight(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight ({currentExercise.unit})</label>
+                                    <input 
+                                        type="number" 
+                                        value={inputWeight}
+                                        onChange={e => setInputWeight(e.target.value)}
+                                        placeholder={currentExercise.targetWeight.split('-')[0]}
+                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                        autoFocus
+                                    />
                                 </div>
                                 <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps</label>
-                                    <input type="number" value={inputReps} onChange={e => setInputReps(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
+                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps Completed</label>
+                                    <input 
+                                        type="number" 
+                                        value={inputReps}
+                                        onChange={e => setInputReps(e.target.value)}
+                                        placeholder={currentExercise.targetReps.split('-')[0]}
+                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                    />
                                 </div>
                             </div>
 
-                            <button onClick={handleCheck} className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] flex items-center justify-center gap-2">
-                                <Icon name="check-circle-2" /> COMPLETE SET
+                            {/* CHECK BUTTON */}
+                            <button 
+                                onClick={handleCheckSet}
+                                className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
+                            >
+                                <i data-lucide="check-circle-2" className="w-6 h-6"></i>
+                                COMPLETE SET & REST
                             </button>
                         </div>
-                    </div>
-                </div>
-            );
-        };
 
-        // 4. SETTINGS
-        const Settings = ({ profile, setProfile, onClose }) => {
-            const [val, setVal] = useState(profile.bench1RM);
-            return (
-                <div className="absolute inset-0 bg-black/95 z-50 flex items-center justify-center p-6">
-                    <div className="w-full max-w-sm cyber-border bg-slate-900 p-6 rounded-xl">
-                        <h2 className="text-xl font-cyber text-white mb-4">SYSTEM CALIBRATION</h2>
-                        <p className="text-xs text-slate-400 mb-6">Enter your 1 Rep Max (1RM) Bench Press. The system will auto-calculate ratios for other muscle groups.</p>
-                        
-                        <label className="text-xs text-cyan-400 font-bold mb-2 block">BENCH PRESS 1RM (KG)</label>
-                        <input type="number" value={val} onChange={e => setVal(e.target.value)} className="w-full cyber-input p-3 rounded mb-6 text-xl" />
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">EST. SQUAT</div>
-                                <div className="text-white font-mono">{(val * 1.3).toFixed(1)} KG</div>
+                        {/* Upcoming Peek */}
+                        {!isLastSet && (
+                            <div className="mt-6 text-center opacity-50">
+                                <p className="text-[10px] text-slate-500 uppercase">UP NEXT</p>
+                                <p className="text-xs text-slate-300 font-mono">Set {currentSetIdx + 2}</p>
                             </div>
-                            <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">EST. DEADLIFT</div>
-                                <div className="text-white font-mono">{(val * 1.5).toFixed(1)} KG</div>
+                        )}
+                        {isLastSet && !isLastExercise && (
+                            <div className="mt-6 text-center opacity-50">
+                                <p className="text-[10px] text-slate-500 uppercase">NEXT EXERCISE</p>
+                                <p className="text-xs text-slate-300 font-mono">{program.exercises[currentExerciseIdx + 1].name}</p>
                             </div>
-                        </div>
-
-                        <button onClick={() => { setProfile({...profile, bench1RM: val}); onClose(); }} className="w-full mt-6 bg-cyan-600 py-3 rounded font-bold text-black font-cyber">
-                            SAVE CONFIG
-                        </button>
+                        )}
+                        
                     </div>
                 </div>
             );
@@ -640,3 +534,4 @@
     </script>
 </body>
 </html>
+
