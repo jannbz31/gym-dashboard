@@ -132,7 +132,7 @@
                 muscles: ['LEGS'],
                 exercises: [
                     { id: 'p6_1', name: 'Hack Squat', sets: 4, targetReps: '10', targetWeight: '60-100', unit: 'kg' },
-                    { id: 'p6_2', name: 'Hip Thrust', sets: 3, targetReps: '8-10', targetWeight: '90-120', unit: 'kg' },
+                    { id: 'p6_2', name: 'Lunges', sets: 3, targetReps: '10-12', targetWeight: '20-30', unit: 'kg (DB)' },
                     { id: 'p6_3', name: 'RDL', sets: 3, targetReps: '8', targetWeight: '90-100', unit: 'kg' },
                     { id: 'p6_4', name: 'Leg Extension', sets: 3, targetReps: '12', targetWeight: '35-50', unit: 'kg' },
                     { id: 'p6_5', name: 'Seated Calf Raise', sets: 4, targetReps: '15', targetWeight: '40-60', unit: 'kg' }
@@ -202,7 +202,7 @@
                             <i data-lucide="cpu" className="text-cyan-400"></i>
                             <span className="font-cyber font-bold text-lg tracking-wider text-white">CYBER<span className="text-cyan-400">PPL</span></span>
                         </div>
-                        <div className="text-xs font-mono text-slate-500">V2.0.1 BUILD</div>
+                        <div className="text-xs font-mono text-slate-500">V2.1.0 CONFIG</div>
                     </header>
 
                     {view === 'dashboard' && <Dashboard 
@@ -317,6 +317,11 @@
             useWakeLock();
             const program = PROGRAM_DATA[dayId];
             const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
+            
+            // NEW: Mode Setup Set (Sebelum mulai set input)
+            const [isSetupMode, setIsSetupMode] = useState(true);
+            const [plannedSets, setPlannedSets] = useState(program.exercises[0].sets);
+
             const [currentSetIdx, setCurrentSetIdx] = useState(0);
             
             // State untuk input saat ini
@@ -333,7 +338,14 @@
 
             const currentExercise = program.exercises[currentExerciseIdx];
             const isLastExercise = currentExerciseIdx === program.exercises.length - 1;
-            const isLastSet = currentSetIdx === currentExercise.sets - 1;
+            // Gunakan plannedSets yang baru diinput user, bukan default program
+            const isLastSet = currentSetIdx === plannedSets - 1;
+
+            // Reset setup mode setiap ganti exercise
+            useEffect(() => {
+                setIsSetupMode(true);
+                setPlannedSets(program.exercises[currentExerciseIdx].sets);
+            }, [currentExerciseIdx]);
 
             // Timer logika
             useEffect(() => {
@@ -346,6 +358,12 @@
                 }
                 return () => clearInterval(interval);
             }, [isResting, restTimer]);
+
+            // Handler: Confirm Sets (Setup Mode)
+            const handleConfirmSets = () => {
+                if (plannedSets < 1) return alert("Min 1 set!");
+                setIsSetupMode(false);
+            };
 
             // Handler: Check Set (Selesai Set)
             const handleCheckSet = () => {
@@ -365,12 +383,13 @@
                         finishWorkout(newResults);
                     } else {
                         // Pindah ke exercise berikutnya
-                        // Trigger rest dulu sebelum pindah alat? Biasanya iya.
+                        // Trigger rest dulu sebelum pindah alat?
                         triggerRest(() => {
                             setCurrentExerciseIdx(prev => prev + 1);
                             setCurrentSetIdx(0);
                             setInputWeight('');
                             setInputReps('');
+                            // isSetupMode akan di-reset oleh useEffect
                         });
                     }
                 } else {
@@ -458,66 +477,87 @@
                             <div className="text-cyan-400 text-xs font-cyber tracking-[0.3em] uppercase mb-2">Current Target</div>
                             <h2 className="text-3xl font-black text-white leading-tight font-cyber">{currentExercise.name}</h2>
                             <div className="mt-2 text-slate-400 text-sm font-mono">
-                                {currentExercise.sets} Sets × {currentExercise.targetReps} Reps
-                            </div>
-                            <div className="mt-1 text-xs text-amber-500 font-bold">
                                 Target: {currentExercise.targetWeight} {currentExercise.unit}
                             </div>
-                            {getLastLogWeight() && (
-                                <div className="mt-2 inline-block px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-400">
-                                    Last Session: {getLastLogWeight()} {currentExercise.unit}
-                                </div>
-                            )}
                         </div>
 
-                        {/* INPUT CARD */}
-                        <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
-                            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
-                                SET {currentSetIdx + 1}
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 mt-4">
-                                <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight ({currentExercise.unit})</label>
-                                    <input 
-                                        type="number" 
-                                        value={inputWeight}
-                                        onChange={e => setInputWeight(e.target.value)}
-                                        placeholder={currentExercise.targetWeight.split('-')[0]}
-                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
-                                        autoFocus
-                                    />
+                        {/* MODE: SET CONFIGURATION */}
+                        {isSetupMode ? (
+                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
+                                <div className="text-center mb-6">
+                                    <i data-lucide="settings-2" className="w-8 h-8 mx-auto text-cyan-400 mb-2"></i>
+                                    <h3 className="text-xl font-cyber font-bold text-white">SET CONFIGURATION</h3>
+                                    <p className="text-xs text-slate-400 mt-1">Adjust total sets for this session</p>
                                 </div>
-                                <div>
-                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps Completed</label>
-                                    <input 
-                                        type="number" 
-                                        value={inputReps}
-                                        onChange={e => setInputReps(e.target.value)}
-                                        placeholder={currentExercise.targetReps.split('-')[0]}
-                                        className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
-                                    />
+                                
+                                <div className="mb-6">
+                                    <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block text-center">Total Sets Planned</label>
+                                    <div className="flex items-center justify-center gap-4">
+                                        <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><i data-lucide="minus"></i></button>
+                                        <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">
+                                            {plannedSets}
+                                        </div>
+                                        <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><i data-lucide="plus"></i></button>
+                                    </div>
                                 </div>
-                            </div>
 
-                            {/* CHECK BUTTON */}
-                            <button 
-                                onClick={handleCheckSet}
-                                className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
-                            >
-                                <i data-lucide="check-circle-2" className="w-6 h-6"></i>
-                                COMPLETE SET & REST
-                            </button>
-                        </div>
+                                <button 
+                                    onClick={handleConfirmSets}
+                                    className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold py-4 rounded-xl flex items-center justify-center gap-2"
+                                >
+                                    CONFIRM & START
+                                </button>
+                            </div>
+                        ) : (
+                            /* MODE: INPUT DATA */
+                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in slide-in-from-bottom-4 duration-300">
+                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
+                                    SET {currentSetIdx + 1} <span className="text-cyan-500 mx-1">/</span> {plannedSets}
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div>
+                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Weight ({currentExercise.unit})</label>
+                                        <input 
+                                            type="number" 
+                                            value={inputWeight}
+                                            onChange={e => setInputWeight(e.target.value)}
+                                            placeholder={currentExercise.targetWeight.split('-')[0]}
+                                            className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Reps Completed</label>
+                                        <input 
+                                            type="number" 
+                                            value={inputReps}
+                                            onChange={e => setInputReps(e.target.value)}
+                                            placeholder={currentExercise.targetReps.split('-')[0]}
+                                            className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* CHECK BUTTON */}
+                                <button 
+                                    onClick={handleCheckSet}
+                                    className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] active:scale-95 transition-transform flex items-center justify-center gap-2"
+                                >
+                                    <i data-lucide="check-circle-2" className="w-6 h-6"></i>
+                                    COMPLETE SET & REST
+                                </button>
+                            </div>
+                        )}
 
                         {/* Upcoming Peek */}
-                        {!isLastSet && (
+                        {!isSetupMode && !isLastSet && (
                             <div className="mt-6 text-center opacity-50">
                                 <p className="text-[10px] text-slate-500 uppercase">UP NEXT</p>
                                 <p className="text-xs text-slate-300 font-mono">Set {currentSetIdx + 2}</p>
                             </div>
                         )}
-                        {isLastSet && !isLastExercise && (
+                        {!isSetupMode && isLastSet && !isLastExercise && (
                             <div className="mt-6 text-center opacity-50">
                                 <p className="text-[10px] text-slate-500 uppercase">NEXT EXERCISE</p>
                                 <p className="text-xs text-slate-300 font-mono">{program.exercises[currentExerciseIdx + 1].name}</p>
