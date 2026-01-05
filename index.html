@@ -124,11 +124,12 @@
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
 
-        // --- DATA PROGRAM (Revised per user request) ---
+        // --- DATA PROGRAM (Revised with Recovery Hours) ---
         const PROGRAM_DATA = {
             1: {
                 name: "PUSH: STRENGTH",
                 target: "Bench Naik, Triceps Kuat",
+                recoveryHours: 48, // Heavy Compound
                 exercises: [
                     { id: 'p1_1', name: 'Incline Bench Machine', sets: 5, reps: '4', weight: '85-90', unit: 'kg' },
                     { id: 'p1_2', name: 'Flat Barbell Bench Press', sets: 4, reps: '5', weight: '70-80', unit: 'kg' },
@@ -140,6 +141,7 @@
             2: {
                 name: "PULL: HYPERTROPHY",
                 target: "Back Tebal & Lebar",
+                recoveryHours: 48, // Heavy Compound Back
                 exercises: [
                     { id: 'p2_1', name: 'Lat Pulldown / Pull Up', sets: 4, reps: '6-8', weight: '65-80', unit: 'kg' },
                     { id: 'p2_2', name: 'Chest-Supported Row', sets: 4, reps: '6-8', weight: '60-80', unit: 'kg' },
@@ -151,6 +153,7 @@
             3: {
                 name: "LEGS: STRENGTH",
                 target: "Kaki Kuat, HNP Safe",
+                recoveryHours: 48, // Heavy Legs
                 exercises: [
                     { id: 'p3_1', name: 'Leg Press', sets: 4, reps: '8-10', weight: '180-240', unit: 'kg' },
                     { id: 'p3_2', name: 'Bulgarian Split Squat', sets: 3, reps: '8', weight: '22-26', unit: 'kg (DB)' },
@@ -162,6 +165,7 @@
             4: {
                 name: "SYSTEM RECHARGE",
                 type: "rest",
+                recoveryHours: 24, // Active Recovery / Rest
                 target: "CNS & Joint Recovery",
                 checklist: [
                     "Active Recovery: Jalan/Sepeda (20-30 min)",
@@ -173,6 +177,7 @@
             5: {
                 name: "UPPER: VOLUME",
                 target: "Growth & Pump",
+                recoveryHours: 24, // Small Muscles / Pump (As requested)
                 exercises: [
                     { id: 'p5_1', name: 'Incline Bench Machine', sets: 4, reps: '8', weight: '75-80', unit: 'kg' },
                     { id: 'p5_2', name: 'Cable Row', sets: 3, reps: '10', weight: '55-70', unit: 'kg' },
@@ -185,6 +190,7 @@
             6: {
                 name: "LOWER: HYPERTROPHY",
                 target: "Size & Conditioning",
+                recoveryHours: 48, // Legs
                 exercises: [
                     { id: 'p6_1', name: 'Hack / Pendulum Squat', sets: 4, reps: '10', weight: '60-100', unit: 'kg (Plate)' },
                     { id: 'p6_2', name: 'Hip Thrust', sets: 3, reps: '8-10', weight: '90-120', unit: 'kg' },
@@ -196,6 +202,7 @@
             0: { // Sunday
                 name: "OFF / ZONE 2",
                 type: "rest",
+                recoveryHours: 24, // Active Recovery
                 target: "Opsional Cardio",
                 checklist: [
                     "Cardio Zone 2 (30-40 Menit)",
@@ -238,21 +245,18 @@
         const App = () => {
             const [view, setView] = useState('dashboard');
             const [history, setHistory] = useState([]);
-            const [recoveryScore, setRecoveryScore] = useState(100);
             // Auto detect day
             const [activeDay, setActiveDay] = useState(new Date().getDay());
             const [streak, setStreak] = useState(0);
 
             useEffect(() => {
                 const savedHistory = localStorage.getItem('ppl_cyber_history');
-                const savedRecovery = localStorage.getItem('ppl_cyber_recovery');
                 
                 if (savedHistory) {
                     const parsed = JSON.parse(savedHistory);
                     setHistory(parsed);
                     setStreak(parsed.length);
                 }
-                if (savedRecovery) setRecoveryScore(parseInt(savedRecovery));
             }, []);
 
             const saveHistory = (newSession) => {
@@ -297,8 +301,6 @@
                             activeDay={activeDay} 
                             setActiveDay={setActiveDay}
                             startWorkout={() => setView('workout')} 
-                            recoveryScore={recoveryScore}
-                            setRecoveryScore={setRecoveryScore}
                             streak={streak}
                             history={history}
                         />}
@@ -329,11 +331,52 @@
             </button>
         );
 
-        const Dashboard = ({ activeDay, setActiveDay, startWorkout, recoveryScore, setRecoveryScore, streak, history }) => {
+        const Dashboard = ({ activeDay, setActiveDay, startWorkout, streak, history }) => {
             const todayIndex = new Date().getDay();
             const program = PROGRAM_DATA[activeDay];
             const isRest = program.type === 'rest';
             
+            // --- AUTO RECOVERY LOGIC ---
+            const [recoveryState, setRecoveryState] = useState({ score: 100, label: "READY", color: "text-white" });
+
+            useEffect(() => {
+                const calculateRecovery = () => {
+                    if (history.length === 0) {
+                        setRecoveryState({ score: 100, label: "SYSTEM OPTIMAL", color: "text-cyan-400", timeStr: "" });
+                        return;
+                    }
+
+                    const lastSession = history[0]; // Assuming newest is first
+                    const lastProgram = PROGRAM_DATA[lastSession.programId];
+                    if (!lastProgram) return;
+
+                    const requiredHours = lastProgram.recoveryHours || 24;
+                    const lastTime = new Date(lastSession.date).getTime();
+                    const now = Date.now();
+                    const diffHours = (now - lastTime) / (1000 * 60 * 60);
+
+                    if (diffHours >= requiredHours) {
+                        setRecoveryState({ score: 100, label: "SYSTEM RESTORED", color: "text-cyan-400", timeStr: "READY" });
+                    } else {
+                        const remaining = requiredHours - diffHours;
+                        const score = Math.floor((diffHours / requiredHours) * 100);
+                        const rHours = Math.floor(remaining);
+                        const rMins = Math.floor((remaining - rHours) * 60);
+                        
+                        setRecoveryState({ 
+                            score: score, 
+                            label: "REPAIRING...", 
+                            color: "text-yellow-400",
+                            timeStr: `-${rHours}h ${rMins}m`
+                        });
+                    }
+                };
+
+                calculateRecovery();
+                const interval = setInterval(calculateRecovery, 60000); // Update every min
+                return () => clearInterval(interval);
+            }, [history]);
+
             useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [activeDay]);
 
             return (
@@ -397,22 +440,21 @@
 
                         <div className="bg-black/60 border border-slate-800 p-4 rounded-xl">
                             <div className="flex justify-between items-center mb-2">
-                                <div className="text-[10px] text-slate-500 font-cyber">BODY INTEGRITY</div>
-                                <div className="text-xs font-bold font-mono text-white">{recoveryScore}%</div>
+                                <div className="text-[10px] text-slate-500 font-cyber">SYSTEM REPAIR</div>
+                                <div className={`text-xs font-bold font-mono ${recoveryState.color}`}>{recoveryState.score}%</div>
                             </div>
-                            <input 
-                                type="range" 
-                                min="0" max="100" 
-                                value={recoveryScore} 
-                                onChange={(e) => {
-                                    setRecoveryScore(e.target.value);
-                                    localStorage.setItem('ppl_cyber_recovery', e.target.value);
-                                }}
-                                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
-                            />
-                            <div className="flex justify-between mt-1 text-[10px] text-slate-600 font-cyber uppercase">
-                                <span>Critical</span>
-                                <span>Optimal</span>
+                            
+                            {/* Recovery Bar */}
+                            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden mb-2">
+                                <div 
+                                    className={`h-full transition-all duration-1000 ${recoveryState.score < 100 ? 'bg-yellow-500 animate-pulse' : 'bg-cyan-400'}`}
+                                    style={{ width: `${recoveryState.score}%` }}
+                                ></div>
+                            </div>
+
+                            <div className="flex justify-between items-end">
+                                <span className={`text-[10px] font-cyber tracking-widest ${recoveryState.color}`}>{recoveryState.label}</span>
+                                <span className="text-xs font-mono font-bold text-white">{recoveryState.timeStr}</span>
                             </div>
                         </div>
                     </div>
@@ -665,3 +707,4 @@
     </script>
 </body>
 </html>
+
