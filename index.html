@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER V3.6 - RADAR STATS</title>
+    <title>PPL CYBER V3.7</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -92,12 +92,12 @@
 
         // --- DATABASE & KONFIGURASI ---
         const MUSCLE_CONFIG = {
-            CHEST: { label: 'Dada', recoveryRate: 15, color: '#60a5fa' }, 
-            BACK: { label: 'Sayap', recoveryRate: 15, color: '#c084fc' },
-            LEGS: { label: 'Kaki', recoveryRate: 12, color: '#f87171' }, 
-            SHOULDERS: { label: 'Bahu', recoveryRate: 18, color: '#fbbf24' },
-            ARMS: { label: 'Lengan', recoveryRate: 20, color: '#4ade80' },
-            CARDIO: { label: 'Jantung', recoveryRate: 30, color: '#22d3ee' }
+            CHEST: { label: 'CHEST', recoveryRate: 15, color: '#60a5fa' }, 
+            BACK: { label: 'BACK', recoveryRate: 15, color: '#c084fc' },
+            LEGS: { label: 'LEGS', recoveryRate: 12, color: '#f87171' }, 
+            SHOULDERS: { label: 'SHOULDERS', recoveryRate: 18, color: '#fbbf24' },
+            ARMS: { label: 'ARMS', recoveryRate: 20, color: '#4ade80' },
+            CARDIO: { label: 'CARDIO', recoveryRate: 30, color: '#22d3ee' }
         };
 
         const EXERCISE_DB = [
@@ -218,7 +218,7 @@
                                         fontSize="10" 
                                         textAnchor="middle" 
                                         alignmentBaseline="middle"
-                                        className="font-mono uppercase"
+                                        className="font-mono uppercase font-bold"
                                     >
                                         {MUSCLE_CONFIG[key].label}
                                     </text>
@@ -758,7 +758,6 @@
 
             return (
                 <div className="flex-1 flex flex-col relative pb-20 overflow-hidden">
-                    {/* LOCK SCREEN */}
                     {isResting && (
                         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
                             <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
@@ -782,7 +781,6 @@
                             <div className="mt-2 text-amber-500 text-sm font-mono font-bold">SARAN BEBAN: {calculateRec(currentEx.id)} KG</div>
                         </div>
 
-                        {/* MODE SETUP JUMLAH SET */}
                         {isSetupMode ? (
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
                                 <div className="text-center mb-6">
@@ -799,7 +797,6 @@
                                 {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
                             </div>
                         ) : (
-                            /* MODE INPUT SET */
                             <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
                                 <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
                                     SET KE {setIndex + 1} DARI {plannedSets}
