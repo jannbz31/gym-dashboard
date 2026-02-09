@@ -25,15 +25,7 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Custom Scrollbar for Plate Calc */
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #18181b; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 4px; }
-        
         /* Animations */
-        @keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin-slow { animation: spin-slow 3s linear infinite; }
-        
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
@@ -43,6 +35,13 @@
         /* Snap scrolling */
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
+
+        /* Remove Arrows/Spinners from Number Input */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
     </style>
 
     <script>
@@ -66,7 +65,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICONS (Inline SVG components to avoid external dependency issues) ---
+        // --- ICONS (Inline SVG components) ---
         const Icon = ({ path, className = "w-6 h-6" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {path}
@@ -80,22 +79,25 @@
             Check: (props) => <Icon {...props} path={<path d="M20 6 9 17l-5-5"/>} />,
             RefreshCw: (props) => <Icon {...props} path={<><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></>} />,
             Info: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></>} />,
-            Disc: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></>} />,
             BarChart: (props) => <Icon {...props} path={<><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></>} />,
             X: (props) => <Icon {...props} path={<path d="M18 6 6 18M6 6l12 12"/>} />,
             Activity: (props) => <Icon {...props} path={<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>} />,
             Calendar: (props) => <Icon {...props} path={<><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></>} />,
+            Clock: (props) => <Icon {...props} path={<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>} />,
+            Hourglass: (props) => <Icon {...props} path={<path d="M4.5 3h15"/><path d="M4.5 21h15"/><path d="M6 3v6a6 6 0 0 0 12 0V3"/><path d="M6 21v-6a6 6 0 0 1 12 0v6"/>} />,
+            Plus: (props) => <Icon {...props} path={<path d="M5 12h14"/><path d="M12 5v14"/>} />,
+            Minus: (props) => <Icon {...props} path={<path d="M5 12h14"/>} />,
         };
 
         // --- DATA & IMAGES ---
-
+        
         const EXERCISE_IMAGES = {
-            squat: "https://images.unsplash.com/photo-1574680096141-1cddd32e24c7?auto=format&fit=crop&w=800&q=60",
-            bench: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=60",
-            deadlift: "https://images.unsplash.com/photo-1603287681836-e566d56526e1?auto=format&fit=crop&w=800&q=60",
-            ohp: "https://images.unsplash.com/photo-1532029837066-6e530430065c?auto=format&fit=crop&w=800&q=60",
-            row: "https://images.unsplash.com/photo-1598971639058-211a74a96ded?auto=format&fit=crop&w=800&q=60",
-            general: "https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=60"
+            squat: "https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?auto=format&fit=crop&w=800&q=80",
+            bench: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80",
+            deadlift: "https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=80",
+            ohp: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80",
+            row: "https://images.unsplash.com/photo-1598971639058-211a74a96ded?auto=format&fit=crop&w=800&q=80",
+            general: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80"
         };
 
         const getExerciseImage = (name) => {
@@ -136,7 +138,10 @@
             return rpeData[targetRPE];
         };
 
-        // --- PROGRAM BUILDER ---
+        // --- PROGRAM BUILDER (Added Tempo & Rest based on PDF) ---
+        // Tempo Format: Eccentric - Pause - Concentric (e.g., 1.0.1)
+        // Rest in Seconds
+        
         const createStandardWeek = (weekNum, intensityMod) => ({
             title: `Minggu ${weekNum}`,
             days: [
@@ -144,36 +149,36 @@
                     name: "Hari 1 - Fokus Squat & Bench",
                     desc: "Volume tinggi untuk kaki dan dada.",
                     exercises: [
-                        { name: "Competition Squat", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
-                        { name: "Competition Pause Bench", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
-                        { name: "3ct Pause Squat", sets: 3, reps: 5, rpe: 8, type: "variasi" }
+                        { name: "Competition Squat", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.0.1", rest: 180 },
+                        { name: "Competition Pause Bench", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.1.1", rest: 180 },
+                        { name: "3ct Pause Squat", sets: 3, reps: 5, rpe: 8, type: "variasi", tempo: "1.3.1", rest: 180 }
                     ]
                 },
                 {
                     name: "Hari 2 - Deadlift & Upper",
                     desc: "Pulling power dan overhead strength.",
                     exercises: [
-                        { name: "Competition Deadlift", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
-                        { name: "Spoto Press", sets: 4, reps: 8, rpe: 8, type: "variasi" },
-                        { name: "Overhead Press", sets: 3, reps: 8, rpe: 7, type: "aksesori" }
+                        { name: "Competition Deadlift", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.0.1", rest: 180 },
+                        { name: "Spoto Press", sets: 4, reps: 8, rpe: 8, type: "variasi", tempo: "1.1.1", rest: 150 }, // Spoto has invisible pause
+                        { name: "Overhead Press", sets: 3, reps: 8, rpe: 7, type: "aksesori", tempo: "1.0.1", rest: 120 }
                     ]
                 },
                 {
                     name: "Hari 3 - Volume Akumulasi",
                     desc: "Membangun kapasitas kerja.",
                     exercises: [
-                        { name: "2ct Pause Squat", sets: 3, reps: 4, percentage: 0.72 * intensityMod, type: "variasi" },
-                        { name: "Competition Pause Bench", sets: 5, reps: Math.max(3, 5 - (weekNum > 4 ? 1 : 0)), percentage: 0.72 * intensityMod, type: "utama" },
-                        { name: "Feet Up Bench", sets: 3, reps: 8, rpe: 7, type: "aksesori" }
+                        { name: "2ct Pause Squat", sets: 3, reps: 4, percentage: 0.72 * intensityMod, type: "variasi", tempo: "1.2.1", rest: 180 },
+                        { name: "Competition Pause Bench", sets: 5, reps: Math.max(3, 5 - (weekNum > 4 ? 1 : 0)), percentage: 0.72 * intensityMod, type: "utama", tempo: "1.1.1", rest: 180 },
+                        { name: "Feet Up Bench", sets: 3, reps: 8, rpe: 7, type: "aksesori", tempo: "1.0.1", rest: 120 }
                     ]
                 },
                 {
                     name: "Hari 4 - Variasi Deadlift",
                     desc: "Teknik deadlift dan punggung.",
                     exercises: [
-                        { name: "Pause Deadlift (Bawah Lutut)", sets: 3, reps: 5, percentage: 0.70 * intensityMod, type: "variasi" },
-                        { name: "Touch & Go Bench", sets: 4, reps: 8, rpe: 8, type: "variasi" },
-                        { name: "Pendlay Row", sets: 4, reps: 10, rpe: 8, type: "aksesori" }
+                        { name: "Pause Deadlift (Bawah Lutut)", sets: 3, reps: 5, percentage: 0.70 * intensityMod, type: "variasi", tempo: "1.1.1", rest: 180 },
+                        { name: "Touch & Go Bench", sets: 4, reps: 8, rpe: 8, type: "variasi", tempo: "1.0.1", rest: 150 },
+                        { name: "Pendlay Row", sets: 4, reps: 10, rpe: 8, type: "aksesori", tempo: "1.0.1", rest: 120 }
                     ]
                 }
             ]
@@ -193,36 +198,36 @@
                         name: "5 Hari Sebelum Lomba",
                         desc: "Sesi Opener Squat & Bench.",
                         exercises: [
-                            { name: "Comp Squat (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
-                            { name: "Comp Squat", sets: 3, reps: 2, percentage: 0.82, type: "backoff" },
-                            { name: "Comp Bench (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
-                            { name: "Comp Bench", sets: 3, reps: 2, percentage: 0.84, type: "backoff" }
+                            { name: "Comp Squat (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Squat", sets: 3, reps: 2, percentage: 0.82, type: "backoff", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Bench (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.1.1", rest: 180 },
+                            { name: "Comp Bench", sets: 3, reps: 2, percentage: 0.84, type: "backoff", tempo: "1.1.1", rest: 180 }
                         ]
                     },
                     {
                         name: "4 Hari Sebelum Lomba",
                         desc: "Sesi Opener Deadlift.",
                         exercises: [
-                            { name: "Comp Deadlift (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
-                            { name: "Comp Deadlift", sets: 2, reps: 2, percentage: 0.82, type: "backoff" },
-                            { name: "Comp Bench", sets: 4, reps: 3, percentage: 0.85, type: "utama" }
+                            { name: "Comp Deadlift (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Deadlift", sets: 2, reps: 2, percentage: 0.82, type: "backoff", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Bench", sets: 4, reps: 3, percentage: 0.85, type: "utama", tempo: "1.1.1", rest: 180 }
                         ]
                     },
                     {
                         name: "3 Hari Sebelum Lomba",
                         desc: "Latihan ringan untuk menjaga gerakan.",
                         exercises: [
-                            { name: "Comp Squat", sets: 1, reps: 1, percentage: 0.85, type: "teknik" },
-                            { name: "Comp Bench", sets: 1, reps: 1, percentage: 0.85, type: "teknik" },
-                            { name: "Comp Deadlift", sets: 1, reps: 1, percentage: 0.82, type: "teknik" }
+                            { name: "Comp Squat", sets: 1, reps: 1, percentage: 0.85, type: "teknik", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Bench", sets: 1, reps: 1, percentage: 0.85, type: "teknik", tempo: "1.1.1", rest: 180 },
+                            { name: "Comp Deadlift", sets: 1, reps: 1, percentage: 0.82, type: "teknik", tempo: "1.0.1", rest: 180 }
                         ]
                     },
                     {
                         name: "2 Hari Sebelum Lomba",
                         desc: "Aktivasi saraf terakhir.",
                         exercises: [
-                            { name: "Comp Squat", sets: 2, reps: 1, percentage: 0.75, type: "teknik" },
-                            { name: "Comp Bench", sets: 3, reps: 3, percentage: 0.78, type: "teknik" }
+                            { name: "Comp Squat", sets: 2, reps: 1, percentage: 0.75, type: "teknik", tempo: "1.0.1", rest: 180 },
+                            { name: "Comp Bench", sets: 3, reps: 3, percentage: 0.78, type: "teknik", tempo: "1.1.1", rest: 180 }
                         ]
                     }
                 ]
@@ -232,75 +237,6 @@
 
         const FULL_PROGRAM = buildProgram();
 
-        // --- COMPONENTS ---
-
-        const PlateCalculator = ({ weight, unit, onClose }) => {
-            const barWeight = unit === 'kg' ? 20 : 45;
-            const availablePlates = unit === 'kg' 
-                ? [25, 20, 15, 10, 5, 2.5, 1.25] 
-                : [45, 35, 25, 10, 5, 2.5];
-            
-            let remainder = (weight - barWeight) / 2;
-            const platesNeeded = [];
-            
-            if (remainder > 0) {
-                availablePlates.forEach(plate => {
-                    while (remainder >= plate) {
-                        platesNeeded.push(plate);
-                        remainder -= plate;
-                    }
-                });
-            }
-
-            return (
-                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in" onClick={onClose}>
-                    <div className="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-100" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Icons.Disc className="w-6 h-6 text-blue-500 animate-spin-slow" /> Kalkulator Pelat
-                            </h3>
-                            <button onClick={onClose} className="bg-zinc-800 p-2 rounded-full hover:bg-zinc-700 transition"><Icons.X className="text-zinc-400 w-5 h-5" /></button>
-                        </div>
-                        
-                        <div className="text-center mb-8 relative">
-                            <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full"></div>
-                            <div className="relative text-6xl font-black text-white tracking-tighter">{weight}<span className="text-xl text-zinc-500 font-medium ml-1">{unit}</span></div>
-                            <div className="text-zinc-400 text-sm mt-2 font-medium">Total Berat (Termasuk Bar)</div>
-                        </div>
-
-                        <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                            <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-2">
-                                <span>Per Sisi</span>
-                                <span>Keping</span>
-                            </div>
-                            {platesNeeded.length === 0 ? (
-                                <div className="text-center text-zinc-500 py-6 italic">Hanya Bar Kosong (Barbell Warmup)</div>
-                            ) : (
-                                platesNeeded.map((plate, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-white font-medium bg-zinc-800/50 p-3 rounded-xl border border-zinc-800/50">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`h-8 w-3 rounded-full shadow-lg ${
-                                                plate >= 20 ? 'bg-red-600 shadow-red-900/50' : 
-                                                plate >= 15 ? 'bg-blue-600 shadow-blue-900/50' : 
-                                                plate >= 10 ? 'bg-green-600 shadow-green-900/50' : 
-                                                plate >= 5 ? 'bg-white shadow-zinc-900/50' : 'bg-zinc-500'
-                                            }`} />
-                                            <span className="text-sm text-zinc-300">Keping {idx+1}</span>
-                                        </div>
-                                        <span className="font-bold">{plate} {unit}</span>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                        
-                        <div className="mt-6 pt-4 border-t border-zinc-800 text-center text-xs text-zinc-500">
-                            Asumsi berat bar: {barWeight} {unit}
-                        </div>
-                    </div>
-                </div>
-            );
-        };
-
         const App = () => {
             const [view, setView] = useState('dashboard');
             const [maxes, setMaxes] = useState({ squat: 100, bench: 80, deadlift: 140 });
@@ -308,7 +244,6 @@
             const [currentWeek, setCurrentWeek] = useState(1);
             const [currentDay, setCurrentDay] = useState(0);
             const [history, setHistory] = useState({});
-            const [modalData, setModalData] = useState(null); 
 
             useEffect(() => {
                 const saved = localStorage.getItem('cbb_ultimate_data');
@@ -358,6 +293,19 @@
                     }
                 }));
                 return total === 0 ? 0 : Math.round((done/total)*100);
+            };
+
+            const handleImageError = (e) => {
+                e.target.onerror = null;
+                e.target.src = EXERCISE_IMAGES.general;
+            };
+
+            // Enhanced Max Input Logic
+            const adjustMax = (lift, delta) => {
+                setMaxes(prev => ({
+                    ...prev,
+                    [lift]: Math.max(0, prev[lift] + delta)
+                }));
             };
 
             // VIEWS
@@ -430,10 +378,15 @@
                             <button
                                 key={idx}
                                 onClick={() => { setCurrentDay(idx); setView('workout'); }}
-                                className="w-full bg-zinc-900 border border-zinc-800 p-1 rounded-2xl flex items-center gap-4 hover:border-blue-500/50 hover:bg-zinc-800 transition-all group overflow-hidden relative"
+                                className="w-full bg-zinc-900 border border-zinc-800 p-1 rounded-2xl flex items-center gap-4 hover:border-blue-500/50 hover:bg-zinc-800 transition-all group overflow-hidden relative bg-zinc-800"
                             >
+                                <div className="absolute inset-0 bg-zinc-800"></div>
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
-                                    <img src={getExerciseImage(day.exercises[0].name)} className="w-full h-full object-cover grayscale" />
+                                    <img 
+                                        src={getExerciseImage(day.exercises[0].name)} 
+                                        onError={handleImageError}
+                                        className="w-full h-full object-cover grayscale" 
+                                    />
                                 </div>
 
                                 <div className={`w-20 h-20 rounded-xl flex flex-col items-center justify-center font-bold relative z-10 ${
@@ -467,10 +420,11 @@
                 
                 return (
                     <div className="pb-32 bg-zinc-950 min-h-screen">
-                        <div className="relative h-64 w-full overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-black/50 z-10">
+                        <div className="relative h-64 w-full overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-black/50 z-10 bg-zinc-900">
                             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent z-10" />
                             <img 
                                 src={getExerciseImage(dayData.exercises[0].name)} 
+                                onError={handleImageError}
                                 className="w-full h-full object-cover fade-in" 
                                 alt="workout header" 
                             />
@@ -504,19 +458,29 @@
 
                                 return (
                                     <div key={eIdx} className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl hover:border-zinc-700 transition-all duration-300 group">
-                                        <div className="relative h-24 overflow-hidden border-b border-zinc-800">
+                                        <div className="relative h-24 overflow-hidden border-b border-zinc-800 bg-zinc-800">
                                             <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-transparent z-10"></div>
-                                            <img src={getExerciseImage(ex.name)} className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-700" />
+                                            <img 
+                                                src={getExerciseImage(ex.name)} 
+                                                onError={handleImageError}
+                                                className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-700" 
+                                            />
                                             
                                             <div className="absolute inset-0 z-20 p-4 flex flex-col justify-center">
                                                 <h3 className="font-bold text-white text-xl leading-none drop-shadow-md">{ex.name}</h3>
                                                 <div className="flex flex-wrap gap-2 mt-2">
-                                                    <span className="text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
-                                                        {ex.sets} SETS
-                                                    </span>
-                                                    <span className="text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
-                                                        {ex.reps} REPS
-                                                    </span>
+                                                    {ex.tempo && (
+                                                        <span className="flex items-center gap-1 text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
+                                                            <Icons.Hourglass className="w-3 h-3 text-blue-300" />
+                                                            {ex.tempo}
+                                                        </span>
+                                                    )}
+                                                    {ex.rest && (
+                                                        <span className="flex items-center gap-1 text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
+                                                            <Icons.Clock className="w-3 h-3 text-blue-300" />
+                                                            {ex.rest}s
+                                                        </span>
+                                                    )}
                                                     {ex.rpe && (
                                                         <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded font-bold border border-orange-500/20">
                                                             RPE {ex.rpe}
@@ -547,17 +511,12 @@
                                                             
                                                             <div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <button 
-                                                                        onClick={(e) => {
-                                                                            e.stopPropagation();
-                                                                            if(load) setModalData({ weight: load, unit });
-                                                                        }}
-                                                                        className={`text-2xl font-black tracking-tight cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-1 ${done ? 'text-zinc-600 decoration-zinc-700' : 'text-white'}`}
+                                                                    <div 
+                                                                        className={`text-2xl font-black tracking-tight flex items-center gap-1 ${done ? 'text-zinc-600 decoration-zinc-700' : 'text-white'}`}
                                                                     >
                                                                         {load ? load : '---'}
                                                                         <span className="text-xs font-bold text-zinc-600 mt-2">{unit}</span>
-                                                                        {load && <Icons.Disc className="w-3 h-3 text-zinc-600 ml-1" />}
-                                                                    </button>
+                                                                    </div>
                                                                 </div>
                                                                 {isAutoRegulated && (
                                                                     <div className="text-[10px] text-orange-400/80 font-medium">
@@ -595,17 +554,33 @@
                             </h3>
                             <div className="space-y-4">
                                 {['squat', 'bench', 'deadlift'].map(lift => (
-                                    <div key={lift} className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-800 focus-within:border-blue-500 transition-colors">
-                                        <div className="capitalize font-bold text-zinc-300 text-lg">{lift}</div>
-                                        <div className="flex items-center gap-2">
+                                    <div key={lift} className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <div className="capitalize font-bold text-zinc-300 text-lg">{lift}</div>
+                                            <span className="text-sm font-bold text-zinc-600">{unit}</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <button 
+                                                onClick={() => adjustMax(lift, -2.5)}
+                                                className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 active:scale-95 transition"
+                                            >
+                                                <Icons.Minus className="w-6 h-6" />
+                                            </button>
+                                            
                                             <input 
                                                 type="number" 
                                                 value={maxes[lift]} 
                                                 onChange={e => setMaxes({...maxes, [lift]: Number(e.target.value)})}
-                                                className="bg-transparent text-right text-2xl font-bold text-white w-24 outline-none placeholder-zinc-700"
+                                                className="flex-1 bg-transparent text-center text-3xl font-black text-white outline-none placeholder-zinc-700"
                                                 placeholder="0"
                                             />
-                                            <span className="text-sm font-bold text-zinc-600">{unit}</span>
+                                            
+                                            <button 
+                                                onClick={() => adjustMax(lift, 2.5)}
+                                                className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 active:scale-95 transition"
+                                            >
+                                                <Icons.Plus className="w-6 h-6" />
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
@@ -638,7 +613,7 @@
                     </div>
 
                     <div className="text-center text-xs text-zinc-600 pt-10 font-medium">
-                        Calgary Barbell App v2.0 <br/>
+                        Calgary Barbell App v2.1 <br/>
                         Dibuat untuk Powerlifter Indonesia 🇮🇩
                     </div>
                 </div>
@@ -649,14 +624,6 @@
                     {view === 'dashboard' && <DashboardView />}
                     {view === 'workout' && <WorkoutView />}
                     {view === 'settings' && <SettingsView />}
-                    
-                    {modalData && (
-                        <PlateCalculator 
-                            weight={modalData.weight} 
-                            unit={modalData.unit} 
-                            onClose={() => setModalData(null)} 
-                        />
-                    )}
                 </div>
             );
         };
@@ -666,4 +633,5 @@
     </script>
 </body>
 </html>
+
 
