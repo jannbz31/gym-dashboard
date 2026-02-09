@@ -1,933 +1,604 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PPL CYBER V3.8 - INTENSITY RADAR</title>
+import React, { useState, useEffect } from 'react';
+import { 
+  Settings, 
+  ChevronRight, 
+  ChevronLeft, 
+  Check, 
+  RefreshCw, 
+  Info,
+  Disc,
+  BarChart,
+  X,
+  Dumbbell,
+  Activity,
+  Calendar
+} from 'lucide-react';
+
+// --- GAMBAR LATIHAN (Contextual Images) ---
+// Menggunakan Unsplash ID yang spesifik untuk setiap jenis gerakan
+const EXERCISE_IMAGES = {
+  squat: "https://images.unsplash.com/photo-1574680096141-1cddd32e24c7?auto=format&fit=crop&w=800&q=60", // Back Squat
+  bench: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=800&q=60", // Bench Press
+  deadlift: "https://images.unsplash.com/photo-1603287681836-e566d56526e1?auto=format&fit=crop&w=800&q=60", // Deadlift setup
+  ohp: "https://images.unsplash.com/photo-1532029837066-6e530430065c?auto=format&fit=crop&w=800&q=60", // Overhead
+  row: "https://images.unsplash.com/photo-1598971639058-211a74a96ded?auto=format&fit=crop&w=800&q=60", // Rows/Barbell
+  general: "https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=60" // Gym atmosphere
+};
+
+const getExerciseImage = (name) => {
+  const n = name.toLowerCase();
+  if (n.includes('squat')) return EXERCISE_IMAGES.squat;
+  if (n.includes('bench') || n.includes('press') || n.includes('spoto')) return EXERCISE_IMAGES.bench;
+  if (n.includes('overhead') || n.includes('ohp')) return EXERCISE_IMAGES.ohp;
+  if (n.includes('deadlift')) return EXERCISE_IMAGES.deadlift;
+  if (n.includes('row')) return EXERCISE_IMAGES.row;
+  return EXERCISE_IMAGES.general;
+};
+
+// --- LOGIKA RPE (Reactive Training Systems Estimation) ---
+const RPE_CHART = {
+  1: { 10: 1.0, 9: 0.96, 8: 0.92, 7: 0.89 },
+  2: { 10: 0.96, 9: 0.92, 8: 0.89, 7: 0.86 },
+  3: { 10: 0.92, 9: 0.89, 8: 0.86, 7: 0.84 },
+  4: { 10: 0.89, 9: 0.86, 8: 0.84, 7: 0.81 },
+  5: { 10: 0.86, 9: 0.84, 8: 0.81, 7: 0.79 },
+  6: { 10: 0.84, 9: 0.81, 8: 0.79, 7: 0.76 },
+  8: { 10: 0.80, 9: 0.76, 8: 0.74, 7: 0.71 },
+  10: { 10: 0.74, 9: 0.71, 8: 0.68, 7: 0.65 },
+  12: { 10: 0.70, 9: 0.67, 8: 0.64, 7: 0.61 }
+};
+
+const getEstimatedPercentage = (reps, rpe) => {
+  const availableReps = [1, 2, 3, 4, 5, 6, 8, 10, 12];
+  const closestRep = availableReps.reduce((prev, curr) => 
+    Math.abs(curr - reps) < Math.abs(prev - reps) ? curr : prev
+  );
+  
+  const rpeData = RPE_CHART[closestRep];
+  if (!rpeData) return 0.7;
+  
+  const targetRPE = Math.round(rpe);
+  if (targetRPE >= 10) return rpeData[10];
+  if (targetRPE <= 7) return rpeData[7];
+  return rpeData[targetRPE];
+};
+
+// --- STRUKTUR PROGRAM LENGKAP ---
+const createStandardWeek = (weekNum, intensityMod) => ({
+  title: `Minggu ${weekNum}`,
+  days: [
+    {
+      name: "Hari 1 - Fokus Squat & Bench",
+      desc: "Volume tinggi untuk kaki dan dada.",
+      exercises: [
+        { name: "Competition Squat", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
+        { name: "Competition Pause Bench", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
+        { name: "3ct Pause Squat", sets: 3, reps: 5, rpe: 8, type: "variasi" }
+      ]
+    },
+    {
+      name: "Hari 2 - Deadlift & Upper",
+      desc: "Pulling power dan overhead strength.",
+      exercises: [
+        { name: "Competition Deadlift", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama" },
+        { name: "Spoto Press", sets: 4, reps: 8, rpe: 8, type: "variasi" },
+        { name: "Overhead Press", sets: 3, reps: 8, rpe: 7, type: "aksesori" }
+      ]
+    },
+    {
+      name: "Hari 3 - Volume Akumulasi",
+      desc: "Membangun kapasitas kerja.",
+      exercises: [
+        { name: "2ct Pause Squat", sets: 3, reps: 4, percentage: 0.72 * intensityMod, type: "variasi" },
+        { name: "Competition Pause Bench", sets: 5, reps: Math.max(3, 5 - (weekNum > 4 ? 1 : 0)), percentage: 0.72 * intensityMod, type: "utama" },
+        { name: "Feet Up Bench", sets: 3, reps: 8, rpe: 7, type: "aksesori" }
+      ]
+    },
+    {
+      name: "Hari 4 - Variasi Deadlift",
+      desc: "Teknik deadlift dan punggung.",
+      exercises: [
+        { name: "Pause Deadlift (Bawah Lutut)", sets: 3, reps: 5, percentage: 0.70 * intensityMod, type: "variasi" },
+        { name: "Touch & Go Bench", sets: 4, reps: 8, rpe: 8, type: "variasi" },
+        { name: "Pendlay Row", sets: 4, reps: 10, rpe: 8, type: "aksesori" }
+      ]
+    }
+  ]
+});
+
+const buildProgram = () => {
+  const weeks = {};
+  for (let i = 1; i <= 7; i++) {
+    const intensity = 1 + ((i - 1) * 0.025); 
+    weeks[i] = createStandardWeek(i, intensity);
+  }
+  // Minggu 8: Taper (Sesuai PDF Page 4)
+  weeks[8] = {
+    title: "Minggu 8 - PEAK / KOMPETISI",
+    note: "Minggu Tapering. Volume sangat rendah untuk memaksimalkan performa.",
+    days: [
+      {
+        name: "5 Hari Sebelum Lomba",
+        desc: "Sesi Opener Squat & Bench.",
+        exercises: [
+          { name: "Comp Squat (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
+          { name: "Comp Squat", sets: 3, reps: 2, percentage: 0.82, type: "backoff" },
+          { name: "Comp Bench (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
+          { name: "Comp Bench", sets: 3, reps: 2, percentage: 0.84, type: "backoff" }
+        ]
+      },
+      {
+        name: "4 Hari Sebelum Lomba",
+        desc: "Sesi Opener Deadlift.",
+        exercises: [
+          { name: "Comp Deadlift (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama" },
+          { name: "Comp Deadlift", sets: 2, reps: 2, percentage: 0.82, type: "backoff" },
+          { name: "Comp Bench", sets: 4, reps: 3, percentage: 0.85, type: "utama" }
+        ]
+      },
+      {
+        name: "3 Hari Sebelum Lomba",
+        desc: "Latihan ringan untuk menjaga gerakan.",
+        exercises: [
+          { name: "Comp Squat", sets: 1, reps: 1, percentage: 0.85, type: "teknik" },
+          { name: "Comp Bench", sets: 1, reps: 1, percentage: 0.85, type: "teknik" },
+          { name: "Comp Deadlift", sets: 1, reps: 1, percentage: 0.82, type: "teknik" }
+        ]
+      },
+      {
+        name: "2 Hari Sebelum Lomba",
+        desc: "Aktivasi saraf terakhir.",
+        exercises: [
+          { name: "Comp Squat", sets: 2, reps: 1, percentage: 0.75, type: "teknik" },
+          { name: "Comp Bench", sets: 3, reps: 3, percentage: 0.78, type: "teknik" }
+        ]
+      }
+    ]
+  };
+  return weeks;
+};
+
+const FULL_PROGRAM = buildProgram();
+
+// --- KOMPONEN BANTUAN ---
+
+const PlateCalculator = ({ weight, unit, onClose }) => {
+  const barWeight = unit === 'kg' ? 20 : 45;
+  const availablePlates = unit === 'kg' 
+    ? [25, 20, 15, 10, 5, 2.5, 1.25] 
+    : [45, 35, 25, 10, 5, 2.5];
+  
+  let remainder = (weight - barWeight) / 2;
+  const platesNeeded = [];
+  
+  if (remainder > 0) {
+    availablePlates.forEach(plate => {
+      while (remainder >= plate) {
+        platesNeeded.push(plate);
+        remainder -= plate;
+      }
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
+      <div className="bg-zinc-900 border border-zinc-800 w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-100" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+            <Disc className="w-6 h-6 text-blue-500 animate-spin-slow" /> Kalkulator Pelat
+          </h3>
+          <button onClick={onClose} className="bg-zinc-800 p-2 rounded-full hover:bg-zinc-700 transition"><X className="text-zinc-400 w-5 h-5" /></button>
+        </div>
+        
+        <div className="text-center mb-8 relative">
+          <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full"></div>
+          <div className="relative text-6xl font-black text-white tracking-tighter">{weight}<span className="text-xl text-zinc-500 font-medium ml-1">{unit}</span></div>
+          <div className="text-zinc-400 text-sm mt-2 font-medium">Total Berat (Termasuk Bar)</div>
+        </div>
+
+        <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+          <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-800 pb-2 mb-2">
+            <span>Per Sisi</span>
+            <span>Keping</span>
+          </div>
+          {platesNeeded.length === 0 ? (
+            <div className="text-center text-zinc-500 py-6 italic">Hanya Bar Kosong (Barbell Warmup)</div>
+          ) : (
+            platesNeeded.map((plate, idx) => (
+              <div key={idx} className="flex justify-between items-center text-white font-medium bg-zinc-800/50 p-3 rounded-xl border border-zinc-800/50">
+                <div className="flex items-center gap-3">
+                  <div className={`h-8 w-3 rounded-full shadow-lg ${
+                    plate >= 20 ? 'bg-red-600 shadow-red-900/50' : 
+                    plate >= 15 ? 'bg-blue-600 shadow-blue-900/50' : 
+                    plate >= 10 ? 'bg-green-600 shadow-green-900/50' : 
+                    plate >= 5 ? 'bg-white shadow-zinc-900/50' : 'bg-zinc-500'
+                  }`} />
+                  <span className="text-sm text-zinc-300">Keping {idx+1}</span>
+                </div>
+                <span className="font-bold">{plate} {unit}</span>
+              </div>
+            ))
+          )}
+        </div>
+        
+        <div className="mt-6 pt-4 border-t border-zinc-800 text-center text-xs text-zinc-500">
+          Asumsi berat bar: {barWeight} {unit}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function App() {
+  const [view, setView] = useState('dashboard');
+  const [maxes, setMaxes] = useState({ squat: 100, bench: 80, deadlift: 140 });
+  const [unit, setUnit] = useState('kg');
+  const [currentWeek, setCurrentWeek] = useState(1);
+  const [currentDay, setCurrentDay] = useState(0);
+  const [history, setHistory] = useState({});
+  const [modalData, setModalData] = useState(null); 
+
+  // Persistence
+  useEffect(() => {
+    const saved = localStorage.getItem('cbb_ultimate_data');
+    if (saved) {
+      const d = JSON.parse(saved);
+      setMaxes(d.maxes || { squat: 100, bench: 80, deadlift: 140 });
+      setUnit(d.unit || 'kg');
+      setHistory(d.history || {});
+      setCurrentWeek(d.currentWeek || 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cbb_ultimate_data', JSON.stringify({ maxes, unit, history, currentWeek }));
+  }, [maxes, unit, history, currentWeek]);
+
+  // Logic
+  const getRounding = () => unit === 'kg' ? 2.5 : 5;
+  
+  const calculateLoad = (percentage, liftName, rpe, reps) => {
+    let base = maxes.squat;
+    const n = liftName.toLowerCase();
+    if (n.includes('bench') || n.includes('press')) base = maxes.bench;
+    if (n.includes('deadlift') || n.includes('row')) base = maxes.deadlift;
+
+    let targetPercent = percentage;
+    if (!targetPercent && rpe && reps) {
+       targetPercent = getEstimatedPercentage(reps, rpe);
+    }
+
+    if (!targetPercent) return null;
+
+    const raw = base * targetPercent;
+    return Math.round(raw / getRounding()) * getRounding();
+  };
+
+  const toggleSet = (id) => setHistory(p => ({ ...p, [id]: !p[id] }));
+  const getSetId = (w, d, e, s) => `w${w}-d${d}-e${e}-s${s}`;
+
+  const getProgress = (w) => {
+    let total = 0, done = 0;
+    FULL_PROGRAM[w].days.forEach((day, dIdx) => day.exercises.forEach((ex, eIdx) => {
+      for(let s=0; s<ex.sets; s++) {
+        total++;
+        if (history[getSetId(w,dIdx,eIdx,s)]) done++;
+      }
+    }));
+    return total === 0 ? 0 : Math.round((done/total)*100);
+  };
+
+  // --- HALAMAN UTAMA ---
+
+  const DashboardView = () => (
+    <div className="pb-32 p-5 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header */}
+      <div className="flex justify-between items-center pt-2">
+        <div>
+          <h1 className="text-3xl font-black text-white italic tracking-tighter">CALGARY<span className="text-blue-500">BARBELL</span></h1>
+          <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Ultimate Tracker</p>
+        </div>
+        <button onClick={() => setView('settings')} className="bg-zinc-900 border border-zinc-800 p-3 rounded-full text-zinc-400 hover:text-white hover:border-zinc-600 transition-all">
+          <Settings className="w-6 h-6" />
+        </button>
+      </div>
+
+      {/* Progress Card */}
+      <div className="relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800 p-6 shadow-2xl">
+        <div className="absolute top-0 right-0 p-32 bg-blue-600/20 blur-3xl rounded-full pointer-events-none -mr-16 -mt-16"></div>
+        <div className="relative z-10">
+           <div className="flex justify-between items-end mb-4">
+             <div>
+               <div className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-1">Minggu Ini</div>
+               <div className="text-4xl font-black text-white">{getProgress(currentWeek)}% <span className="text-lg text-zinc-600 font-medium">Selesai</span></div>
+             </div>
+             <div className="text-right">
+                <div className="text-blue-500 font-bold text-lg">Minggu {currentWeek}</div>
+                <div className="text-zinc-500 text-xs">Fase {currentWeek < 5 ? 'Akumulasi' : (currentWeek === 8 ? 'Tapering' : 'Transmutasi')}</div>
+             </div>
+           </div>
+           <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+             <div className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(59,130,246,0.5)]" style={{ width: `${getProgress(currentWeek)}%` }} />
+           </div>
+        </div>
+      </div>
+
+      {/* Week Selector */}
+      <div className="space-y-4">
+        <h2 className="text-white font-bold flex items-center gap-2">
+          <Calendar className="text-blue-500 w-5 h-5" /> Pilih Minggu
+        </h2>
+        <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar -mx-5 px-5 snap-x">
+          {Object.keys(FULL_PROGRAM).map(w => {
+            const wk = Number(w);
+            const active = currentWeek === wk;
+            const weekProg = getProgress(wk);
+            return (
+              <button 
+                key={w}
+                onClick={() => { setCurrentWeek(wk); setCurrentDay(0); }}
+                className={`snap-center flex-shrink-0 w-24 h-32 rounded-2xl flex flex-col items-center justify-center gap-1 border-2 transition-all duration-300 relative overflow-hidden ${
+                  active 
+                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-900/30 scale-105 z-10' 
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                }`}
+              >
+                {active && <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>}
+                <span className="text-[10px] font-black uppercase tracking-widest z-10">Minggu</span>
+                <span className="text-4xl font-black z-10">{w}</span>
+                {weekProg > 0 && (
+                  <div className="absolute bottom-3 w-12 h-1 bg-black/20 rounded-full overflow-hidden z-10">
+                    <div className="h-full bg-white/80" style={{width: `${weekProg}%`}}></div>
+                  </div>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Days List */}
+      <div className="space-y-3">
+        {FULL_PROGRAM[currentWeek].days.map((day, idx) => (
+          <button
+            key={idx}
+            onClick={() => { setCurrentDay(idx); setView('workout'); }}
+            className="w-full bg-zinc-900 border border-zinc-800 p-1 rounded-2xl flex items-center gap-4 hover:border-blue-500/50 hover:bg-zinc-800 transition-all group overflow-hidden relative"
+          >
+            {/* Background Image Tipis */}
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
+               <img src={getExerciseImage(day.exercises[0].name)} className="w-full h-full object-cover grayscale" />
+            </div>
+
+            <div className={`w-20 h-20 rounded-xl flex flex-col items-center justify-center font-bold relative z-10 ${
+              currentDay === idx ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'bg-zinc-950 text-zinc-600'
+            }`}>
+              <span className="text-xs uppercase">Hari</span>
+              <span className="text-2xl">{idx + 1}</span>
+            </div>
+            
+            <div className="text-left flex-1 py-3 relative z-10">
+              <h3 className="text-white font-bold text-lg group-hover:text-blue-400 transition-colors leading-tight">{day.name}</h3>
+              <p className="text-zinc-500 text-xs mt-1 line-clamp-1">{day.desc}</p>
+              <div className="flex gap-2 mt-2">
+                {day.exercises.slice(0,3).map((ex, i) => (
+                   <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-blue-500/50"></div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="pr-4 relative z-10">
+               <ChevronRight className="text-zinc-700 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const WorkoutView = () => {
+    const dayData = FULL_PROGRAM[currentWeek].days[currentDay];
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://unpkg.com/lucide@0.292.0/dist/umd/lucide.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    return (
+      <div className="pb-32 bg-zinc-950 min-h-screen">
+        {/* Dynamic Header Image */}
+        <div className="relative h-64 w-full overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-black/50 z-10">
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent z-10" />
+          <img 
+            src={getExerciseImage(dayData.exercises[0].name)} 
+            className="w-full h-full object-cover animate-in fade-in zoom-in-105 duration-1000" 
+            alt="workout header" 
+          />
+          <div className="absolute bottom-6 left-6 z-20 pr-6">
+            <div className="flex items-center gap-2 mb-2">
+               <span className="px-2 py-1 bg-blue-600 text-white text-[10px] font-black uppercase rounded tracking-wider">Minggu {currentWeek}</span>
+               <span className="px-2 py-1 bg-zinc-800 text-zinc-300 text-[10px] font-black uppercase rounded tracking-wider">Hari {currentDay + 1}</span>
+            </div>
+            <h1 className="text-3xl font-black text-white leading-none shadow-black drop-shadow-lg">{dayData.name}</h1>
+            <p className="text-zinc-300 text-sm mt-2 line-clamp-2">{dayData.desc}</p>
+          </div>
+          <button 
+            onClick={() => setView('dashboard')} 
+            className="absolute top-4 left-4 z-30 bg-black/40 backdrop-blur-md p-3 rounded-full text-white border border-white/10 hover:bg-black/60 transition-all"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
 
-    <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-red: #ff0055;
-            --neon-amber: #ffaa00;
-            --neon-green: #00ff9d;
-            --neon-purple: #bd00ff;
-            --bg-dark: #020204;
-            --panel-bg: rgba(15, 20, 30, 0.95);
-        }
+        <div className="p-5 space-y-6 -mt-4 relative z-20">
+          {FULL_PROGRAM[currentWeek].note && (
+             <div className="bg-blue-900/10 border border-blue-500/30 p-4 rounded-2xl flex gap-3 backdrop-blur-sm">
+               <Info className="text-blue-400 shrink-0 w-5 h-5" />
+               <p className="text-blue-200 text-sm font-medium">{FULL_PROGRAM[currentWeek].note}</p>
+             </div>
+          )}
 
-        body {
-            background-color: var(--bg-dark);
-            color: #e2e8f0;
-            font-family: 'Rajdhani', sans-serif;
-            background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        .font-cyber { font-family: 'Orbitron', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        .cyber-border {
-            position: relative;
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 243, 255, 0.15);
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-        }
-        .cyber-border::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px;
-            border-top: 2px solid var(--neon-blue); border-left: 2px solid var(--neon-blue);
-        }
-        .cyber-border::after {
-            content: ''; position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
-            border-bottom: 2px solid var(--neon-blue); border-right: 2px solid var(--neon-blue);
-        }
-
-        .cyber-input {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid #334155;
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            transition: all 0.2s;
-        }
-        .cyber-input:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
-            outline: none;
-        }
-
-        @keyframes lockdown {
-            0% { background-color: rgba(0,0,0,0); backdrop-filter: blur(0px); }
-            100% { background-color: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
-        }
-        .lock-active { animation: lockdown 0.3s forwards; }
-
-        @keyframes pulse-red { 0% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.7);} 70% {box-shadow: 0 0 0 10px rgba(255, 0, 85, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 0, 85, 0);} }
-        .animate-pulse-red { animation: pulse-red 2s infinite; }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .animate-shake { animation: shake 0.3s ease-in-out; }
-    </style>
-</head>
-<body>
-    <div id="root"></div>
-    <div class="scan-overlay"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef, useMemo } = React;
-
-        // --- DATABASE & KONFIGURASI ---
-        const MUSCLE_CONFIG = {
-            CHEST: { label: 'CHEST', recoveryRate: 15, color: '#60a5fa' }, 
-            BACK: { label: 'BACK', recoveryRate: 15, color: '#c084fc' },
-            LEGS: { label: 'LEGS', recoveryRate: 12, color: '#f87171' }, 
-            SHOULDERS: { label: 'SHOULDERS', recoveryRate: 18, color: '#fbbf24' },
-            ARMS: { label: 'ARMS', recoveryRate: 20, color: '#4ade80' },
-            CARDIO: { label: 'CARDIO', recoveryRate: 30, color: '#22d3ee' }
-        };
-
-        const EXERCISE_DB = [
-            { id: 'ex_bench_flat', name: 'Flat Bench Press (Barbell)', type: 'PUSH', muscles: ['CHEST', 'SHOULDERS', 'ARMS'], ratio: 1.0, intensity: 0.8 },
-            { id: 'ex_bench_inc_mach', name: 'Incline Bench Machine', type: 'PUSH', muscles: ['CHEST', 'SHOULDERS'], ratio: 0.85, intensity: 0.75 },
-            { id: 'ex_ohp_seat', name: 'Seated Shoulder Press', type: 'PUSH', muscles: ['SHOULDERS', 'ARMS'], ratio: 0.60, intensity: 0.75 },
-            { id: 'ex_pec_deck', name: 'Pec Deck / Fly', type: 'PUSH', muscles: ['CHEST'], ratio: 0.40, intensity: 0.65 },
-            { id: 'ex_tri_push', name: 'Triceps Pushdown', type: 'PUSH', muscles: ['ARMS'], ratio: 0.35, intensity: 0.70 },
-            { id: 'ex_dips', name: 'Dips (Weighted)', type: 'PUSH', muscles: ['CHEST', 'ARMS'], ratio: 0.9, intensity: 0.8 },
-            { id: 'ex_lat_raise', name: 'Lateral Raise', type: 'PUSH', muscles: ['SHOULDERS'], ratio: 0.15, intensity: 0.6 },
-            { id: 'ex_lat_pull', name: 'Lat Pulldown', type: 'PULL', muscles: ['BACK', 'ARMS'], ratio: 0.85, intensity: 0.75 },
-            { id: 'ex_row_supp', name: 'Chest-Supported Row', type: 'PULL', muscles: ['BACK'], ratio: 0.80, intensity: 0.75 },
-            { id: 'ex_cab_row', name: 'Seated Cable Row', type: 'PULL', muscles: ['BACK'], ratio: 0.75, intensity: 0.75 },
-            { id: 'ex_face_pull', name: 'Face Pull', type: 'PULL', muscles: ['SHOULDERS', 'BACK'], ratio: 0.30, intensity: 0.65 },
-            { id: 'ex_curl_ez', name: 'EZ Bar Curl', type: 'PULL', muscles: ['ARMS'], ratio: 0.35, intensity: 0.70 },
-            { id: 'ex_pull_up', name: 'Pull Up', type: 'PULL', muscles: ['BACK', 'ARMS'], ratio: 0.9, intensity: 0.8 },
-            { id: 'ex_squat_hack', name: 'Hack Squat', type: 'LEGS', muscles: ['LEGS'], ratio: 1.3, intensity: 0.8 },
-            { id: 'ex_leg_press', name: 'Leg Press', type: 'LEGS', muscles: ['LEGS'], ratio: 2.5, intensity: 0.8 },
-            { id: 'ex_deadlift', name: 'Deadlift', type: 'LEGS', muscles: ['LEGS', 'BACK'], ratio: 1.5, intensity: 0.85 },
-            { id: 'ex_lunge', name: 'Lunges (DB)', type: 'LEGS', muscles: ['LEGS'], ratio: 0.4, intensity: 0.7 },
-            { id: 'ex_leg_ext', name: 'Leg Extension', type: 'LEGS', muscles: ['LEGS'], ratio: 0.5, intensity: 0.7 },
-            { id: 'ex_leg_curl', name: 'Leg Curl', type: 'LEGS', muscles: ['LEGS'], ratio: 0.45, intensity: 0.7 },
-            { id: 'ex_calf', name: 'Calf Raise', type: 'LEGS', muscles: ['LEGS'], ratio: 0.8, intensity: 0.7 },
-            { id: 'ex_rdl', name: 'Romanian Deadlift', type: 'LEGS', muscles: ['LEGS', 'BACK'], ratio: 1.1, intensity: 0.75 },
-            { id: 'ex_hip_thrust', name: 'Hip Thrust', type: 'LEGS', muscles: ['LEGS'], ratio: 1.6, intensity: 0.8 }
-        ];
-
-        const SCHEDULE_TEMPLATE = {
-            1: { name: "PUSH DAY (BERAT)", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_bench_flat', 'ex_ohp_seat', 'ex_pec_deck', 'ex_tri_push'] },
-            2: { name: "PULL DAY (OTOT JADI)", type: "PULL", defaultEx: ['ex_lat_pull', 'ex_row_supp', 'ex_cab_row', 'ex_face_pull', 'ex_curl_ez'] },
-            3: { name: "LEG DAY (JANGAN SKIP)", type: "LEGS", defaultEx: ['ex_leg_press', 'ex_lunge', 'ex_deadlift', 'ex_leg_curl', 'ex_calf'] },
-            4: { name: "REST DAY / SANTAI", type: "REST", defaultEx: [] },
-            5: { name: "UPPER BODY (PUMP)", type: "PUSH", defaultEx: ['ex_bench_inc_mach', 'ex_cab_row', 'ex_pec_deck', 'ex_lat_raise', 'ex_tri_push', 'ex_curl_ez'] },
-            6: { name: "LOWER BODY (GEBUK KAKI)", type: "LEGS", defaultEx: ['ex_squat_hack', 'ex_hip_thrust', 'ex_rdl', 'ex_leg_ext', 'ex_calf'] },
-            0: { name: "LIBUR / CARDIO TIPIS", type: "REST", defaultEx: [] }
-        };
-
-        const DAYS_MAP = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
-
-        // --- COMPONENTS ---
-        const Icon = ({ name, size = 18, className = "" }) => {
-            const ref = useRef(null);
-            useEffect(() => {
-                if (window.lucide) {
-                    const iconName = name.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
-                    const def = window.lucide.icons[iconName];
-                    if (def && ref.current) {
-                        ref.current.innerHTML = '';
-                        const el = window.lucide.createElement(def);
-                        el.setAttribute('width', size);
-                        el.setAttribute('height', size);
-                        if(className) el.setAttribute('class', className);
-                        ref.current.appendChild(el);
-                    }
-                }
-            }, [name, size, className]);
-            return <span ref={ref} className="inline-flex items-center" />;
-        };
-
-        const NavBtn = ({ icon, label, active, onClick }) => (
-            <button onClick={onClick} className={`flex flex-col items-center gap-1 transition-all ${active ? 'text-cyan-400 scale-110 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]' : 'text-slate-600'}`}>
-                <Icon name={icon} size={24} />
-                <span className="text-[10px] font-cyber tracking-widest">{label}</span>
-            </button>
-        );
-
-        // --- RADAR CHART COMPONENT (INTENSITY) ---
-        const RadarChart = ({ data, maxRatio }) => {
-            const size = 300;
-            const center = size / 2;
-            const radius = 100;
-            const axes = Object.keys(data);
-            const angleSlice = (Math.PI * 2) / axes.length;
-
-            const getCoords = (value, max, index) => {
-                const angle = index * angleSlice - Math.PI / 2;
-                const normalizedVal = max > 0 ? (value / max) * radius : 0;
-                return {
-                    x: center + normalizedVal * Math.cos(angle),
-                    y: center + normalizedVal * Math.sin(angle)
-                };
-            };
-
-            const points = axes.map((key, i) => {
-                const { x, y } = getCoords(data[key].ratio, maxRatio, i);
-                return `${x},${y}`;
-            }).join(" ");
+          {dayData.exercises.map((ex, eIdx) => {
+            const load = calculateLoad(ex.percentage, ex.name, ex.rpe, ex.reps);
+            const isAutoRegulated = !ex.percentage && ex.rpe;
 
             return (
-                <div className="relative flex justify-center py-4">
-                    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                        {/* Grid */}
-                        {[0.25, 0.5, 0.75, 1].map((r, i) => (
-                            <circle key={i} cx={center} cy={center} r={radius * r} fill="none" stroke="#1e293b" strokeWidth="1" />
-                        ))}
-                        
-                        {/* Axes */}
-                        {axes.map((key, i) => {
-                            const angle = i * angleSlice - Math.PI / 2;
-                            const x = center + radius * Math.cos(angle);
-                            const y = center + radius * Math.sin(angle);
-                            const labelX = center + (radius + 25) * Math.cos(angle);
-                            const labelY = center + (radius + 25) * Math.sin(angle);
-                            return (
-                                <g key={key}>
-                                    <line x1={center} y1={center} x2={x} y2={y} stroke="#334155" strokeWidth="1" />
-                                    <text 
-                                        x={labelX} y={labelY} 
-                                        fill={data[key].ratio > 0 ? "#22d3ee" : "#64748b"} 
-                                        fontSize="10" 
-                                        textAnchor="middle" 
-                                        alignmentBaseline="middle"
-                                        className="font-mono uppercase font-bold"
-                                    >
-                                        {MUSCLE_CONFIG[key].label}
-                                    </text>
-                                </g>
-                            );
-                        })}
-
-                        {/* Data Polygon */}
-                        <polygon points={points} fill="rgba(34, 211, 238, 0.3)" stroke="#22d3ee" strokeWidth="2" />
-                        
-                        {/* Data Dots */}
-                        {axes.map((key, i) => {
-                            const { x, y } = getCoords(data[key].ratio, maxRatio, i);
-                            return (
-                                <circle key={i} cx={x} cy={y} r="3" fill="#000" stroke="#22d3ee" strokeWidth="2" />
-                            );
-                        })}
-                    </svg>
-                </div>
-            );
-        };
-
-        // --- MAIN APP COMPONENT ---
-        const App = () => {
-            const [view, setView] = useState('dashboard');
-            const [activeDay, setActiveDay] = useState(new Date().getDay());
-            
-            const [userProfile, setUserProfile] = useState({ bench1RM: 60 });
-            const [muscleFatigue, setMuscleFatigue] = useState({}); 
-            const [history, setHistory] = useState([]);
-            const [draftWorkout, setDraftWorkout] = useState([]); 
-            const [isFullscreen, setIsFullscreen] = useState(false);
-
-            useEffect(() => {
-                const savedProfile = localStorage.getItem('ppl_v3_profile');
-                const savedFatigue = localStorage.getItem('ppl_v3_fatigue');
-                const savedHistory = localStorage.getItem('ppl_v3_history');
-
-                if (savedProfile) setUserProfile(JSON.parse(savedProfile));
-                if (savedFatigue) setMuscleFatigue(JSON.parse(savedFatigue));
-                if (savedHistory) setHistory(JSON.parse(savedHistory));
-
-                document.addEventListener('fullscreenchange', () => {
-                    setIsFullscreen(!!document.fullscreenElement);
-                });
-            }, []);
-
-            const calculateRecWeight = (exerciseId) => {
-                const ex = EXERCISE_DB.find(e => e.id === exerciseId);
-                if (!ex) return 0;
-                const raw = userProfile.bench1RM * ex.ratio * ex.intensity;
-                return Math.round(raw / 2.5) * 2.5; 
-            };
-
-            const updateFatigue = (exercisesDone) => {
-                const now = Date.now();
-                const newFatigue = { ...muscleFatigue };
-                Object.keys(newFatigue).forEach(muscle => {
-                    const data = newFatigue[muscle];
-                    const hoursPassed = (now - data.lastUpdate) / (1000 * 60 * 60);
-                    const recoveryAmount = hoursPassed * MUSCLE_CONFIG[muscle].recoveryRate;
-                    data.fatiguePoints = Math.max(0, data.fatiguePoints - recoveryAmount);
-                    data.lastUpdate = now;
-                });
-                exercisesDone.forEach(entry => {
-                    const exDef = EXERCISE_DB.find(e => e.id === entry.id);
-                    if (exDef) {
-                        const volume = entry.sets.reduce((acc, s) => acc + (parseFloat(s.weight)*parseFloat(s.reps)), 0);
-                        const fatigueAdded = volume / 20; 
-                        exDef.muscles.forEach(m => {
-                            if (!newFatigue[m]) newFatigue[m] = { fatiguePoints: 0, lastUpdate: now };
-                            newFatigue[m].fatiguePoints += fatigueAdded;
-                            newFatigue[m].lastUpdate = now;
-                        });
-                    }
-                });
-                setMuscleFatigue(newFatigue);
-                localStorage.setItem('ppl_v3_fatigue', JSON.stringify(newFatigue));
-            };
-
-            const handleSaveSession = (sessionData) => {
-                const newHist = [sessionData, ...history];
-                setHistory(newHist);
-                localStorage.setItem('ppl_v3_history', JSON.stringify(newHist));
-                updateFatigue(sessionData.exercises); 
-                setView('dashboard');
-            };
-
-            const toggleFullScreen = () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => console.error(err));
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
-                }
-            };
-
-            return (
-                <div className="h-[100dvh] w-full flex flex-col bg-black text-slate-200 font-sans overflow-hidden">
-                    <header className="flex-none h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur flex items-center justify-between px-4 z-20">
-                        <div className="flex items-center gap-2 text-cyan-400">
-                            <Icon name="activity" />
-                            <span className="font-cyber font-bold tracking-widest text-white">CYBER<span className="text-cyan-400">PPL</span></span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => setView('settings')} className="p-2 bg-slate-800 rounded border border-slate-700 text-xs font-mono text-cyan-400">
-                                1RM: {userProfile.bench1RM}KG
-                            </button>
-                            <button onClick={toggleFullScreen} className="p-2 text-slate-400 hover:text-white">
-                                <Icon name={isFullscreen ? "minimize" : "maximize"} />
-                            </button>
-                        </div>
-                    </header>
-
-                    <main className="flex-1 overflow-hidden relative flex flex-col min-h-0 pb-20">
-                        {view === 'dashboard' && <Dashboard 
-                            activeDay={activeDay} 
-                            setActiveDay={setActiveDay}
-                            muscleFatigue={muscleFatigue}
-                            config={MUSCLE_CONFIG}
-                            onStartBuild={() => {
-                                const template = SCHEDULE_TEMPLATE[activeDay];
-                                const initialDraft = template.defaultEx.map(id => {
-                                    const ex = EXERCISE_DB.find(e => e.id === id);
-                                    return { ...ex, plannedSets: 3 }; 
-                                }).filter(Boolean);
-                                setDraftWorkout(initialDraft);
-                                setView('builder');
-                            }}
-                        />}
-
-                        {view === 'builder' && <WorkoutBuilder 
-                            draft={draftWorkout}
-                            setDraft={setDraftWorkout}
-                            dayType={SCHEDULE_TEMPLATE[activeDay].type}
-                            onLaunch={() => setView('active_session')}
-                            onBack={() => setView('dashboard')}
-                            calculateRec={calculateRecWeight}
-                        />}
-
-                        {view === 'active_session' && <ActiveSession 
-                            draft={draftWorkout}
-                            onFinish={handleSaveSession}
-                            onAbort={() => setView('dashboard')}
-                            calculateRec={calculateRecWeight}
-                            programName={SCHEDULE_TEMPLATE[activeDay].name}
-                        />}
-
-                        {view === 'settings' && <Settings 
-                            profile={userProfile} 
-                            setProfile={p => { setUserProfile(p); localStorage.setItem('ppl_v3_profile', JSON.stringify(p)); }} 
-                            onClose={() => setView('dashboard')} 
-                        />}
-
-                        {view === 'history' && <HistoryView 
-                            history={history} 
-                            onBack={() => setView('dashboard')}
-                        />}
-
-                        {view === 'stats' && <StatsView 
-                            history={history}
-                            onBack={() => setView('dashboard')}
-                        />}
-                    </main>
-
-                    {view !== 'active_session' && (
-                        <nav className="flex-none border-t border-slate-800 bg-black/95 backdrop-blur p-4 z-20 flex justify-around absolute bottom-0 w-full pb-6">
-                            <NavBtn icon="layout-dashboard" label="MARKAS" active={view === 'dashboard'} onClick={() => setView('dashboard')} />
-                            <div className="w-px bg-slate-800 h-8 self-center"></div>
-                            <NavBtn icon="radar" label="RADAR" active={view === 'stats'} onClick={() => setView('stats')} />
-                            <div className="w-px bg-slate-800 h-8 self-center"></div>
-                            <NavBtn icon="history" label="RIWAYAT" active={view === 'history'} onClick={() => setView('history')} />
-                        </nav>
-                    )}
-                </div>
-            );
-        };
-
-        // --- SUB-COMPONENTS ---
-
-        const Dashboard = ({ activeDay, setActiveDay, muscleFatigue, config, onStartBuild }) => {
-            const [now, setNow] = useState(Date.now());
-            useEffect(() => {
-                const interval = setInterval(() => setNow(Date.now()), 1000); 
-                return () => clearInterval(interval);
-            }, []);
-
-            const getRecoveryInfo = (muscle) => {
-                const data = muscleFatigue[muscle] || { fatiguePoints: 0, lastUpdate: Date.now() };
-                const rate = config[muscle].recoveryRate;
-                const hoursPassed = (now - data.lastUpdate) / (1000 * 60 * 60);
-                const currentFatigue = Math.max(0, data.fatiguePoints - (hoursPassed * rate));
-                const recoveryPct = Math.min(100, Math.max(0, 100 - (currentFatigue / 10))); 
-                let timeString = "SIAP TEMPUR";
-                if (recoveryPct < 100) {
-                    const hoursNeeded = currentFatigue / rate;
-                    const h = Math.floor(hoursNeeded);
-                    const m = Math.floor((hoursNeeded - h) * 60);
-                    const s = Math.floor(((hoursNeeded - h) * 60 - m) * 60);
-                    timeString = `-${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-                }
-                return { pct: Math.floor(recoveryPct), time: timeString };
-            };
-
-            const template = SCHEDULE_TEMPLATE[activeDay];
-
-            return (
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                    <div className="flex justify-between items-center cyber-border rounded p-3">
-                        <button onClick={() => setActiveDay(d => d === 0 ? 6 : d - 1)}><Icon name="chevron-left" /></button>
-                        <div className="text-center">
-                            <div className="text-[10px] text-cyan-400 font-cyber tracking-widest">JADWAL HARI INI</div>
-                            <div className="text-xl font-bold text-white">{DAYS_MAP[activeDay]}</div>
-                        </div>
-                        <button onClick={() => setActiveDay(d => d === 6 ? 0 : d + 1)}><Icon name="chevron-right" /></button>
-                    </div>
-
-                    <div className="cyber-border rounded p-4 bg-black/60">
-                        <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-2">
-                            <span className="font-cyber text-sm text-cyan-400">KONDISI OTOT</span>
-                            <Icon name="activity" size={16} className="text-cyan-400 animate-pulse" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            {Object.keys(config).map(muscle => {
-                                const info = getRecoveryInfo(muscle);
-                                const isReady = info.pct === 100;
-                                return (
-                                    <div key={muscle} className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-mono">
-                                            <span className="text-slate-400">{config[muscle].label}</span>
-                                            <span className={isReady ? "text-cyan-400" : "text-amber-500"}>{info.time}</span>
-                                        </div>
-                                        <div className="h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                                            <div 
-                                                className={`h-full transition-all duration-500 ${isReady ? 'bg-cyan-400 shadow-[0_0_5px_cyan]' : 'bg-amber-600'}`} 
-                                                style={{width: `${info.pct}%`}}
-                                            ></div>
-                                        </div>
-                                        <div className="text-right text-[10px] font-bold">{info.pct}%</div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-
-                    <div className="cyber-border rounded p-5 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4 opacity-10"><Icon name="dumbbell" size={100}/></div>
-                        <h2 className="text-2xl font-cyber font-black text-white italic">{template.name}</h2>
-                        <div className="text-xs text-slate-400 mt-2 mb-6 font-mono max-w-[70%]">
-                            REKOMENDASI: {template.defaultEx.length} JENIS LATIHAN
-                        </div>
-                        
-                        {template.type === 'REST' ? (
-                            <div className="p-3 bg-green-900/20 border border-green-500/30 rounded text-green-400 text-center font-mono text-sm">
-                                WAKTUNYA RECOVERY, BRO
-                            </div>
-                        ) : (
-                            <button onClick={onStartBuild} className="w-full py-4 bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold rounded clip-path-polygon flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(8,145,178,0.5)]">
-                                <Icon name="settings-2" size={18}/> ATUR LATIHAN
-                            </button>
+              <div key={eIdx} className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl hover:border-zinc-700 transition-all duration-300 group">
+                {/* Exercise Title Bar */}
+                <div className="relative h-24 overflow-hidden border-b border-zinc-800">
+                   <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-transparent z-10"></div>
+                   <img src={getExerciseImage(ex.name)} className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-700" />
+                   
+                   <div className="absolute inset-0 z-20 p-4 flex flex-col justify-center">
+                      <h3 className="font-bold text-white text-xl leading-none drop-shadow-md">{ex.name}</h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        <span className="text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
+                          {ex.sets} SETS
+                        </span>
+                        <span className="text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
+                          {ex.reps} REPS
+                        </span>
+                        {ex.rpe && (
+                          <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded font-bold border border-orange-500/20">
+                            RPE {ex.rpe}
+                          </span>
                         )}
-                    </div>
+                      </div>
+                   </div>
                 </div>
-            );
-        };
 
-        // --- STATS VIEW (RADAR) ---
-        const StatsView = ({ history, onBack }) => {
-            const [period, setPeriod] = useState('WEEK'); 
-
-            const statsData = useMemo(() => {
-                const now = new Date();
-                const limitDate = new Date();
-                limitDate.setDate(now.getDate() - (period === 'WEEK' ? 7 : 30));
-
-                const filteredHistory = history.filter(s => new Date(s.date) >= limitDate);
-                
-                const stats = {};
-                Object.keys(MUSCLE_CONFIG).forEach(k => stats[k] = { volume: 0, sets: 0, ratio: 0 });
-
-                filteredHistory.forEach(session => {
-                    if (Array.isArray(session.exercises)) {
-                        session.exercises.forEach(exSession => {
-                            const exDef = EXERCISE_DB.find(e => e.id === exSession.id);
-                            if (exDef) {
-                                const setLen = exSession.sets ? exSession.sets.length : 0;
-                                const vol = exSession.sets ? exSession.sets.reduce((a, b) => a + (parseFloat(b.weight||0)*parseFloat(b.reps||0)), 0) : 0;
-                                
-                                exDef.muscles.forEach(m => {
-                                    if(stats[m]) {
-                                        stats[m].sets += setLen;
-                                        stats[m].volume += vol;
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-
-                // Calculate Ratio (Avg Volume per Set)
-                Object.keys(stats).forEach(key => {
-                    stats[key].ratio = stats[key].sets > 0 ? Math.round(stats[key].volume / stats[key].sets) : 0;
-                });
-
-                // Calculate Max for Normalization
-                const maxRatio = Math.max(...Object.values(stats).map(d => d.ratio), 1); 
-
-                return { stats, maxRatio };
-            }, [history, period]);
-
-            return (
-                <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                            <button onClick={onBack}><Icon name="arrow-left" className="text-slate-400" /></button>
-                            <h2 className="text-xl font-cyber font-bold text-white tracking-wider">RADAR STATS</h2>
-                        </div>
-                        <div className="flex bg-slate-900 rounded p-1">
-                            <button onClick={() => setPeriod('WEEK')} className={`px-3 py-1 text-[10px] font-cyber rounded transition ${period === 'WEEK' ? 'bg-cyan-600 text-black' : 'text-slate-500'}`}>MINGGU</button>
-                            <button onClick={() => setPeriod('MONTH')} className={`px-3 py-1 text-[10px] font-cyber rounded transition ${period === 'MONTH' ? 'bg-cyan-600 text-black' : 'text-slate-500'}`}>BULAN</button>
-                        </div>
-                    </div>
-
-                    <div className="cyber-border rounded-xl p-4 bg-black/60 flex flex-col items-center">
-                        <RadarChart data={statsData.stats} maxRatio={statsData.maxRatio} />
-                        
-                        <div className="mt-4 text-[10px] font-mono text-center text-slate-400">
-                            DATA MENUNJUKKAN <span className="text-cyan-400 font-bold">RATA-RATA VOLUME PER SET (KG)</span><br/>
-                            INDIKATOR INTENSITAS LATIHAN
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        {Object.entries(statsData.stats).sort((a,b) => b[1].ratio - a[1].ratio).map(([key, data]) => (
-                            <div key={key} className="bg-slate-900 border border-slate-800 p-3 rounded flex justify-between items-center">
-                                <div>
-                                    <div className="text-[10px] text-slate-500 font-cyber">{MUSCLE_CONFIG[key].label}</div>
-                                    <div className="text-xs text-slate-400">{data.sets} SETS</div>
+                {/* Sets List */}
+                <div className="divide-y divide-zinc-800/50 bg-zinc-900">
+                  {Array.from({length: ex.sets}).map((_, sIdx) => {
+                    const setId = getSetId(currentWeek, currentDay, eIdx, sIdx);
+                    const done = history[setId];
+                    
+                    return (
+                      <div key={sIdx} className={`flex items-center justify-between p-4 transition-all duration-300 ${done ? 'bg-blue-900/5' : 'hover:bg-zinc-800/50'}`}>
+                         <div className="flex items-center gap-4">
+                           <button 
+                             onClick={() => toggleSet(setId)}
+                             className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+                               done 
+                                ? 'bg-blue-500 text-white shadow-blue-500/30 scale-110' 
+                                : 'bg-zinc-800 text-zinc-600 border border-zinc-700 hover:border-zinc-500'
+                             }`}
+                           >
+                             <Check className={`w-5 h-5 ${done ? 'opacity-100' : 'opacity-0'}`} />
+                           </button>
+                           
+                           <div>
+                             <div className="flex items-center gap-2">
+                               <button 
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   if(load) setModalData({ weight: load, unit });
+                                 }}
+                                 className={`text-2xl font-black tracking-tight cursor-pointer hover:text-blue-400 transition-colors flex items-center gap-1 ${done ? 'text-zinc-600 decoration-zinc-700' : 'text-white'}`}
+                               >
+                                 {load ? load : '---'}
+                                 <span className="text-xs font-bold text-zinc-600 mt-2">{unit}</span>
+                                 {load && <Disc className="w-3 h-3 text-zinc-600 ml-1" />}
+                               </button>
+                             </div>
+                             {isAutoRegulated && (
+                                <div className="text-[10px] text-orange-400/80 font-medium">
+                                  Estimasi beban untuk RPE {ex.rpe}
                                 </div>
-                                <div className="text-right">
-                                    <div className="text-[10px] text-cyan-500 font-mono">AVG INTENSITY</div>
-                                    <div className="text-sm font-bold text-white">{data.ratio.toLocaleString()}</div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                             )}
+                           </div>
+                         </div>
+                         <div className="text-zinc-600 font-mono text-sm font-bold bg-zinc-950 px-2 py-1 rounded border border-zinc-800">
+                           {ex.reps}x
+                         </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              </div>
             );
-        };
+          })}
+        </div>
+      </div>
+    );
+  };
 
-        const WorkoutBuilder = ({ draft, setDraft, dayType, onLaunch, onBack, calculateRec }) => {
-            const [isAdding, setIsAdding] = useState(false);
-
-            const removeEx = (idx) => {
-                const newDraft = [...draft];
-                newDraft.splice(idx, 1);
-                setDraft(newDraft);
-            };
-
-            const addEx = (ex) => {
-                setDraft([...draft, { ...ex, plannedSets: 3 }]);
-                setIsAdding(false);
-            };
-
-            const updateSets = (idx, val) => {
-                const newDraft = [...draft];
-                newDraft[idx].plannedSets = Math.max(1, val);
-                setDraft(newDraft);
-            };
-
-            const availableEx = EXERCISE_DB.filter(e => {
-                if (e.type === dayType) return true;
-                if (dayType === 'PUSH' || dayType === 'PULL') return e.muscles.includes('ARMS') || e.muscles.includes('SHOULDERS');
-                return false;
-            });
-
-            return (
-                <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
-                    <div className="p-4 border-b border-slate-800 bg-black flex justify-between items-center">
-                        <button onClick={onBack} className="text-slate-400"><Icon name="arrow-left"/></button>
-                        <h2 className="font-cyber text-white">PERSIAPAN LATIHAN</h2>
-                        <div className="w-6"></div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {draft.map((ex, idx) => (
-                            <div key={idx} className="bg-slate-800 rounded p-3 flex justify-between items-center border border-slate-700">
-                                <div>
-                                    <div className="font-bold text-white text-sm">{ex.name}</div>
-                                    <div className="text-[10px] text-cyan-400 font-mono">SARAN: {calculateRec(ex.id)} KG</div>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center bg-black rounded px-2 py-1">
-                                        <button onClick={() => updateSets(idx, ex.plannedSets-1)} className="text-slate-500"><Icon name="minus" size={14}/></button>
-                                        <span className="mx-2 font-mono font-bold w-4 text-center">{ex.plannedSets}</span>
-                                        <button onClick={() => updateSets(idx, ex.plannedSets+1)} className="text-cyan-400"><Icon name="plus" size={14}/></button>
-                                    </div>
-                                    <button onClick={() => removeEx(idx)} className="text-red-500"><Icon name="trash-2" size={16}/></button>
-                                </div>
-                            </div>
-                        ))}
-
-                        <button onClick={() => setIsAdding(true)} className="w-full py-3 border border-dashed border-slate-600 text-slate-400 rounded hover:border-cyan-500 hover:text-cyan-500 transition">
-                            + TAMBAH GERAKAN
-                        </button>
-                    </div>
-
-                    <div className="p-4 bg-black border-t border-slate-800">
-                        <button onClick={onLaunch} className="w-full bg-cyan-600 text-black font-cyber font-bold py-4 rounded shadow-[0_0_15px_cyan]">
-                            GASKAN LATIHAN
-                        </button>
-                    </div>
-
-                    {isAdding && (
-                        <div className="absolute inset-0 bg-black/95 z-50 flex flex-col">
-                            <div className="p-4 border-b border-slate-800 flex justify-between">
-                                <span className="font-cyber">DAFTAR LATIHAN</span>
-                                <button onClick={() => setIsAdding(false)}><Icon name="x"/></button>
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                                {availableEx.map(ex => (
-                                    <button key={ex.id} onClick={() => addEx(ex)} className="w-full text-left p-3 bg-slate-900 border border-slate-800 rounded hover:border-cyan-500">
-                                        <div className="text-white font-bold text-sm">{ex.name}</div>
-                                        <div className="text-[10px] text-slate-500">{ex.muscles.join(', ')}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+  const SettingsView = () => (
+    <div className="p-6 pb-24 space-y-8 animate-in slide-in-from-right duration-300 bg-zinc-950 min-h-screen">
+      <div className="flex items-center gap-4 mb-8">
+        <button onClick={() => setView('dashboard')} className="bg-zinc-900 border border-zinc-800 p-3 rounded-full text-white hover:bg-zinc-800 transition"><ChevronLeft /></button>
+        <h1 className="text-2xl font-black text-white">PROFIL SAYA</h1>
+      </div>
+      
+      <div className="space-y-6">
+        <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
+          <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+            <Activity className="w-4 h-4" /> 1 Rep Max (Rekor)
+          </h3>
+          <div className="space-y-4">
+            {['squat', 'bench', 'deadlift'].map(lift => (
+              <div key={lift} className="flex justify-between items-center bg-zinc-950 p-4 rounded-xl border border-zinc-800 focus-within:border-blue-500 transition-colors">
+                <div className="capitalize font-bold text-zinc-300 text-lg">{lift}</div>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="number" 
+                    value={maxes[lift]} 
+                    onChange={e => setMaxes({...maxes, [lift]: Number(e.target.value)})}
+                    className="bg-transparent text-right text-2xl font-bold text-white w-24 outline-none placeholder-zinc-700"
+                    placeholder="0"
+                  />
+                  <span className="text-sm font-bold text-zinc-600">{unit}</span>
                 </div>
-            );
-        };
+              </div>
+            ))}
+          </div>
+        </div>
 
-        const ActiveSession = ({ draft, onFinish, onAbort, calculateRec, programName }) => {
-            const [startTime] = useState(Date.now());
-            const [exIndex, setExIndex] = useState(0);
-            const [setIndex, setSetIndex] = useState(0);
-            const [inputWeight, setInputWeight] = useState('');
-            const [inputReps, setInputReps] = useState('');
-            
-            const [isResting, setIsResting] = useState(false);
-            const [restTimer, setRestTimer] = useState(0);
-            const [results, setResults] = useState([]);
+        <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
+          <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+            <Settings className="w-4 h-4" /> Satuan Berat
+          </h3>
+          <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800">
+            {['kg', 'lbs'].map(u => (
+              <button 
+                key={u} 
+                onClick={() => setUnit(u)}
+                className={`flex-1 py-3 rounded-lg font-black text-sm transition-all duration-300 ${unit === u ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                {u.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            const [isSetupMode, setIsSetupMode] = useState(true);
-            const [plannedSets, setPlannedSets] = useState(draft[0].plannedSets);
-            const [errorMsg, setErrorMsg] = useState('');
+        <button 
+           onClick={() => { if(window.confirm('Reset semua data latihan?')) setHistory({}) }}
+           className="w-full py-4 flex items-center justify-center gap-2 text-red-500 font-bold bg-red-500/5 rounded-xl hover:bg-red-500/10 transition border border-red-500/10"
+        >
+          <RefreshCw className="w-5 h-5" /> Reset History Latihan
+        </button>
+      </div>
 
-            const currentEx = draft[exIndex];
-            const isLastEx = exIndex === draft.length - 1;
-            const isLastSet = setIndex === plannedSets - 1;
+      <div className="text-center text-xs text-zinc-600 pt-10 font-medium">
+        Calgary Barbell App v2.0 <br/>
+        Dibuat untuk Powerlifter Indonesia 🇮🇩
+      </div>
+    </div>
+  );
 
-            useEffect(() => {
-                setIsSetupMode(true);
-                setPlannedSets(draft[exIndex].plannedSets);
-                setSetIndex(0);
-                setInputWeight('');
-                setInputReps('');
-                setErrorMsg('');
-            }, [exIndex]);
+  return (
+    <div className="min-h-screen bg-zinc-950 text-zinc-200 font-sans selection:bg-blue-500/30">
+      <div className="max-w-md mx-auto min-h-screen relative shadow-2xl bg-zinc-950 border-x border-zinc-900 overflow-hidden">
+        {view === 'dashboard' && <DashboardView />}
+        {view === 'workout' && <WorkoutView />}
+        {view === 'settings' && <SettingsView />}
+        
+        {/* Modal Plate Calculator */}
+        {modalData && (
+          <PlateCalculator 
+            weight={modalData.weight} 
+            unit={modalData.unit} 
+            onClose={() => setModalData(null)} 
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
-            useEffect(() => {
-                const rec = calculateRec(currentEx.id);
-                if (rec > 0) setInputWeight(rec);
-            }, [currentEx]);
-
-            useEffect(() => {
-                let interval;
-                if (isResting && restTimer > 0) interval = setInterval(() => setRestTimer(t => t-1), 1000);
-                else if (isResting && restTimer === 0) setIsResting(false);
-                return () => clearInterval(interval);
-            }, [isResting, restTimer]);
-
-            const handleConfirmSets = () => {
-                if (plannedSets < 1) {
-                    setErrorMsg("MINIMAL 1 SET DONG");
-                    return;
-                }
-                setIsSetupMode(false);
-                setErrorMsg('');
-            };
-
-            const handleCheck = () => {
-                if(!inputWeight || !inputReps) {
-                    setErrorMsg("ISI DULU BOSQU");
-                    return;
-                }
-                setErrorMsg('');
-
-                const newResults = [...results];
-                let exEntry = newResults.find(r => r.id === currentEx.id);
-                if (!exEntry) {
-                    exEntry = { id: currentEx.id, name: currentEx.name, sets: [] };
-                    newResults.push(exEntry);
-                }
-                exEntry.sets.push({ weight: inputWeight, reps: inputReps });
-                setResults(newResults);
-
-                if (isLastSet) {
-                    if (isLastEx) {
-                        const duration = Math.floor((Date.now() - startTime)/1000);
-                        onFinish({
-                            id: Date.now(),
-                            date: new Date().toISOString(),
-                            programName: programName, 
-                            duration: duration,
-                            exercises: newResults 
-                        });
-                    } else {
-                        triggerRest(() => {
-                            setExIndex(prev => prev + 1);
-                        });
-                    }
-                } else {
-                    triggerRest(() => {
-                        setSetIndex(prev => prev + 1);
-                    });
-                }
-            };
-
-            const triggerRest = (cb) => {
-                setRestTimer(90);
-                setIsResting(true);
-                cb();
-            };
-
-            const formatTime = (s) => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;
-
-            return (
-                <div className="flex-1 flex flex-col relative pb-20 overflow-hidden">
-                    {isResting && (
-                        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur text-white lock-active">
-                            <div className="text-cyan-400 animate-pulse mb-4"><Icon name="lock" size={64} /></div>
-                            <h1 className="text-4xl font-cyber font-black tracking-widest text-red-500">ISTIRAHAT</h1>
-                            <p className="text-xs font-mono text-slate-400 uppercase mb-6">Napas dulu bro...</p>
-                            <div className="text-6xl font-mono font-bold glow-text-blue border-2 border-cyan-500/50 p-6 rounded-xl bg-black/50 mt-4">{formatTime(restTimer)}</div>
-                            <button onClick={() => setIsResting(false)} className="mt-8 px-4 py-2 border border-slate-600 rounded text-xs font-mono hover:bg-white/10">HAJAR LANGSUNG (SKIP)</button>
-                            <p className="text-[10px] text-slate-500 mt-4">Sabar, biar otot tumbuh maksimal</p>
-                        </div>
-                    )}
-
-                    <div className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-                        <button onClick={onAbort} className="text-red-500 text-xs font-bold border border-red-900 px-2 py-1 rounded">BATAL</button>
-                        <div className="text-[10px] text-slate-500 font-cyber">LATIHAN KE <span className="text-cyan-400 font-bold ml-1">{exIndex + 1} / {draft.length}</span></div>
-                    </div>
-
-                    <div className="flex-1 p-6 flex flex-col justify-center overflow-y-auto">
-                        <div className="mb-8 text-center">
-                            <div className="text-cyan-400 text-xs font-cyber tracking-widest mb-2">TARGET SEKARANG</div>
-                            <h2 className="text-3xl font-black text-white font-cyber leading-tight">{currentEx.name}</h2>
-                            <div className="mt-2 text-amber-500 text-sm font-mono font-bold">SARAN BEBAN: {calculateRec(currentEx.id)} KG</div>
-                        </div>
-
-                        {isSetupMode ? (
-                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative animate-in fade-in zoom-in duration-300">
-                                <div className="text-center mb-6">
-                                    <div className="mx-auto text-cyan-400 mb-2 flex justify-center"><Icon name="settings-2" size={32} /></div>
-                                    <h3 className="text-xl font-cyber font-bold text-white">ATUR SET</h3>
-                                    <p className="text-xs text-slate-400 mt-1">Mau main berapa set hari ini?</p>
-                                </div>
-                                <div className="mb-6 flex items-center justify-center gap-4">
-                                    <button onClick={() => setPlannedSets(s => Math.max(1, s - 1))} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="minus" /></button>
-                                    <div className="w-24 cyber-input text-3xl font-bold p-3 rounded-xl text-center">{plannedSets}</div>
-                                    <button onClick={() => setPlannedSets(s => s + 1)} className="p-3 bg-slate-800 rounded-lg hover:bg-slate-700"><Icon name="plus" /></button>
-                                </div>
-                                <button onClick={handleConfirmSets} className="w-full bg-cyan-600 hover:bg-cyan-500 text-black font-cyber font-bold py-4 rounded-xl">GAS!</button>
-                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
-                            </div>
-                        ) : (
-                            <div className="cyber-border bg-black/60 p-6 rounded-2xl relative">
-                                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-cyan-900 text-cyan-200 px-3 py-1 rounded text-xs font-bold font-mono border border-cyan-500">
-                                    SET KE {setIndex + 1} DARI {plannedSets}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 mt-4">
-                                    <div>
-                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Beban (KG)</label>
-                                        <input type="number" value={inputWeight} onChange={e => setInputWeight(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] text-slate-500 font-cyber uppercase mb-1 block">Repetisi</label>
-                                        <input type="number" value={inputReps} onChange={e => setInputReps(e.target.value)} className="w-full cyber-input text-2xl font-bold p-4 rounded-xl text-center" />
-                                    </div>
-                                </div>
-
-                                <button onClick={handleCheck} className="w-full mt-6 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-cyber font-bold py-4 rounded-xl shadow-[0_0_15px_rgba(8,145,178,0.6)] flex items-center justify-center gap-2">
-                                    <Icon name="check-circle-2" /> KELAR SET
-                                </button>
-                                {errorMsg && <div className="text-red-500 text-xs text-center mt-4 font-bold animate-shake">{errorMsg}</div>}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            );
-        };
-
-        const HistoryView = ({ history, onBack }) => {
-            const [expandedId, setExpandedId] = useState(null);
-
-            const formatDuration = (sec) => {
-                const m = Math.floor(sec / 60);
-                const s = sec % 60;
-                return `${m}m ${s}s`;
-            };
-
-            const toggleExpand = (id) => {
-                setExpandedId(expandedId === id ? null : id);
-            };
-
-            return (
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    <div className="flex items-center gap-2 mb-6">
-                        <button onClick={onBack}><Icon name="arrow-left" className="text-slate-400" /></button>
-                        <h2 className="text-xl font-cyber font-bold text-white tracking-wider">RIWAYAT LATIHAN</h2>
-                    </div>
-
-                    {history.length === 0 ? (
-                        <div className="text-center py-20 opacity-50 flex flex-col items-center">
-                            <Icon name="folder-x" size={48} className="text-slate-600 mb-4" />
-                            <p className="font-cyber text-slate-500">BELUM ADA LATIHAN, YUK GAS!</p>
-                        </div>
-                    ) : (
-                        history.map((session) => {
-                            const isExpanded = expandedId === session.id;
-                            let totalSets = 0;
-                            
-                            if (Array.isArray(session.exercises)) {
-                                session.exercises.forEach(ex => {
-                                    if(ex.sets) totalSets += ex.sets.length;
-                                });
-                            }
-
-                            const dateObj = new Date(session.date);
-
-                            return (
-                                <div key={session.id} className={`cyber-border rounded-lg overflow-hidden transition-all duration-300 ${isExpanded ? 'bg-black/60 border-cyan-500/50' : 'bg-black/30'}`}>
-                                    <div onClick={() => toggleExpand(session.id)} className="p-4 cursor-pointer flex justify-between items-center active:bg-white/5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="bg-slate-900 p-3 rounded text-cyan-400">
-                                                <div className="font-bold font-mono text-lg leading-none">{dateObj.getDate()}</div>
-                                                <div className="text-[10px] uppercase font-mono">{dateObj.toLocaleDateString('id-ID', {month:'short'})}</div>
-                                            </div>
-                                            <div>
-                                                <div className="font-cyber font-bold text-white text-sm">{session.programName || "LATIHAN"}</div>
-                                                <div className="flex gap-3 text-[10px] text-slate-400 font-mono mt-1">
-                                                    <span className="flex items-center gap-1"><Icon name="clock" size={10}/> {dateObj.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</span>
-                                                    <span className="flex items-center gap-1"><Icon name="timer" size={10}/> {formatDuration(session.duration)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right flex flex-col items-end">
-                                            <div className="text-xs font-bold text-white">{totalSets} SETS</div>
-                                            <div className="text-[10px] text-slate-500 text-cyan-400">DETAIL <Icon name="chevron-down" size={10} className="inline"/></div>
-                                        </div>
-                                    </div>
-
-                                    {isExpanded && (
-                                        <div className="border-t border-slate-800 bg-black/40 p-4">
-                                            <div className="space-y-4">
-                                                {session.exercises.map((ex) => (
-                                                    <div key={ex.id} className="text-sm">
-                                                        <div className="text-cyan-400 font-bold mb-1 text-xs uppercase tracking-wide">{ex.name}</div>
-                                                        <div className="grid grid-cols-3 gap-2 text-[10px] font-mono text-slate-500 mb-1 border-b border-slate-800 pb-1">
-                                                            <div>SET</div><div>KG</div><div>REPS</div>
-                                                        </div>
-                                                        {ex.sets.map((set, idx) => (
-                                                            <div key={idx} className="grid grid-cols-3 gap-2 text-xs font-mono text-slate-300 py-1">
-                                                                <div className="text-slate-500">{idx + 1}</div>
-                                                                <div>{set.weight}</div>
-                                                                <div>{set.reps}</div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })
-                    )}
-                </div>
-            );
-        };
-
-        const Settings = ({ profile, setProfile, onClose }) => {
-            const [val, setVal] = useState(profile.bench1RM);
-            return (
-                <div className="absolute inset-0 bg-black/95 z-50 flex items-center justify-center p-6">
-                    <div className="w-full max-w-sm cyber-border bg-slate-900 p-6 rounded-xl">
-                        <h2 className="text-xl font-cyber text-white mb-4">KALIBRASI KEKUATAN</h2>
-                        <p className="text-xs text-slate-400 mb-6">Masukin rekor 1x angkat (1RM) Bench Press lo. Nanti gue itungin estimasi beban buat latihan lain.</p>
-                        
-                        <label className="text-xs text-cyan-400 font-bold mb-2 block">BENCH PRESS 1RM (KG)</label>
-                        <input type="number" value={val} onChange={e => setVal(e.target.value)} className="w-full cyber-input p-3 rounded mb-6 text-xl" />
-                        
-                        <div className="grid grid-cols-2 gap-2">
-                            <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">ESTIMASI SQUAT</div>
-                                <div className="text-white font-mono">{(val * 1.3).toFixed(1)} KG</div>
-                            </div>
-                            <div className="bg-black p-2 rounded">
-                                <div className="text-[10px] text-slate-500">ESTIMASI DEADLIFT</div>
-                                <div className="text-white font-mono">{(val * 1.5).toFixed(1)} KG</div>
-                            </div>
-                        </div>
-
-                        <button onClick={() => { setProfile({...profile, bench1RM: val}); onClose(); }} className="w-full mt-6 bg-cyan-600 py-3 rounded font-bold text-black font-cyber">
-                            SIMPAN
-                        </button>
-                    </div>
-                </div>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
-</body>
-</html>
 
