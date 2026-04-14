@@ -4,13 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WA Link Generator - Will Fitness Tracker</title>
+    <title>Will Fitness WA Tool - Fixed Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .row-done { opacity: 0.6; background-color: #f0fdf4 !important; }
+        .row-done { opacity: 0.5; background-color: #f8fafc !important; }
+        .row-done .status-icon { color: #10b981; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
@@ -18,92 +19,94 @@
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen pb-12">
 
-    <!-- Header -->
+    <!-- Navbar -->
     <nav class="bg-emerald-600 text-white p-4 shadow-lg mb-6 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="bg-white p-1.5 rounded-lg shadow-inner">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-xl shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                 </div>
                 <div>
-                    <h1 class="font-bold text-lg leading-none">Will Fitness WA Tool</h1>
-                    <p class="text-[10px] opacity-75 font-medium mt-1 uppercase tracking-wider">Member Management v2.0</p>
+                    <h1 class="font-bold text-lg leading-none">Will Fitness Tool</h1>
+                    <p class="text-[10px] opacity-80 font-medium mt-1 uppercase tracking-widest">Fixed Column Mapping</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <div id="progress-container" class="hidden sm:flex flex-col items-end">
-                    <span id="progress-text" class="text-[10px] font-bold uppercase mb-1">Progress: 0/0</span>
-                    <div class="w-32 h-1.5 bg-emerald-800 rounded-full overflow-hidden">
-                        <div id="progress-bar" class="w-0 h-full bg-white transition-all duration-500"></div>
+                <div id="progress-info" class="hidden sm:block text-right">
+                    <p class="text-[10px] font-bold uppercase opacity-80" id="progress-label">Progress: 0/0</p>
+                    <div class="w-32 h-1.5 bg-emerald-800 rounded-full mt-1 overflow-hidden">
+                        <div id="progress-bar" class="h-full bg-white w-0 transition-all duration-500"></div>
                     </div>
                 </div>
-                <div class="text-xs bg-emerald-700 px-3 py-1.5 rounded-full font-bold" id="stats-badge">Siap</div>
+                <div class="bg-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/30" id="data-status">Siap</div>
             </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- Kolom Kiri: Konfigurasi -->
+        <!-- Konfigurasi -->
         <div class="lg:col-span-4 space-y-5">
             
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-tight">1. Unggah Data</label>
-                <div id="drop-zone" class="border-2 border-dashed border-emerald-200 rounded-xl p-6 text-center hover:bg-emerald-50 cursor-pointer transition-all group">
-                    <input type="file" id="csv-input" class="hidden" accept=".csv, .xlsx, .xls">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto text-emerald-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <p class="text-xs text-slate-500 font-medium">Klik untuk pilih file CSV/Excel</p>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">1. Input Data</h2>
+                <div id="drop-zone" class="border-2 border-dashed border-emerald-100 rounded-2xl p-8 text-center hover:bg-emerald-50 hover:border-emerald-300 cursor-pointer transition-all group">
+                    <input type="file" id="file-input" class="hidden" accept=".csv, .xlsx, .xls">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto text-emerald-300 mb-3 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <p class="text-sm font-semibold text-slate-600">Klik atau seret file ke sini</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Mendukung file CSV & Excel</p>
                 </div>
-                <div class="mt-3 flex items-center gap-2">
-                    <input type="checkbox" id="has-header" class="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                    <label for="has-header" class="text-xs text-slate-600 font-medium cursor-pointer">File memiliki judul (Header)</label>
+                
+                <div class="mt-4 space-y-2">
+                    <div class="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <input type="checkbox" id="has-header" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer">
+                        <label for="has-header" class="text-xs text-slate-600 font-semibold cursor-pointer select-none">File memiliki judul (Header)</label>
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        <label class="text-xs text-slate-600 font-semibold">Mulai dari baris ke:</label>
+                        <input type="number" id="start-row" value="1" min="1" class="w-16 bg-white border border-slate-200 rounded px-2 py-1 text-xs font-bold text-center">
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <label class="block text-sm font-bold text-slate-700 mb-4 uppercase tracking-tight">2. Pemetaan Kolom</label>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200" id="mapping-card">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">2. Pemetaan Kolom</h2>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Nama Member</label>
-                        <select id="select-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Kolom Nama</label>
+                        <select id="map-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
                     </div>
                     <div>
-                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Nomor HP</label>
-                        <select id="select-phone" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Kolom No. WhatsApp</label>
+                        <select id="map-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
                     </div>
                     <div>
-                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Expired Date</label>
-                        <select id="select-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <label class="text-[10px] uppercase font-bold text-slate-400 block mb-1">Kolom Tanggal Expired</label>
+                        <select id="map-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-tight">3. Template Pesan</label>
-                <textarea id="msg-template" class="w-full h-36 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none leading-relaxed">Halo {{Nama Member}}, member Will Fitness Anda akan berakhir pada {{Expired Date}}. Segera perpanjang ya!</textarea>
-                <div class="mt-2">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Variabel:</p>
-                    <div class="flex flex-wrap gap-1">
-                        <code class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono">{{Nama Member}}</code>
-                        <code class="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600 font-mono">{{Expired Date}}</code>
-                    </div>
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">3. Isi Pesan</h2>
+                <textarea id="msg-template" class="w-full h-32 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none leading-relaxed">Halo {{Nama}}, masa member Will Fitness Anda berakhir pada {{Expired}}. Segera perpanjang ya!</textarea>
+                <div class="mt-2 flex gap-2">
+                    <span class="text-[9px] bg-slate-100 px-2 py-1 rounded text-slate-500 font-bold border border-slate-200 cursor-help" title="Gunakan {{Nama}} dan {{Expired}}">VARIABEL AKTIF</span>
                 </div>
             </div>
         </div>
 
-        <!-- Kolom Kanan: Hasil -->
-        <div class="lg:col-span-8 flex flex-col">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-[calc(100vh-140px)] min-h-[500px]">
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
-                    <div>
-                        <h2 class="font-bold text-slate-700 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                            Daftar Member
-                        </h2>
-                    </div>
+        <!-- Tabel Hasil -->
+        <div class="lg:col-span-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-140px)] min-h-[500px]">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+                    <h2 class="font-bold text-slate-700 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>
+                        Daftar Antrian Member
+                    </h2>
                     <div class="flex gap-2">
-                        <button id="btn-reset-checklist" class="hidden text-[10px] font-bold text-slate-400 hover:text-red-500 px-3 py-2 uppercase transition-colors">Reset Checklist</button>
-                        <button id="btn-export" class="hidden text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-4 py-2 rounded-xl transition-all border border-emerald-100 shadow-sm">Ekspor Excel</button>
+                        <button id="btn-reset" class="hidden text-xs font-bold text-slate-400 hover:text-red-500 px-3 py-2 transition-colors">Reset Checklist</button>
+                        <button id="btn-export" class="hidden text-xs font-bold text-emerald-600 hover:bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-xl transition-all shadow-sm">Simpan Laporan</button>
                     </div>
                 </div>
 
@@ -111,17 +114,20 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
                             <tr class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                                <th class="px-6 py-4 border-b border-slate-100 w-12 text-center">Status</th>
-                                <th class="px-6 py-4 border-b border-slate-100">Nama</th>
-                                <th class="px-6 py-4 border-b border-slate-100">WhatsApp</th>
-                                <th class="px-6 py-4 border-b border-slate-100">Expired</th>
-                                <th class="px-6 py-4 border-b border-slate-100 text-right">Aksi</th>
+                                <th class="px-6 py-4 border-b border-slate-100 w-16 text-center">Done</th>
+                                <th class="px-6 py-4 border-b border-slate-100">Nama Lengkap</th>
+                                <th class="px-6 py-4 border-b border-slate-100">No. HP</th>
+                                <th class="px-6 py-4 border-b border-slate-100">Tgl Expired</th>
+                                <th class="px-6 py-4 border-b border-slate-100 text-right">Tindakan</th>
                             </tr>
                         </thead>
-                        <tbody id="result-list" class="divide-y divide-slate-50">
+                        <tbody id="table-body" class="divide-y divide-slate-50">
                             <tr>
-                                <td colspan="5" class="px-5 py-32 text-center text-slate-300">
-                                    <p class="text-sm">Silakan unggah file Anda.</p>
+                                <td colspan="5" class="px-6 py-32 text-center">
+                                    <div class="flex flex-col items-center gap-3 grayscale opacity-30">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                                        <p class="text-sm font-medium">Belum ada data member yang dimuat.</p>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -134,206 +140,214 @@
     <!-- Notification -->
     <div id="toast" class="fixed bottom-10 right-10 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-300 flex items-center gap-3 z-[100] border border-slate-700">
         <div class="bg-emerald-500 rounded-full p-1"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-        <span id="toast-msg" class="text-sm font-semibold">Tautan WA Disalin!</span>
+        <span id="toast-msg" class="text-sm font-semibold">Tautan Disalin!</span>
     </div>
 
     <script>
         let rawData = [];
-        let clickedIndices = new Set();
+        let checklist = new Set();
 
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('csv-input');
-        const hasHeader = document.getElementById('has-header');
-        const selectName = document.getElementById('select-name');
-        const selectPhone = document.getElementById('select-phone');
-        const selectExpiry = document.getElementById('select-expiry');
-        const template = document.getElementById('msg-template');
-        const resultList = document.getElementById('result-list');
-        const statsBadge = document.getElementById('stats-badge');
-        const btnExport = document.getElementById('btn-export');
-        const btnReset = document.getElementById('btn-reset-checklist');
-        const progressBar = document.getElementById('progress-bar');
-        const progressText = document.getElementById('progress-text');
-        const progressContainer = document.getElementById('progress-container');
-
-        dropZone.onclick = () => fileInput.click();
-        fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) processFile(file);
+        const dom = {
+            fileInput: document.getElementById('file-input'),
+            dropZone: document.getElementById('drop-zone'),
+            hasHeader: document.getElementById('has-header'),
+            startRow: document.getElementById('start-row'),
+            mapName: document.getElementById('map-name'),
+            mapPhone: document.getElementById('map-phone'),
+            mapExpiry: document.getElementById('map-expiry'),
+            template: document.getElementById('msg-template'),
+            tableBody: document.getElementById('table-body'),
+            dataStatus: document.getElementById('data-status'),
+            btnReset: document.getElementById('btn-reset'),
+            btnExport: document.getElementById('btn-export'),
+            progressBar: document.getElementById('progress-bar'),
+            progressText: document.getElementById('progress-text'),
+            progressInfo: document.getElementById('progress-info'),
+            toast: document.getElementById('toast'),
+            toastMsg: document.getElementById('toast-msg')
         };
 
-        function processFile(file) {
+        dom.dropZone.onclick = () => dom.fileInput.click();
+        dom.fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+        function handleFile(file) {
+            if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, raw: true });
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array', raw: true });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                // header: 1 menghasilkan array of arrays (AOA)
+                const data = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
                 
-                if (jsonData.length > 0) {
-                    rawData = jsonData;
-                    clickedIndices.clear();
-                    setupMapping();
-                    renderResults();
-                    statsBadge.innerText = `${jsonData.length} Member`;
-                    btnExport.classList.remove('hidden');
-                    btnReset.classList.remove('hidden');
-                    progressContainer.classList.remove('hidden');
+                // Bersihkan baris yang benar-benar kosong
+                rawData = data.filter(row => row && row.length > 0);
+                
+                if (rawData.length > 0) {
+                    checklist.clear();
+                    setupDropdowns();
+                    render();
+                    dom.dataStatus.innerText = `${rawData.length} Member`;
+                    [dom.btnReset, dom.btnExport, dom.progressInfo].forEach(el => el.classList.remove('hidden'));
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        function setupMapping() {
-            const firstRow = rawData[0];
-            const colNames = firstRow.map((val, idx) => hasHeader.checked ? (val || `Kolom ${idx + 1}`) : `Kolom ${idx + 1}`);
+        function setupDropdowns() {
+            // Gunakan baris pertama untuk deteksi kolom
+            const sampleRow = rawData[0];
+            const colNames = sampleRow.map((_, i) => `Kolom ${i + 1}`);
             
-            [selectName, selectPhone, selectExpiry].forEach((dropdown) => {
-                dropdown.innerHTML = '';
-                colNames.forEach((name, colIdx) => {
+            [dom.mapName, dom.mapPhone, dom.mapExpiry].forEach((select, i) => {
+                select.innerHTML = '';
+                sampleRow.forEach((val, idx) => {
                     const opt = document.createElement('option');
-                    opt.value = colIdx;
-                    opt.textContent = name;
-                    if (dropdown === selectName && colIdx === 0) opt.selected = true;
-                    if (dropdown === selectPhone && colIdx === 1) opt.selected = true;
-                    if (dropdown === selectExpiry && colIdx === 2) opt.selected = true;
-                    dropdown.appendChild(opt);
+                    opt.value = idx;
+                    opt.textContent = `${colNames[idx]} (Contoh: ${String(val).substring(0,15)})`;
+                    // Auto mapping berdasarkan urutan CSV Anda: 0: Nama, 1: HP, 2: Tanggal
+                    if (i === 0 && idx === 0) opt.selected = true;
+                    if (i === 1 && idx === 1) opt.selected = true;
+                    if (i === 2 && idx === 2) opt.selected = true;
+                    select.appendChild(opt);
                 });
             });
         }
 
         function formatDate(val) {
             if (!val) return "-";
-            let date;
-            if (val instanceof Date && !isNaN(val)) date = val;
-            else if (typeof val === 'string' && val.includes('-')) {
-                const parts = val.split('-');
-                if (parts[0].length === 4) date = new Date(parts[0], parts[1] - 1, parts[2]);
-            } else if (typeof val === 'number') date = new Date((val - 25569) * 86400 * 1000);
+            let d;
+            // Jika serial number Excel (angka)
+            if (typeof val === 'number') {
+                d = new Date((val - 25569) * 86400 * 1000);
+            } else {
+                // Bersihkan string dan coba parsing
+                const s = String(val).trim();
+                d = new Date(s);
+            }
+
+            if (isNaN(d.getTime())) return String(val);
             
-            if (!date || isNaN(date.getTime())) return String(val);
-            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+            return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
         }
 
-        function formatPhone(num) {
-            if (!num) return "";
-            let cleaned = String(num).replace(/\D/g, '');
-            if (cleaned.startsWith('8')) return '62' + cleaned;
-            if (cleaned.startsWith('08')) return '62' + cleaned.substring(1);
-            return cleaned;
+        function formatPhone(val) {
+            let s = String(val).replace(/\D/g, '');
+            if (s.startsWith('8')) return '62' + s;
+            if (s.startsWith('08')) return '62' + s.substring(1);
+            return s;
         }
 
-        function toggleStatus(idx) {
-            if (clickedIndices.has(idx)) clickedIndices.delete(idx);
-            else clickedIndices.add(idx);
-            renderResults();
-        }
-
-        function markAsDone(idx, link) {
-            clickedIndices.add(idx);
-            renderResults();
-            window.open(link, '_blank');
-        }
-
-        function renderResults() {
+        function render() {
             if (rawData.length === 0) return;
-            
-            resultList.innerHTML = '';
-            const startIdx = hasHeader.checked ? 1 : 0;
-            const nameCol = parseInt(selectName.value);
-            const phoneCol = parseInt(selectPhone.value);
-            const expiryCol = parseInt(selectExpiry.value);
 
-            const displayData = rawData.slice(startIdx);
+            dom.tableBody.innerHTML = '';
+            const offset = parseInt(dom.startRow.value) - 1;
+            const hasHeader = dom.hasHeader.checked;
             
+            // Tentukan baris mana yang akan ditampilkan
+            const startIdx = hasHeader ? Math.max(offset, 1) : Math.max(offset, 0);
+            const items = rawData.slice(startIdx);
+
+            const nCol = parseInt(dom.mapName.value);
+            const pCol = parseInt(dom.mapPhone.value);
+            const eCol = parseInt(dom.mapExpiry.value);
+
             // Update Progress
-            const total = displayData.length;
-            const done = clickedIndices.size;
-            progressText.innerText = `Progress: ${done}/${total}`;
-            progressBar.style.width = `${(done / total) * 100}%`;
+            const done = checklist.size;
+            const total = items.length;
+            dom.progressText.innerText = `Progress: ${done}/${total}`;
+            dom.progressBar.style.width = `${(done / total) * 100}%`;
 
-            displayData.forEach((row, localIdx) => {
-                const globalIdx = startIdx + localIdx;
-                const name = row[nameCol] || '-';
-                const rawPhone = row[phoneCol] || '';
-                const cleanPhone = formatPhone(rawPhone);
-                const expiry = formatDate(row[expiryCol]);
-                const isDone = clickedIndices.has(globalIdx);
+            items.forEach((row, i) => {
+                const globalIdx = startIdx + i;
+                const name = String(row[nCol] || '-');
+                const phoneRaw = String(row[pCol] || '');
+                const expiry = formatDate(row[eCol]);
+                const isDone = checklist.has(globalIdx);
 
-                let msg = template.value.replace(/{{Nama Member}}/g, name).replace(/{{Expired Date}}/g, expiry);
+                const cleanPhone = formatPhone(phoneRaw);
+                const msg = dom.template.value
+                    .replace(/{{Nama}}/g, name)
+                    .replace(/{{Expired}}/g, expiry);
                 const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
 
                 const tr = document.createElement('tr');
-                tr.className = `transition-all duration-300 ${isDone ? 'row-done' : 'hover:bg-slate-50'}`;
+                tr.className = `group transition-all ${isDone ? 'row-done' : 'hover:bg-slate-50/80'}`;
                 
                 tr.innerHTML = `
                     <td class="px-6 py-4 text-center">
-                        <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleStatus(${globalIdx})" 
+                        <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleDone(${globalIdx})" 
                             class="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500 cursor-pointer">
                     </td>
-                    <td class="px-6 py-4 text-sm font-semibold ${isDone ? 'text-slate-400' : 'text-slate-700'}">${name}</td>
-                    <td class="px-6 py-4 text-sm font-mono ${isDone ? 'text-slate-300' : 'text-slate-500'}">${rawPhone}</td>
-                    <td class="px-6 py-4 text-sm font-medium ${isDone ? 'text-slate-300' : 'text-slate-600'}">${expiry}</td>
+                    <td class="px-6 py-4 text-sm font-semibold text-slate-700">${name}</td>
+                    <td class="px-6 py-4 text-sm font-mono text-slate-500">${phoneRaw}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-emerald-600">${expiry}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button onclick="copyText('${waLink}')" class="p-2 text-slate-400 hover:text-emerald-600 bg-slate-100 hover:bg-emerald-50 rounded-xl transition-all">
+                            <button onclick="copy('${waLink}')" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             </button>
-                            <button onclick="markAsDone(${globalIdx}, '${waLink}')" class="p-2 ${isDone ? 'bg-slate-200' : 'bg-emerald-500 hover:bg-emerald-600'} text-white rounded-xl transition-all shadow-sm active:scale-90">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
-                            </button>
+                            <a href="${waLink}" target="_blank" onclick="checklist.add(${globalIdx}); render();" 
+                                class="p-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-all shadow-sm active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </a>
                         </div>
                     </td>
                 `;
-                resultList.appendChild(tr);
+                dom.tableBody.appendChild(tr);
             });
         }
 
-        [selectName, selectPhone, selectExpiry, hasHeader].forEach(el => el.addEventListener('change', renderResults));
-        template.addEventListener('input', renderResults);
-        
-        btnReset.onclick = () => {
-            if(confirm('Reset semua checklist?')) {
-                clickedIndices.clear();
-                renderResults();
-            }
+        window.toggleDone = (idx) => {
+            if (checklist.has(idx)) checklist.delete(idx);
+            else checklist.add(idx);
+            render();
         };
 
-        function copyText(txt) {
+        window.copy = (text) => {
             const input = document.createElement('textarea');
-            input.value = txt;
+            input.value = text;
             document.body.appendChild(input);
             input.select();
             document.execCommand('copy');
             document.body.removeChild(input);
-            showToast("Tautan Disalin!");
-        }
+            showToast("Tautan WA disalin!");
+        };
 
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('opacity-0', 'translate-y-10');
-            setTimeout(() => toast.classList.add('opacity-0', 'translate-y-10'), 3000);
+            dom.toastMsg.innerText = msg;
+            dom.toast.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => dom.toast.classList.add('opacity-0', 'translate-y-10'), 3000);
         }
 
-        btnExport.onclick = () => {
-            const startIdx = hasHeader.checked ? 1 : 0;
-            const dataToExport = rawData.slice(startIdx).map((row, idx) => {
-                const name = row[parseInt(selectName.value)];
-                const expiry = formatDate(row[parseInt(selectExpiry.value)]);
-                const phone = formatPhone(row[parseInt(selectPhone.value)]);
+        [dom.hasHeader, dom.startRow, dom.mapName, dom.mapPhone, dom.mapExpiry].forEach(el => {
+            el.onchange = render;
+        });
+        dom.template.oninput = render;
+
+        dom.btnReset.onclick = () => {
+            if(confirm('Hapus semua tanda checklist?')) {
+                checklist.clear();
+                render();
+            }
+        };
+
+        dom.btnExport.onclick = () => {
+            const items = rawData.map((row, i) => {
+                const name = row[parseInt(dom.mapName.value)];
+                const phone = row[parseInt(dom.mapPhone.value)];
+                const exp = formatDate(row[parseInt(dom.mapExpiry.value)]);
                 return {
-                    "Nama Member": name,
-                    "No HP": row[parseInt(selectPhone.value)],
-                    "Expired": expiry,
-                    "Status": clickedIndices.has(startIdx + idx) ? "SUDAH DIKIRIM" : "BELUM",
-                    "Link WA": `https://wa.me/${phone}?text=${encodeURIComponent(template.value.replace(/{{Nama Member}}/g, name).replace(/{{Expired Date}}/g, expiry))}`
+                    Nama: name,
+                    Nomor: phone,
+                    Expired: exp,
+                    Status: checklist.has(i) ? "TERKIRIM" : "BELUM"
                 };
             });
-            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const ws = XLSX.utils.json_to_sheet(items);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "WillFitness_Report");
-            XLSX.writeFile(wb, "Laporan_Kirim_WA.xlsx");
+            XLSX.writeFile(wb, "Report_WhatsApp.xlsx");
         };
     </script>
 </body>
