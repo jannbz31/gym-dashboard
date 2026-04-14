@@ -71,15 +71,15 @@
                 <div class="space-y-4">
                     <div>
                         <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Nama</label>
-                        <select id="map-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <select id="map-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Nomor HP</label>
-                        <select id="map-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <select id="map-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
                     </div>
                     <div>
                         <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Tgl Expired</label>
-                        <select id="map-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500"></select>
+                        <select id="map-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
                     </div>
                     <div class="pt-2 border-t border-slate-100">
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -90,14 +90,26 @@
                 </div>
             </div>
 
-            <!-- Step 3: Action -->
+            <!-- Step 3: Edit Pesan -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 3: Eksekusi</h3>
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 3: Edit Pesan</h3>
+                <div class="mb-3">
+                    <label class="text-[11px] font-bold text-slate-500 block mb-2 uppercase tracking-wide">Variabel Klik:</label>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <button onclick="insertTag('{{Nama}}')" class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100 transition-colors shadow-sm">+ Nama Member</button>
+                        <button onclick="insertTag('{{Expired}}')" class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100 transition-colors shadow-sm">+ Tgl Expired</button>
+                    </div>
+                </div>
+                <textarea id="msg-template" class="w-full h-40 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none leading-relaxed shadow-inner" placeholder="Tulis pesan Anda di sini...">Halo {{Nama}}, member Will Fitness Anda berakhir pada {{Expired}}. Segera perpanjang ya!</textarea>
+            </div>
+
+            <!-- Step 4: Action -->
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 4: Eksekusi</h3>
                 <button id="btn-process" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                     OLAH DATA SEKARANG
                 </button>
-                <p class="text-[10px] text-center text-slate-400 mt-3 italic font-medium">Data akan diproses & format tanggal diperbaiki otomatis</p>
             </div>
         </div>
 
@@ -107,13 +119,14 @@
                 
                 <div class="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
                     <div>
-                        <h2 class="font-bold text-slate-700 flex items-center gap-2">
+                        <h2 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 00 2 2h10a2 2 0 00 2-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                            Tabel Member Terolah
+                            Daftar Member Terolah
                         </h2>
+                        <p class="text-[11px] text-slate-400 font-medium">Klik ikon pesawat untuk membuka WhatsApp</p>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-export" class="hidden text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-xl transition-all">Export Report</button>
+                        <button id="btn-export" class="hidden text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-xl transition-all shadow-sm">Simpan Laporan Excel</button>
                     </div>
                 </div>
 
@@ -121,11 +134,11 @@
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
                             <tr class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                                <th class="px-6 py-4 border-b border-slate-100 w-16 text-center">Cek</th>
+                                <th class="px-6 py-4 border-b border-slate-100 w-16 text-center">Status</th>
                                 <th class="px-6 py-4 border-b border-slate-100">Nama</th>
                                 <th class="px-6 py-4 border-b border-slate-100">WA</th>
-                                <th class="px-6 py-4 border-b border-slate-100">Expired (Fixed)</th>
-                                <th class="px-6 py-4 border-b border-slate-100 text-right">Link WA</th>
+                                <th class="px-6 py-4 border-b border-slate-100">Expired (DD/MM/YYYY)</th>
+                                <th class="px-6 py-4 border-b border-slate-100 text-right">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="table-body" class="divide-y divide-slate-50">
@@ -133,7 +146,7 @@
                                 <td colspan="5" class="py-32 text-center text-slate-300">
                                     <div class="flex flex-col items-center gap-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <p class="text-sm font-medium">Belum ada data. Silakan Olah Data di panel kiri.</p>
+                                        <p class="text-sm font-medium">Upload file & klik Olah Data.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -141,22 +154,19 @@
                     </table>
                 </div>
 
-                <div class="p-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-tight">
+                <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-tight">
                     <span>Will Fitness Automation Tool</span>
-                    <span>v3.0 Stable - Format DD/MM/YYYY</span>
+                    <span>v3.5 - Smart Format Ready</span>
                 </div>
             </div>
         </div>
     </main>
 
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-300 flex items-center gap-3 z-[100]">
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-300 flex items-center gap-3 z-[100] border border-slate-700">
         <div class="bg-emerald-500 rounded-full p-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
         <span id="toast-msg" class="text-xs font-bold uppercase tracking-wide">Pesan Tersalin!</span>
     </div>
-
-    <!-- Template Chat (hidden) -->
-    <textarea id="chat-template" class="hidden">Halo {{Nama}}, member Will Fitness Anda berakhir pada {{Expired}}. Segera perpanjang ya!</textarea>
 
     <script>
         let rawMatrix = [];
@@ -179,7 +189,7 @@
             progressBar: document.getElementById('progress-bar'),
             progressText: document.getElementById('progress-text'),
             stats: document.getElementById('stats'),
-            chatTemplate: document.getElementById('chat-template')
+            msgTemplate: document.getElementById('msg-template')
         };
 
         el.dropZone.onclick = () => el.fileInput.click();
@@ -191,7 +201,6 @@
             reader.onload = (e) => {
                 const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                // header: 1 untuk mendapatkan matrix murni [ [row1col1, row1col2], [row2col1...] ]
                 rawMatrix = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
                 
                 if (rawMatrix.length > 0) {
@@ -213,9 +222,8 @@
                 firstRow.forEach((val, idx) => {
                     const opt = document.createElement('option');
                     opt.value = idx;
-                    opt.textContent = `Kolom ${idx + 1} (Contoh: ${String(val).substring(0, 15)})`;
+                    opt.textContent = `Kolom ${idx + 1} (${String(val || 'Kosong').substring(0, 15)})`;
                     
-                    // Auto-mapping berdasarkan posisi standar CSV user (Nama, HP, Exp)
                     if (i === 0 && idx === 0) opt.selected = true;
                     if (i === 1 && idx === 1) opt.selected = true;
                     if (i === 2 && idx === 2) opt.selected = true;
@@ -226,22 +234,29 @@
         }
 
         /**
-         * Core Logic: TANGGAL DD/MM/YYYY
+         * Klik Tombol Variabel
          */
+        window.insertTag = (tag) => {
+            const start = el.msgTemplate.selectionStart;
+            const end = el.msgTemplate.selectionEnd;
+            const text = el.msgTemplate.value;
+            el.msgTemplate.value = text.substring(0, start) + tag + text.substring(end);
+            el.msgTemplate.focus();
+            el.msgTemplate.setSelectionRange(start + tag.length, start + tag.length);
+        };
+
         function parseDate(val) {
             if (!val) return "-";
             let d;
             
-            // Handle XLSX serial number (angka)
             if (typeof val === 'number') {
                 d = new Date((val - 25569) * 86400 * 1000);
             } else {
-                // Bersihkan string dan coba parse YYYY-MM-DD
                 const cleanStr = String(val).trim();
                 d = new Date(cleanStr);
             }
 
-            if (isNaN(d.getTime())) return String(val); // Kembalikan apa adanya jika gagal
+            if (isNaN(d.getTime())) return String(val);
 
             const dd = String(d.getDate()).padStart(2, '0');
             const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -257,10 +272,13 @@
         }
 
         /**
-         * EKSEKUSI OLAH DATA
+         * OLAH DATA SEKARANG
          */
         el.btnProcess.onclick = () => {
-            if (rawMatrix.length === 0) return;
+            if (rawMatrix.length === 0) {
+                showToast("Pilih file dulu!");
+                return;
+            }
             
             el.btnProcess.disabled = true;
             el.btnProcess.innerHTML = '<div class="custom-loader"></div> MEMPROSES...';
@@ -276,11 +294,10 @@
                 processedData = dataSlice.map((row, idx) => {
                     const nama = row[colN] || "-";
                     const hp = row[colP] || "";
-                    const rawExp = row[colE];
-                    const fixedExp = parseDate(rawExp);
+                    const fixedExp = parseDate(row[colE]);
                     const cleanWA = formatWA(hp);
                     
-                    const textChat = el.chatTemplate.value
+                    const textChat = el.msgTemplate.value
                         .replace(/{{Nama}}/g, nama)
                         .replace(/{{Expired}}/g, fixedExp);
 
@@ -301,7 +318,7 @@
                 
                 el.stats.classList.remove('hidden');
                 el.btnExport.classList.remove('hidden');
-                showToast("Data Berhasil Diolah!");
+                showToast("Berhasil diolah!");
             }, 600);
         };
 
@@ -310,7 +327,6 @@
             
             if (processedData.length === 0) return;
 
-            // Update Progress
             const total = processedData.length;
             const done = checklist.size;
             el.progressText.innerText = `Progress: ${done}/${total}`;
@@ -330,10 +346,10 @@
                     <td class="px-6 py-4 text-sm font-bold text-emerald-600">${item.fixedExp}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex justify-end gap-2">
-                            <button onclick="copyLink('${item.link}')" class="p-2 text-slate-400 hover:text-emerald-600 bg-slate-100 rounded-lg transition-all" title="Copy Link">
+                            <button onclick="copyLink('${item.link}')" class="p-2 text-slate-400 hover:text-emerald-600 bg-slate-100 rounded-lg transition-all" title="Salin Tautan">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             </button>
-                            <a href="${item.link}" target="_blank" onclick="markAsSent(${item.id})" class="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm transition-all active:scale-90" title="Kirim WA">
+                            <a href="${item.link}" target="_blank" onclick="markAsSent(${item.id})" class="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-lg shadow-emerald-100 transition-all active:scale-90" title="Kirim WA">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                             </a>
                         </div>
@@ -361,7 +377,7 @@
             temp.select();
             document.execCommand('copy');
             document.body.removeChild(temp);
-            showToast("Tautan WA Tersalin!");
+            showToast("Tautan Disalin!");
         };
 
         function showToast(msg) {
@@ -380,7 +396,7 @@
             const ws = XLSX.utils.json_to_sheet(report);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "WillFitness_Report");
-            XLSX.writeFile(wb, "Laporan_WA_WillFitness.xlsx");
+            XLSX.writeFile(wb, "Laporan_WA.xlsx");
         };
     </script>
 </body>
