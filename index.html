@@ -1,637 +1,358 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Calgary Barbell Ultimate Tracker</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Link Generator - Excel Importer</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Babel (untuk JSX) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
-
+    <!-- SheetJS for Excel Processing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        /* Hide Scrollbar but keep functionality */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Animations */
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .slide-up { animation: slideUp 0.5s ease-out forwards; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Snap scrolling */
-        .snap-x { scroll-snap-type: x mandatory; }
-        .snap-center { scroll-snap-align: center; }
-
-        /* Remove Arrows/Spinners from Number Input */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
     </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-emerald-600 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-2 rounded-lg shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl leading-none">WA Link Generator</h1>
+                    <p class="text-[10px] opacity-80 uppercase tracking-widest mt-1">Excel Data Automation</p>
+                </div>
+            </div>
+            <div id="file-status" class="hidden sm:flex items-center gap-2 text-sm bg-emerald-700/50 px-3 py-1.5 rounded-full border border-emerald-500/30">
+                <span id="record-count">0</span> Data Terdeteksi
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Sidebar: Configuration -->
+        <div class="lg:col-span-4 space-y-6">
+            
+            <!-- 1. Upload Section -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm">1</span>
+                    <h2 class="font-bold text-slate-700">Impor Data Excel</h2>
+                </div>
+                
+                <div id="drop-zone" class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-emerald-400 hover:bg-emerald-50/30 transition-all cursor-pointer group">
+                    <input type="file" id="file-input" class="hidden" accept=".xlsx, .xls, .csv">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto text-slate-300 group-hover:text-emerald-500 mb-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                    <p class="text-sm font-medium text-slate-600">Klik atau seret file Excel ke sini</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Mendukung .xlsx, .xls, atau .csv</p>
+                </div>
+                <div id="file-info" class="hidden mt-3 p-2 bg-slate-50 border border-slate-100 rounded-lg flex justify-between items-center">
+                    <span class="text-xs font-medium text-slate-500 truncate" id="file-name">filename.xlsx</span>
+                    <button id="btn-clear" class="text-red-500 hover:text-red-700 p-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                </div>
+            </section>
+
+            <!-- 2. Mapping Section -->
+            <section id="mapping-section" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 opacity-50 pointer-events-none transition-opacity">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm">2</span>
+                    <h2 class="font-bold text-slate-700">Hubungkan Kolom</h2>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Nama Member</label>
+                        <select id="map-name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Nomor HP</label>
+                        <select id="map-phone" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Expired Date</label>
+                        <select id="map-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Template Section -->
+            <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="w-7 h-7 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm">3</span>
+                    <h2 class="font-bold text-slate-700">Template Pesan</h2>
+                </div>
+                <textarea id="template-input" class="w-full h-36 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none resize-none">Halo {{Nama Member}},
+
+Masa keanggotaan Anda akan berakhir pada {{Expired Date}}. Jangan lupa perpanjang ya!
+
+Terima kasih.</textarea>
+                <div class="mt-3">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Variabel (Klik untuk salin):</p>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="copyToClipboard('{{Nama Member}}')" class="text-[10px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-1 rounded font-mono">#Nama</button>
+                        <button onclick="copyToClipboard('{{No. HP}}')" class="text-[10px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-1 rounded font-mono">#NoHP</button>
+                        <button onclick="copyToClipboard('{{Expired Date}}')" class="text-[10px] bg-slate-100 hover:bg-emerald-100 text-slate-600 px-2 py-1 rounded font-mono">#Expired</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Main Content: Results -->
+        <div class="lg:col-span-8 flex flex-col h-full">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-160px)] min-h-[600px]">
+                <div class="p-5 border-b border-slate-100 flex justify-between items-center shrink-0">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        </div>
+                        <h2 class="font-bold text-slate-700">Daftar Link WhatsApp</h2>
+                    </div>
+                    <button id="btn-export" disabled class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export Link
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-auto custom-scrollbar p-2">
+                    <table id="result-table" class="w-full text-left border-collapse min-w-[500px]">
+                        <thead class="sticky top-0 bg-white z-10 shadow-sm">
+                            <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                <th class="px-4 py-3 border-b border-slate-100">Member</th>
+                                <th class="px-4 py-3 border-b border-slate-100">WhatsApp</th>
+                                <th class="px-4 py-3 border-b border-slate-100">Expired</th>
+                                <th class="px-4 py-3 border-b border-slate-100 text-right">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-50">
+                            <!-- Rows will be injected here -->
+                            <tr>
+                                <td colspan="4" class="px-4 py-20 text-center text-slate-400">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 opacity-20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        <p class="text-sm">Silakan upload data Excel untuk memulai.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="p-4 bg-slate-50/50 border-t border-slate-100 text-[10px] text-slate-500 flex justify-between">
+                    <span>© 2024 WA Link Generator</span>
+                    <span id="update-timer">Auto-updated on changes</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 translate-y-20 opacity-0 transition-all duration-300 bg-slate-800 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 z-[100]">
+        <svg xmlns="http://www.w3.org/2000/svg" class="text-emerald-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        <span id="toast-message">Pesan disalin!</span>
+    </div>
 
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        zinc: {
-                            850: '#1f1f22',
-                            950: '#09090b',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-zinc-950 text-zinc-200 min-h-screen">
-    <div id="root"></div>
+        // State Management
+        let excelData = [];
+        let columns = [];
+        let mapping = { name: '', phone: '', expiry: '' };
 
-    <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        // DOM Elements
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const mappingSection = document.getElementById('mapping-section');
+        const tableBody = document.getElementById('table-body');
+        const templateInput = document.getElementById('template-input');
+        const btnExport = document.getElementById('btn-export');
+        const mapName = document.getElementById('map-name');
+        const mapPhone = document.getElementById('map-phone');
+        const mapExpiry = document.getElementById('map-expiry');
 
-        // --- ICONS (Inline SVG components) ---
-        const Icon = ({ path, className = "w-6 h-6" }) => (
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-                {path}
-            </svg>
-        );
+        // Initial setup
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => handleFile(e.target.files[0]);
 
-        const Icons = {
-            Settings: (props) => <Icon {...props} path={<><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></>} />,
-            ChevronRight: (props) => <Icon {...props} path={<path d="m9 18 6-6-6-6"/>} />,
-            ChevronLeft: (props) => <Icon {...props} path={<path d="m15 18-6-6 6-6"/>} />,
-            Check: (props) => <Icon {...props} path={<path d="M20 6 9 17l-5-5"/>} />,
-            RefreshCw: (props) => <Icon {...props} path={<><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></>} />,
-            Info: (props) => <Icon {...props} path={<><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></>} />,
-            BarChart: (props) => <Icon {...props} path={<><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></>} />,
-            X: (props) => <Icon {...props} path={<path d="M18 6 6 18M6 6l12 12"/>} />,
-            Activity: (props) => <Icon {...props} path={<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>} />,
-            Calendar: (props) => <Icon {...props} path={<><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></>} />,
-            Clock: (props) => <Icon {...props} path={<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>} />,
-            Hourglass: (props) => <Icon {...props} path={<path d="M4.5 3h15"/><path d="M4.5 21h15"/><path d="M6 3v6a6 6 0 0 0 12 0V3"/><path d="M6 21v-6a6 6 0 0 1 12 0v6"/>} />,
-            Plus: (props) => <Icon {...props} path={<path d="M5 12h14"/><path d="M12 5v14"/>} />,
-            Minus: (props) => <Icon {...props} path={<path d="M5 12h14"/>} />,
-        };
-
-        // --- DATA & IMAGES ---
-        
-        const EXERCISE_IMAGES = {
-            squat: "https://images.unsplash.com/photo-1566241440091-ec10de8db2e1?auto=format&fit=crop&w=800&q=80",
-            bench: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&w=800&q=80",
-            deadlift: "https://images.unsplash.com/photo-1517963879466-e925ac69aa18?auto=format&fit=crop&w=800&q=80",
-            ohp: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=800&q=80",
-            row: "https://images.unsplash.com/photo-1598971639058-211a74a96ded?auto=format&fit=crop&w=800&q=80",
-            general: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80"
-        };
-
-        const getExerciseImage = (name) => {
-            const n = name.toLowerCase();
-            if (n.includes('squat')) return EXERCISE_IMAGES.squat;
-            if (n.includes('bench') || n.includes('press') || n.includes('spoto')) return EXERCISE_IMAGES.bench;
-            if (n.includes('overhead') || n.includes('ohp')) return EXERCISE_IMAGES.ohp;
-            if (n.includes('deadlift')) return EXERCISE_IMAGES.deadlift;
-            if (n.includes('row')) return EXERCISE_IMAGES.row;
-            return EXERCISE_IMAGES.general;
-        };
-
-        // --- LOGIC ---
-        const RPE_CHART = {
-            1: { 10: 1.0, 9: 0.96, 8: 0.92, 7: 0.89 },
-            2: { 10: 0.96, 9: 0.92, 8: 0.89, 7: 0.86 },
-            3: { 10: 0.92, 9: 0.89, 8: 0.86, 7: 0.84 },
-            4: { 10: 0.89, 9: 0.86, 8: 0.84, 7: 0.81 },
-            5: { 10: 0.86, 9: 0.84, 8: 0.81, 7: 0.79 },
-            6: { 10: 0.84, 9: 0.81, 8: 0.79, 7: 0.76 },
-            8: { 10: 0.80, 9: 0.76, 8: 0.74, 7: 0.71 },
-            10: { 10: 0.74, 9: 0.71, 8: 0.68, 7: 0.65 },
-            12: { 10: 0.70, 9: 0.67, 8: 0.64, 7: 0.61 }
-        };
-
-        const getEstimatedPercentage = (reps, rpe) => {
-            const availableReps = [1, 2, 3, 4, 5, 6, 8, 10, 12];
-            const closestRep = availableReps.reduce((prev, curr) => 
-                Math.abs(curr - reps) < Math.abs(prev - reps) ? curr : prev
-            );
-            
-            const rpeData = RPE_CHART[closestRep];
-            if (!rpeData) return 0.7;
-            
-            const targetRPE = Math.round(rpe);
-            if (targetRPE >= 10) return rpeData[10];
-            if (targetRPE <= 7) return rpeData[7];
-            return rpeData[targetRPE];
-        };
-
-        // --- PROGRAM BUILDER (Added Tempo & Rest based on PDF) ---
-        // Tempo Format: Eccentric - Pause - Concentric (e.g., 1.0.1)
-        // Rest in Seconds
-        
-        const createStandardWeek = (weekNum, intensityMod) => ({
-            title: `Minggu ${weekNum}`,
-            days: [
-                {
-                    name: "Hari 1 - Fokus Squat & Bench",
-                    desc: "Volume tinggi untuk kaki dan dada.",
-                    exercises: [
-                        { name: "Competition Squat", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.0.1", rest: 180 },
-                        { name: "Competition Pause Bench", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.1.1", rest: 180 },
-                        { name: "3ct Pause Squat", sets: 3, reps: 5, rpe: 8, type: "variasi", tempo: "1.3.1", rest: 180 }
-                    ]
-                },
-                {
-                    name: "Hari 2 - Deadlift & Upper",
-                    desc: "Pulling power dan overhead strength.",
-                    exercises: [
-                        { name: "Competition Deadlift", sets: 4, reps: Math.max(3, 7 - (weekNum-1)), percentage: 0.70 * intensityMod, type: "utama", tempo: "1.0.1", rest: 180 },
-                        { name: "Spoto Press", sets: 4, reps: 8, rpe: 8, type: "variasi", tempo: "1.1.1", rest: 150 }, // Spoto has invisible pause
-                        { name: "Overhead Press", sets: 3, reps: 8, rpe: 7, type: "aksesori", tempo: "1.0.1", rest: 120 }
-                    ]
-                },
-                {
-                    name: "Hari 3 - Volume Akumulasi",
-                    desc: "Membangun kapasitas kerja.",
-                    exercises: [
-                        { name: "2ct Pause Squat", sets: 3, reps: 4, percentage: 0.72 * intensityMod, type: "variasi", tempo: "1.2.1", rest: 180 },
-                        { name: "Competition Pause Bench", sets: 5, reps: Math.max(3, 5 - (weekNum > 4 ? 1 : 0)), percentage: 0.72 * intensityMod, type: "utama", tempo: "1.1.1", rest: 180 },
-                        { name: "Feet Up Bench", sets: 3, reps: 8, rpe: 7, type: "aksesori", tempo: "1.0.1", rest: 120 }
-                    ]
-                },
-                {
-                    name: "Hari 4 - Variasi Deadlift",
-                    desc: "Teknik deadlift dan punggung.",
-                    exercises: [
-                        { name: "Pause Deadlift (Bawah Lutut)", sets: 3, reps: 5, percentage: 0.70 * intensityMod, type: "variasi", tempo: "1.1.1", rest: 180 },
-                        { name: "Touch & Go Bench", sets: 4, reps: 8, rpe: 8, type: "variasi", tempo: "1.0.1", rest: 150 },
-                        { name: "Pendlay Row", sets: 4, reps: 10, rpe: 8, type: "aksesori", tempo: "1.0.1", rest: 120 }
-                    ]
-                }
-            ]
+        // Drag and Drop Logic
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
         });
 
-        const buildProgram = () => {
-            const weeks = {};
-            for (let i = 1; i <= 7; i++) {
-                const intensity = 1 + ((i - 1) * 0.025); 
-                weeks[i] = createStandardWeek(i, intensity);
-            }
-            weeks[8] = {
-                title: "Minggu 8 - PEAK / KOMPETISI",
-                note: "Minggu Tapering. Volume sangat rendah untuk memaksimalkan performa.",
-                days: [
-                    {
-                        name: "5 Hari Sebelum Lomba",
-                        desc: "Sesi Opener Squat & Bench.",
-                        exercises: [
-                            { name: "Comp Squat (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Squat", sets: 3, reps: 2, percentage: 0.82, type: "backoff", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Bench (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.1.1", rest: 180 },
-                            { name: "Comp Bench", sets: 3, reps: 2, percentage: 0.84, type: "backoff", tempo: "1.1.1", rest: 180 }
-                        ]
-                    },
-                    {
-                        name: "4 Hari Sebelum Lomba",
-                        desc: "Sesi Opener Deadlift.",
-                        exercises: [
-                            { name: "Comp Deadlift (Opener)", sets: 1, reps: 1, rpe: 8.5, percentage: 0.90, type: "utama", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Deadlift", sets: 2, reps: 2, percentage: 0.82, type: "backoff", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Bench", sets: 4, reps: 3, percentage: 0.85, type: "utama", tempo: "1.1.1", rest: 180 }
-                        ]
-                    },
-                    {
-                        name: "3 Hari Sebelum Lomba",
-                        desc: "Latihan ringan untuk menjaga gerakan.",
-                        exercises: [
-                            { name: "Comp Squat", sets: 1, reps: 1, percentage: 0.85, type: "teknik", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Bench", sets: 1, reps: 1, percentage: 0.85, type: "teknik", tempo: "1.1.1", rest: 180 },
-                            { name: "Comp Deadlift", sets: 1, reps: 1, percentage: 0.82, type: "teknik", tempo: "1.0.1", rest: 180 }
-                        ]
-                    },
-                    {
-                        name: "2 Hari Sebelum Lomba",
-                        desc: "Aktivasi saraf terakhir.",
-                        exercises: [
-                            { name: "Comp Squat", sets: 2, reps: 1, percentage: 0.75, type: "teknik", tempo: "1.0.1", rest: 180 },
-                            { name: "Comp Bench", sets: 3, reps: 3, percentage: 0.78, type: "teknik", tempo: "1.1.1", rest: 180 }
-                        ]
-                    }
-                ]
-            };
-            return weeks;
-        };
+        dropZone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files[0];
+            handleFile(file);
+        });
 
-        const FULL_PROGRAM = buildProgram();
-
-        const App = () => {
-            const [view, setView] = useState('dashboard');
-            const [maxes, setMaxes] = useState({ squat: 100, bench: 80, deadlift: 140 });
-            const [unit, setUnit] = useState('kg');
-            const [currentWeek, setCurrentWeek] = useState(1);
-            const [currentDay, setCurrentDay] = useState(0);
-            const [history, setHistory] = useState({});
-
-            useEffect(() => {
-                const saved = localStorage.getItem('cbb_ultimate_data');
-                if (saved) {
-                    try {
-                        const d = JSON.parse(saved);
-                        if(d.maxes) setMaxes(d.maxes);
-                        if(d.unit) setUnit(d.unit);
-                        if(d.history) setHistory(d.history);
-                        if(d.currentWeek) setCurrentWeek(d.currentWeek);
-                    } catch(e) { console.error("Error loading data", e); }
-                }
-            }, []);
-
-            useEffect(() => {
-                localStorage.setItem('cbb_ultimate_data', JSON.stringify({ maxes, unit, history, currentWeek }));
-            }, [maxes, unit, history, currentWeek]);
-
-            const getRounding = () => unit === 'kg' ? 2.5 : 5;
+        function handleFile(file) {
+            if (!file) return;
             
-            const calculateLoad = (percentage, liftName, rpe, reps) => {
-                let base = maxes.squat;
-                const n = liftName.toLowerCase();
-                if (n.includes('bench') || n.includes('press')) base = maxes.bench;
-                if (n.includes('deadlift') || n.includes('row')) base = maxes.deadlift;
-
-                let targetPercent = percentage;
-                if (!targetPercent && rpe && reps) {
-                   targetPercent = getEstimatedPercentage(reps, rpe);
-                }
-
-                if (!targetPercent) return null;
-
-                const raw = base * targetPercent;
-                return Math.round(raw / getRounding()) * getRounding();
-            };
-
-            const toggleSet = (id) => setHistory(p => ({ ...p, [id]: !p[id] }));
-            const getSetId = (w, d, e, s) => `w${w}-d${d}-e${e}-s${s}`;
-
-            const getProgress = (w) => {
-                let total = 0, done = 0;
-                FULL_PROGRAM[w].days.forEach((day, dIdx) => day.exercises.forEach((ex, eIdx) => {
-                    for(let s=0; s<ex.sets; s++) {
-                        total++;
-                        if (history[getSetId(w,dIdx,eIdx,s)]) done++;
-                    }
-                }));
-                return total === 0 ? 0 : Math.round((done/total)*100);
-            };
-
-            const handleImageError = (e) => {
-                e.target.onerror = null;
-                e.target.src = EXERCISE_IMAGES.general;
-            };
-
-            // Enhanced Max Input Logic
-            const adjustMax = (lift, delta) => {
-                setMaxes(prev => ({
-                    ...prev,
-                    [lift]: Math.max(0, prev[lift] + delta)
-                }));
-            };
-
-            // VIEWS
-            const DashboardView = () => (
-                <div className="pb-32 p-5 space-y-8 slide-up">
-                    <div className="flex justify-between items-center pt-2">
-                        <div>
-                            <h1 className="text-3xl font-black text-white italic tracking-tighter">CALGARY<span className="text-blue-500">BARBELL</span></h1>
-                            <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Ultimate Tracker</p>
-                        </div>
-                        <button onClick={() => setView('settings')} className="bg-zinc-900 border border-zinc-800 p-3 rounded-full text-zinc-400 hover:text-white hover:border-zinc-600 transition-all">
-                            <Icons.Settings className="w-6 h-6" />
-                        </button>
-                    </div>
-
-                    <div className="relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800 p-6 shadow-2xl">
-                        <div className="absolute top-0 right-0 p-32 bg-blue-600/20 blur-3xl rounded-full pointer-events-none -mr-16 -mt-16"></div>
-                        <div className="relative z-10">
-                            <div className="flex justify-between items-end mb-4">
-                                <div>
-                                    <div className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-1">Minggu Ini</div>
-                                    <div className="text-4xl font-black text-white">{getProgress(currentWeek)}% <span className="text-lg text-zinc-600 font-medium">Selesai</span></div>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-blue-500 font-bold text-lg">Minggu {currentWeek}</div>
-                                    <div className="text-zinc-500 text-xs">Fase {currentWeek < 5 ? 'Akumulasi' : (currentWeek === 8 ? 'Tapering' : 'Transmutasi')}</div>
-                                </div>
-                            </div>
-                            <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(59,130,246,0.5)]" style={{ width: `${getProgress(currentWeek)}%` }} />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h2 className="text-white font-bold flex items-center gap-2">
-                            <Icons.Calendar className="text-blue-500 w-5 h-5" /> Pilih Minggu
-                        </h2>
-                        <div className="flex overflow-x-auto gap-3 pb-4 hide-scrollbar -mx-5 px-5 snap-x">
-                            {Object.keys(FULL_PROGRAM).map(w => {
-                                const wk = Number(w);
-                                const active = currentWeek === wk;
-                                const weekProg = getProgress(wk);
-                                return (
-                                    <button 
-                                        key={w}
-                                        onClick={() => { setCurrentWeek(wk); setCurrentDay(0); }}
-                                        className={`snap-center flex-shrink-0 w-24 h-32 rounded-2xl flex flex-col items-center justify-center gap-1 border-2 transition-all duration-300 relative overflow-hidden ${
-                                            active 
-                                                ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-900/30 scale-105 z-10' 
-                                                : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
-                                        }`}
-                                    >
-                                        {active && <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none"></div>}
-                                        <span className="text-[10px] font-black uppercase tracking-widest z-10">Minggu</span>
-                                        <span className="text-4xl font-black z-10">{w}</span>
-                                        {weekProg > 0 && (
-                                            <div className="absolute bottom-3 w-12 h-1 bg-black/20 rounded-full overflow-hidden z-10">
-                                                <div className="h-full bg-white/80" style={{width: `${weekProg}%`}}></div>
-                                            </div>
-                                        )}
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    </div>
-
-                    <div className="space-y-3">
-                        {FULL_PROGRAM[currentWeek].days.map((day, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => { setCurrentDay(idx); setView('workout'); }}
-                                className="w-full bg-zinc-900 border border-zinc-800 p-1 rounded-2xl flex items-center gap-4 hover:border-blue-500/50 hover:bg-zinc-800 transition-all group overflow-hidden relative bg-zinc-800"
-                            >
-                                <div className="absolute inset-0 bg-zinc-800"></div>
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500">
-                                    <img 
-                                        src={getExerciseImage(day.exercises[0].name)} 
-                                        onError={handleImageError}
-                                        className="w-full h-full object-cover grayscale" 
-                                    />
-                                </div>
-
-                                <div className={`w-20 h-20 rounded-xl flex flex-col items-center justify-center font-bold relative z-10 ${
-                                    currentDay === idx ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'bg-zinc-950 text-zinc-600'
-                                }`}>
-                                    <span className="text-xs uppercase">Hari</span>
-                                    <span className="text-2xl">{idx + 1}</span>
-                                </div>
-                                
-                                <div className="text-left flex-1 py-3 relative z-10">
-                                    <h3 className="text-white font-bold text-lg group-hover:text-blue-400 transition-colors leading-tight">{day.name}</h3>
-                                    <p className="text-zinc-500 text-xs mt-1 line-clamp-1">{day.desc}</p>
-                                    <div className="flex gap-2 mt-2">
-                                        {day.exercises.slice(0,3).map((ex, i) => (
-                                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-zinc-700 group-hover:bg-blue-500/50"></div>
-                                        ))}
-                                    </div>
-                                </div>
-                                
-                                <div className="pr-4 relative z-10">
-                                    <Icons.ChevronRight className="w-6 h-6 text-zinc-700 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            );
-
-            const WorkoutView = () => {
-                const dayData = FULL_PROGRAM[currentWeek].days[currentDay];
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-info').classList.remove('hidden');
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                excelData = XLSX.utils.sheet_to_json(worksheet);
                 
-                return (
-                    <div className="pb-32 bg-zinc-950 min-h-screen">
-                        <div className="relative h-64 w-full overflow-hidden rounded-b-[2.5rem] shadow-2xl shadow-black/50 z-10 bg-zinc-900">
-                            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent z-10" />
-                            <img 
-                                src={getExerciseImage(dayData.exercises[0].name)} 
-                                onError={handleImageError}
-                                className="w-full h-full object-cover fade-in" 
-                                alt="workout header" 
-                            />
-                            <div className="absolute bottom-6 left-6 z-20 pr-6">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="px-2 py-1 bg-blue-600 text-white text-[10px] font-black uppercase rounded tracking-wider">Minggu {currentWeek}</span>
-                                    <span className="px-2 py-1 bg-zinc-800 text-zinc-300 text-[10px] font-black uppercase rounded tracking-wider">Hari {currentDay + 1}</span>
-                                </div>
-                                <h1 className="text-3xl font-black text-white leading-none shadow-black drop-shadow-lg">{dayData.name}</h1>
-                                <p className="text-zinc-300 text-sm mt-2 line-clamp-2">{dayData.desc}</p>
-                            </div>
-                            <button 
-                                onClick={() => setView('dashboard')} 
-                                className="absolute top-4 left-4 z-30 bg-black/40 backdrop-blur-md p-3 rounded-full text-white border border-white/10 hover:bg-black/60 transition-all"
-                            >
-                                <Icons.ChevronLeft className="w-6 h-6" />
-                            </button>
-                        </div>
-
-                        <div className="p-5 space-y-6 -mt-4 relative z-20">
-                            {FULL_PROGRAM[currentWeek].note && (
-                                <div className="bg-blue-900/10 border border-blue-500/30 p-4 rounded-2xl flex gap-3 backdrop-blur-sm">
-                                    <Icons.Info className="text-blue-400 shrink-0 w-5 h-5" />
-                                    <p className="text-blue-200 text-sm font-medium">{FULL_PROGRAM[currentWeek].note}</p>
-                                </div>
-                            )}
-
-                            {dayData.exercises.map((ex, eIdx) => {
-                                const load = calculateLoad(ex.percentage, ex.name, ex.rpe, ex.reps);
-                                const isAutoRegulated = !ex.percentage && ex.rpe;
-
-                                return (
-                                    <div key={eIdx} className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-lg hover:shadow-xl hover:border-zinc-700 transition-all duration-300 group">
-                                        <div className="relative h-24 overflow-hidden border-b border-zinc-800 bg-zinc-800">
-                                            <div className="absolute inset-0 bg-gradient-to-r from-zinc-900 via-zinc-900/90 to-transparent z-10"></div>
-                                            <img 
-                                                src={getExerciseImage(ex.name)} 
-                                                onError={handleImageError}
-                                                className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-70 transition-all duration-700" 
-                                            />
-                                            
-                                            <div className="absolute inset-0 z-20 p-4 flex flex-col justify-center">
-                                                <h3 className="font-bold text-white text-xl leading-none drop-shadow-md">{ex.name}</h3>
-                                                <div className="flex flex-wrap gap-2 mt-2">
-                                                    {ex.tempo && (
-                                                        <span className="flex items-center gap-1 text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
-                                                            <Icons.Hourglass className="w-3 h-3 text-blue-300" />
-                                                            {ex.tempo}
-                                                        </span>
-                                                    )}
-                                                    {ex.rest && (
-                                                        <span className="flex items-center gap-1 text-[10px] bg-white/10 backdrop-blur-md text-white px-2 py-0.5 rounded font-medium border border-white/10">
-                                                            <Icons.Clock className="w-3 h-3 text-blue-300" />
-                                                            {ex.rest}s
-                                                        </span>
-                                                    )}
-                                                    {ex.rpe && (
-                                                        <span className="text-[10px] bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded font-bold border border-orange-500/20">
-                                                            RPE {ex.rpe}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="divide-y divide-zinc-800/50 bg-zinc-900">
-                                            {Array.from({length: ex.sets}).map((_, sIdx) => {
-                                                const setId = getSetId(currentWeek, currentDay, eIdx, sIdx);
-                                                const done = history[setId];
-                                                
-                                                return (
-                                                    <div key={sIdx} className={`flex items-center justify-between p-4 transition-all duration-300 ${done ? 'bg-blue-900/5' : 'hover:bg-zinc-800/50'}`}>
-                                                        <div className="flex items-center gap-4">
-                                                            <button 
-                                                                onClick={() => toggleSet(setId)}
-                                                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm ${
-                                                                    done 
-                                                                    ? 'bg-blue-500 text-white shadow-blue-500/30 scale-110' 
-                                                                    : 'bg-zinc-800 text-zinc-600 border border-zinc-700 hover:border-zinc-500'
-                                                                }`}
-                                                            >
-                                                                <Icons.Check className={`w-5 h-5 ${done ? 'opacity-100' : 'opacity-0'}`} />
-                                                            </button>
-                                                            
-                                                            <div>
-                                                                <div className="flex items-center gap-2">
-                                                                    <div 
-                                                                        className={`text-2xl font-black tracking-tight flex items-center gap-1 ${done ? 'text-zinc-600 decoration-zinc-700' : 'text-white'}`}
-                                                                    >
-                                                                        {load ? load : '---'}
-                                                                        <span className="text-xs font-bold text-zinc-600 mt-2">{unit}</span>
-                                                                    </div>
-                                                                </div>
-                                                                {isAutoRegulated && (
-                                                                    <div className="text-[10px] text-orange-400/80 font-medium">
-                                                                        Estimasi beban untuk RPE {ex.rpe}
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-zinc-600 font-mono text-sm font-bold bg-zinc-950 px-2 py-1 rounded border border-zinc-800">
-                                                            {ex.reps}x
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                );
-            };
-
-            const SettingsView = () => (
-                <div className="p-6 pb-24 space-y-8 bg-zinc-950 min-h-screen slide-up">
-                    <div className="flex items-center gap-4 mb-8">
-                        <button onClick={() => setView('dashboard')} className="bg-zinc-900 border border-zinc-800 p-3 rounded-full text-white hover:bg-zinc-800 transition"><Icons.ChevronLeft className="w-6 h-6" /></button>
-                        <h1 className="text-2xl font-black text-white">PROFIL SAYA</h1>
-                    </div>
+                if (excelData.length > 0) {
+                    columns = Object.keys(excelData[0]);
+                    populateSelects();
+                    autoMapColumns();
+                    renderTable();
                     
-                    <div className="space-y-6">
-                        <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
-                            <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Icons.Activity className="w-4 h-4" /> 1 Rep Max (Rekor)
-                            </h3>
-                            <div className="space-y-4">
-                                {['squat', 'bench', 'deadlift'].map(lift => (
-                                    <div key={lift} className="bg-zinc-950 p-4 rounded-xl border border-zinc-800">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <div className="capitalize font-bold text-zinc-300 text-lg">{lift}</div>
-                                            <span className="text-sm font-bold text-zinc-600">{unit}</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <button 
-                                                onClick={() => adjustMax(lift, -2.5)}
-                                                className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 active:scale-95 transition"
-                                            >
-                                                <Icons.Minus className="w-6 h-6" />
-                                            </button>
-                                            
-                                            <input 
-                                                type="number" 
-                                                value={maxes[lift]} 
-                                                onChange={e => setMaxes({...maxes, [lift]: Number(e.target.value)})}
-                                                className="flex-1 bg-transparent text-center text-3xl font-black text-white outline-none placeholder-zinc-700"
-                                                placeholder="0"
-                                            />
-                                            
-                                            <button 
-                                                onClick={() => adjustMax(lift, 2.5)}
-                                                className="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-700 active:scale-95 transition"
-                                            >
-                                                <Icons.Plus className="w-6 h-6" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    mappingSection.classList.remove('opacity-50', 'pointer-events-none');
+                    btnExport.disabled = false;
+                    document.getElementById('file-status').classList.remove('hidden');
+                    document.getElementById('record-count').textContent = excelData.length;
+                    showToast("File berhasil dimuat!");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function populateSelects() {
+            const selects = [mapName, mapPhone, mapExpiry];
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">-- Pilih Kolom --</option>';
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function autoMapColumns() {
+            columns.forEach(col => {
+                const c = col.toLowerCase();
+                if (c.includes('nama') || c.includes('member') || c.includes('name')) mapName.value = col;
+                if (c.includes('hp') || c.includes('wa') || c.includes('telp') || c.includes('phone')) mapPhone.value = col;
+                if (c.includes('exp') || c.includes('tgl') || c.includes('date')) mapExpiry.value = col;
+            });
+            updateMapping();
+        }
+
+        function updateMapping() {
+            mapping.name = mapName.value;
+            mapping.phone = mapPhone.value;
+            mapping.expiry = mapExpiry.value;
+            renderTable();
+        }
+
+        [mapName, mapPhone, mapExpiry].forEach(sel => sel.onchange = updateMapping);
+        templateInput.oninput = renderTable;
+
+        function formatPhone(phone) {
+            if (!phone) return "";
+            let cleaned = String(phone).replace(/\D/g, '');
+            if (cleaned.startsWith('0')) cleaned = '62' + cleaned.substring(1);
+            else if (cleaned.startsWith('8')) cleaned = '62' + cleaned;
+            return cleaned;
+        }
+
+        function generateLink(row) {
+            const name = row[mapping.name] || '';
+            const rawPhone = row[mapping.phone];
+            const phone = formatPhone(rawPhone);
+            const expiry = row[mapping.expiry] || '';
+            
+            if (!phone) return null;
+
+            let message = templateInput.value
+                .replace(/{{Nama Member}}/g, name)
+                .replace(/{{No\. HP}}/g, rawPhone || '')
+                .replace(/{{Expired Date}}/g, expiry);
+
+            return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        }
+
+        function renderTable() {
+            if (excelData.length === 0) return;
+            
+            tableBody.innerHTML = '';
+            excelData.forEach(row => {
+                const link = generateLink(row);
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-4 text-sm font-medium text-slate-700">${row[mapping.name] || '<span class="text-slate-300 italic">Kosong</span>'}</td>
+                    <td class="px-4 py-4 text-sm text-slate-500 font-mono">${row[mapping.phone] || '<span class="text-red-300 italic">No HP</span>'}</td>
+                    <td class="px-4 py-4 text-xs text-slate-500">${row[mapping.expiry] || '-'}</td>
+                    <td class="px-4 py-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="copyToClipboard('${link || ''}')" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all" title="Salin Link" ${!link ? 'disabled' : ''}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                            <a href="${link}" target="_blank" class="p-2 ${link ? 'text-emerald-600 hover:bg-emerald-100' : 'text-slate-200 pointer-events-none'} rounded-lg transition-all" title="Kirim">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
                         </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
 
-                        <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
-                            <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
-                                <Icons.Settings className="w-4 h-4" /> Satuan Berat
-                            </h3>
-                            <div className="flex bg-zinc-950 p-1 rounded-xl border border-zinc-800">
-                                {['kg', 'lbs'].map(u => (
-                                    <button 
-                                        key={u} 
-                                        onClick={() => setUnit(u)}
-                                        className={`flex-1 py-3 rounded-lg font-black text-sm transition-all duration-300 ${unit === u ? 'bg-blue-600 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
-                                    >
-                                        {u.toUpperCase()}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+        function copyToClipboard(text) {
+            if (!text) return;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Berhasil disalin!");
+        }
 
-                        <button 
-                            onClick={() => { if(window.confirm('Reset semua data latihan?')) setHistory({}) }}
-                            className="w-full py-4 flex items-center justify-center gap-2 text-red-500 font-bold bg-red-500/5 rounded-xl hover:bg-red-500/10 transition border border-red-500/10"
-                        >
-                            <Icons.RefreshCw className="w-5 h-5" /> Reset History Latihan
-                        </button>
-                    </div>
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
 
-                    <div className="text-center text-xs text-zinc-600 pt-10 font-medium">
-                        Calgary Barbell App v2.1 <br/>
-                        Dibuat untuk Powerlifter Indonesia 🇮🇩
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="max-w-md mx-auto min-h-screen relative shadow-2xl bg-zinc-950 border-x border-zinc-900 overflow-hidden">
-                    {view === 'dashboard' && <DashboardView />}
-                    {view === 'workout' && <WorkoutView />}
-                    {view === 'settings' && <SettingsView />}
-                </div>
-            );
+        document.getElementById('btn-clear').onclick = () => {
+            excelData = [];
+            tableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-20 text-center text-slate-400">Data dihapus. Silakan upload kembali.</td></tr>';
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-status').classList.add('hidden');
+            mappingSection.classList.add('opacity-50', 'pointer-events-none');
+            btnExport.disabled = true;
+            fileInput.value = '';
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        btnExport.onclick = () => {
+            if (excelData.length === 0) return;
+            const exportData = excelData.map(row => ({
+                ...row,
+                'WhatsApp_Link': generateLink(row)
+            }));
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "WA_Links");
+            XLSX.writeFile(wb, "WA_Links_Generated.xlsx");
+            showToast("File siap didownload!");
+        };
     </script>
 </body>
 </html>
 
-
+```
