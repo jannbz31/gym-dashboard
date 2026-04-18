@@ -4,400 +4,370 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Will Fitness - WA Link Generator Pro</title>
+    <title>WillFitness | Masa Depan Kebugaran Anda</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .checked-row { background-color: #f0fdf4 !important; opacity: 0.7; }
-        .custom-loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #10b981;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-purple: #bc13fe;
+            --bg-dark: #050505;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+        }
+
+        .neon-border {
+            border: 1px solid var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+            transition: all 0.3s ease;
+        }
+
+        .gradient-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
+        }
+
+        .step-transition {
+            transition: all 0.5s ease;
+        }
+
+        /* Hide Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+
+        .bg-grid {
+            background-image: linear-gradient(to right, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        @keyframes pulse-neon {
+            0% { box-shadow: 0 0 5px var(--neon-blue); }
+            50% { box-shadow: 0 0 20px var(--neon-blue); }
+            100% { box-shadow: 0 0 5px var(--neon-blue); }
+        }
+
+        .active-dot {
+            animation: pulse-neon 2s infinite;
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen pb-20">
+<body class="bg-grid">
 
-    <!-- Header -->
-    <nav class="bg-emerald-600 text-white p-4 shadow-lg sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-white p-1.5 rounded-xl shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14.7 8.38 8.38 0 0 1 3.8.9L21 3.5v8z"></path></svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-none">Will Fitness WA Linker</h1>
-                    <p class="text-[10px] opacity-80 font-medium uppercase tracking-widest mt-0.5">Generator & Tracker</p>
-                </div>
-            </div>
-            <div id="stats" class="hidden sm:flex items-center gap-4">
-                <div class="text-right">
-                    <p class="text-[10px] font-bold uppercase" id="progress-text">Progress: 0/0</p>
-                    <div class="w-24 h-1.5 bg-emerald-800 rounded-full mt-1 overflow-hidden">
-                        <div id="progress-bar" class="w-0 h-full bg-emerald-300 transition-all duration-500"></div>
-                    </div>
-                </div>
-            </div>
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center glass m-0 rounded-none border-t-0 border-x-0">
+        <div class="text-2xl font-bold font-orbitron tracking-widest text-white">
+            WILL<span class="text-[#00f2ff]">FITNESS</span>
         </div>
+        <div class="hidden md:flex space-x-8 font-semibold text-sm uppercase tracking-widest">
+            <a href="#home" class="hover:text-[#00f2ff] transition">Home</a>
+            <a href="#analyzer" class="hover:text-[#00f2ff] transition">AI Analyzer</a>
+            <a href="#membership" class="hover:text-[#00f2ff] transition">Membership</a>
+        </div>
+        <button class="gradient-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-tighter">Join Now</button>
     </nav>
 
-    <main class="max-w-6xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        <!-- Sisi Kiri: Input & Config -->
-        <div class="lg:col-span-4 space-y-6">
+    <!-- Hero Section -->
+    <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20">
+        <div class="relative">
+            <div class="absolute -top-20 -left-20 w-64 h-64 bg-[#bc13fe] rounded-full filter blur-[120px] opacity-20"></div>
+            <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-[#00f2ff] rounded-full filter blur-[120px] opacity-20"></div>
             
-            <!-- Step 1: Upload -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 1: Pilih File</h3>
-                <div id="drop-zone" class="relative border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-emerald-400 hover:bg-emerald-50 transition-all cursor-pointer group">
-                    <input type="file" id="file-input" class="hidden" accept=".csv, .xlsx, .xls">
-                    <div class="py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto text-slate-300 group-hover:text-emerald-500 mb-2 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                        <p class="text-sm font-semibold text-slate-600" id="file-label">Pilih CSV Member</p>
-                        <p class="text-[10px] text-slate-400 mt-1">Seret file ke sini atau klik</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 2: Mapping -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200" id="config-card">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 2: Atur Kolom</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Nama</label>
-                        <select id="map-name" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Nomor HP</label>
-                        <select id="map-phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
-                    </div>
-                    <div>
-                        <label class="text-[11px] font-bold text-slate-500 block mb-1">Kolom Tgl Expired</label>
-                        <select id="map-expiry" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 transition-all"></select>
-                    </div>
-                    <div class="pt-2 border-t border-slate-100">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="has-header" class="w-4 h-4 rounded text-emerald-600 border-slate-300 focus:ring-emerald-500">
-                            <span class="text-xs font-semibold text-slate-600">Baris pertama adalah judul</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Step 3: Edit Pesan -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 3: Edit Pesan</h3>
-                <div class="mb-3">
-                    <label class="text-[11px] font-bold text-slate-500 block mb-2 uppercase tracking-wide">Variabel Klik:</label>
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        <button onclick="insertTag('{{Nama}}')" class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100 transition-colors shadow-sm">+ Nama Member</button>
-                        <button onclick="insertTag('{{Expired}}')" class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg font-bold hover:bg-emerald-100 transition-colors shadow-sm">+ Tgl Expired</button>
-                    </div>
-                </div>
-                <textarea id="msg-template" class="w-full h-40 p-3 text-sm bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 resize-none leading-relaxed shadow-inner" placeholder="Tulis pesan Anda di sini...">Halo {{Nama}}, member Will Fitness Anda berakhir pada {{Expired}}. Segera perpanjang ya!</textarea>
-            </div>
-
-            <!-- Step 4: Action -->
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                <h3 class="text-xs font-bold text-slate-400 uppercase mb-4 tracking-wider">Langkah 4: Eksekusi</h3>
-                <button id="btn-process" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    OLAH DATA SEKARANG
-                </button>
+            <h1 class="text-5xl md:text-8xl font-orbitron font-bold mb-6 tracking-tighter">
+                EVOLUSI <br> <span class="neon-text italic text-[#00f2ff]">FISIK ANDA</span>
+            </h1>
+            <p class="max-w-2xl text-gray-400 text-lg mb-10 leading-relaxed">
+                WillFitness bukan sekadar gym. Kami adalah ekosistem transformasi berbasis data untuk memaksimalkan potensi genetik Anda melalui sains dan teknologi.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#analyzer" class="gradient-btn px-10 py-4 rounded-xl font-bold text-lg">MULAI ANALISIS TUBUH</a>
+                <button class="border border-white/20 hover:bg-white/10 px-10 py-4 rounded-xl font-bold text-lg transition">JELAJAHI FASILITAS</button>
             </div>
         </div>
+    </section>
 
-        <!-- Sisi Kanan: Hasil -->
-        <div class="lg:col-span-8 flex flex-col h-full">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-[calc(100vh-160px)] min-h-[600px] overflow-hidden">
-                
-                <div class="p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white z-10">
-                    <div>
-                        <h2 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 00 2 2h10a2 2 0 00 2-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                            Daftar Member Terolah
-                        </h2>
-                        <p class="text-[11px] text-slate-400 font-medium">Klik ikon pesawat untuk membuka WhatsApp</p>
+    <!-- AI Body Analyzer Section -->
+    <section id="analyzer" class="py-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-orbitron font-bold mb-4">AI FITNESS CONSULTANT</h2>
+                <p class="text-gray-400">Isi data di bawah ini untuk mendapatkan algoritma latihan personal Anda.</p>
+            </div>
+
+            <!-- Questionnaire Container -->
+            <div id="quiz-container" class="glass p-8 md:p-12 relative overflow-hidden">
+                <!-- Progress Bar -->
+                <div class="w-full bg-white/10 h-1 mb-10 rounded-full">
+                    <div id="progress" class="h-full bg-[#00f2ff] transition-all duration-500" style="width: 5%"></div>
+                </div>
+
+                <!-- Questions -->
+                <div id="question-box" class="min-h-[300px] flex flex-col justify-center">
+                    <!-- Questions will be injected here by JS -->
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="flex justify-between mt-10">
+                    <button id="prev-btn" class="hidden text-gray-400 hover:text-white transition">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali
+                    </button>
+                    <button id="next-btn" class="gradient-btn px-8 py-3 rounded-xl font-bold ml-auto">
+                        Lanjut <i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Box (Hidden initially) -->
+            <div id="result-box" class="hidden glass p-8 md:p-12 mt-10 border-[#00f2ff]/30 border shadow-2xl">
+                <div class="text-center mb-8">
+                    <div class="inline-block p-4 rounded-full bg-[#00f2ff]/10 mb-4">
+                        <i class="fas fa-microchip text-3xl text-[#00f2ff]"></i>
                     </div>
-                    <div class="flex gap-2">
-                        <button id="btn-export" class="hidden text-xs font-bold text-emerald-600 hover:bg-emerald-50 px-4 py-2 border border-emerald-100 rounded-xl transition-all shadow-sm">Simpan Laporan Excel</button>
+                    <h3 class="text-2xl font-orbitron font-bold">ANALISIS SELESAI</h3>
+                    <p class="text-gray-400">Berdasarkan algoritma WillFitness, berikut rekomendasi Anda:</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 mb-10">
+                    <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                        <p class="text-xs uppercase text-[#00f2ff] mb-2 font-bold tracking-widest">Program Utama</p>
+                        <h4 id="res-program" class="text-2xl font-bold">...</h4>
+                        <p id="res-desc" class="text-sm text-gray-400 mt-2">...</p>
+                    </div>
+                    <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
+                        <p class="text-xs uppercase text-[#bc13fe] mb-2 font-bold tracking-widest">Komitmen Sesi</p>
+                        <h4 id="res-session" class="text-2xl font-bold">...</h4>
+                        <p class="text-sm text-gray-400 mt-2">Disesuaikan dengan jadwal pemulihan tubuh Anda.</p>
                     </div>
                 </div>
 
-                <div class="flex-1 overflow-auto custom-scrollbar">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
-                            <tr class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                                <th class="px-6 py-4 border-b border-slate-100 w-16 text-center">Status</th>
-                                <th class="px-6 py-4 border-b border-slate-100">Nama</th>
-                                <th class="px-6 py-4 border-b border-slate-100">WA</th>
-                                <th class="px-6 py-4 border-b border-slate-100">Expired (DD/MM/YYYY)</th>
-                                <th class="px-6 py-4 border-b border-slate-100 text-right">Tindakan</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-50">
-                            <tr>
-                                <td colspan="5" class="py-32 text-center text-slate-300">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 opacity-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                        <p class="text-sm font-medium">Upload file & klik Olah Data.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-tight">
-                    <span>Will Fitness Automation Tool</span>
-                    <span>v3.5 - Smart Format Ready</span>
+                <div class="text-center">
+                    <p class="mb-6 text-sm italic">Amankan slot latihan Anda dengan Personal Trainer ahli kami.</p>
+                    <button onclick="window.open('https://wa.me/yournumber')" class="gradient-btn w-full md:w-auto px-12 py-4 rounded-xl font-bold text-lg">
+                        KLAIM PROGRAM & FREE TRIAL
+                    </button>
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-2xl opacity-0 translate-y-10 transition-all duration-300 flex items-center gap-3 z-[100] border border-slate-700">
-        <div class="bg-emerald-500 rounded-full p-1"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-        <span id="toast-msg" class="text-xs font-bold uppercase tracking-wide">Pesan Tersalin!</span>
-    </div>
+    <!-- Membership Pricing -->
+    <section id="membership" class="py-24 bg-black/50">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-orbitron font-bold mb-4">PRICING TIERS</h2>
+                <p class="text-gray-400">Pilih akses transformasi Anda.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Basic -->
+                <div class="glass p-8 flex flex-col hover:scale-105 transition">
+                    <h4 class="font-orbitron text-xl mb-4">MEMBER ONLY</h4>
+                    <div class="text-4xl font-bold mb-6">Rp 450k<span class="text-sm text-gray-500">/bln</span></div>
+                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Full Gym Access</li>
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Free Locker & Shower</li>
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> All Classes Access</li>
+                        <li class="opacity-30"><i class="fas fa-times mr-2"></i> Personal Trainer</li>
+                    </ul>
+                    <button class="border border-white/20 py-3 rounded-lg hover:bg-white/10">DAFTAR SEKARANG</button>
+                </div>
+                <!-- PT Focus (Best Seller) -->
+                <div class="glass p-8 flex flex-col border-[#bc13fe]/50 border-2 relative scale-110 z-10 bg-black/40">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#bc13fe] text-xs font-bold px-4 py-1 rounded-full">POPULER</div>
+                    <h4 class="font-orbitron text-xl mb-4 text-[#bc13fe]">PT TRANSFORMATION</h4>
+                    <div class="text-4xl font-bold mb-6">Rp 2.5jt<span class="text-sm text-gray-500">/12 Sesi</span></div>
+                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
+                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Incl. Gym Membership</li>
+                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Nutrition Coaching</li>
+                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Weekly InBody Check</li>
+                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> VIP Recovery Session</li>
+                    </ul>
+                    <button class="gradient-btn py-3 rounded-lg font-bold">PILIH PAKET INI</button>
+                </div>
+                <!-- Elite -->
+                <div class="glass p-8 flex flex-col hover:scale-105 transition">
+                    <h4 class="font-orbitron text-xl mb-4">COACHING ELITE</h4>
+                    <div class="text-4xl font-bold mb-6">Rp 4.5jt<span class="text-sm text-gray-500">/24 Sesi</span></div>
+                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> High Frequency Training</li>
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Supplementation Plan</li>
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Private Training Zone</li>
+                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> 24/7 Coach Support</li>
+                    </ul>
+                    <button class="border border-white/20 py-3 rounded-lg hover:bg-white/10">DAFTAR SEKARANG</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/10 text-center">
+        <div class="text-xl font-orbitron font-bold mb-4">WILL<span class="text-[#00f2ff]">FITNESS</span></div>
+        <p class="text-gray-500 text-sm mb-6">Kalimalang, Jakarta | © 2024 Futurism Fitness.</p>
+        <div class="flex justify-center space-x-6">
+            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-tiktok"></i></a>
+            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-whatsapp"></i></a>
+        </div>
+    </footer>
 
     <script>
-        let rawMatrix = [];
-        let checklist = new Set();
-        let processedData = [];
+        const questions = [
+            { q: "Berapa Persentase Lemak Tubuh (Body Fat %) Anda?", type: "range", min: 5, max: 50, unit: "%", id: "bf" },
+            { q: "Apa status Massa Otot Anda saat ini?", type: "select", options: ["Rendah", "Normal", "Tinggi"], id: "muscle" },
+            { q: "Level Lemak Visceral (skala 1-20)?", type: "range", min: 1, max: 20, unit: "", id: "visceral" },
+            { q: "Bagaimana status BMR Anda?", type: "select", options: ["Rendah", "Normal", "Tinggi"], id: "bmr" },
+            { q: "Ada ketimpangan massa otot kiri/kanan?", type: "select", options: ["Ya", "Tidak"], id: "imbalance" },
+            { q: "Ada riwayat cedera (Lutut/Pinggang/Bahu)?", type: "select", options: ["Ya", "Tidak"], id: "injury" },
+            { q: "Bisa melakukan deep squat tanpa rasa sakit?", type: "select", options: ["Bisa", "Terbatas", "Sakit"], id: "mobility" },
+            { q: "Rata-rata jam tidur per malam?", type: "range", min: 3, max: 10, unit: "Jam", id: "sleep" },
+            { q: "Memiliki riwayat Medis (HT/Gula)?", type: "select", options: ["Ada", "Tidak ada"], id: "medical" },
+            { q: "Liter air putih harian?", type: "range", min: 1, max: 5, unit: "Liter", id: "water" },
+            { q: "Frekuensi makan besar sehari?", type: "range", min: 1, max: 6, unit: "Kali", id: "meal" },
+            { q: "Sering makan olahan/minuman manis?", type: "select", options: ["Sering", "Kadang", "Jarang"], id: "junk" },
+            { q: "Asupan protein harian?", type: "select", options: ["Sangat Kurang", "Cukup", "Tinggi"], id: "protein" },
+            { q: "Merokok atau alkohol rutin?", type: "select", options: ["Ya", "Tidak"], id: "badhabit" },
+            { q: "Apa target utama 3 bulan ke depan?", type: "select", options: ["Fat Loss", "Muscle Build", "Stamina"], id: "goal" },
+            { q: "Berapa hari bisa ke gym seminggu?", type: "range", min: 1, max: 7, unit: "Hari", id: "days" },
+            { q: "Durasi maksimal per sesi?", type: "range", min: 30, max: 120, unit: "Menit", id: "duration" },
+            { q: "Jenis latihan yang disukai?", type: "select", options: ["Angkat Beban", "Kardio", "Campuran"], id: "pref" },
+            { q: "Tingkat stres harian (1-10)?", type: "range", min: 1, max: 10, unit: "", id: "stress" },
+            { q: "Motivasi Terbesar?", type: "select", options: ["Kesehatan", "Penampilan", "Performa"], id: "motive" }
+        ];
 
-        const el = {
-            fileInput: document.getElementById('file-input'),
-            dropZone: document.getElementById('drop-zone'),
-            fileLabel: document.getElementById('file-label'),
-            mapName: document.getElementById('map-name'),
-            mapPhone: document.getElementById('map-phone'),
-            mapExpiry: document.getElementById('map-expiry'),
-            hasHeader: document.getElementById('has-header'),
-            btnProcess: document.getElementById('btn-process'),
-            btnExport: document.getElementById('btn-export'),
-            tableBody: document.getElementById('table-body'),
-            toast: document.getElementById('toast'),
-            toastMsg: document.getElementById('toast-msg'),
-            progressBar: document.getElementById('progress-bar'),
-            progressText: document.getElementById('progress-text'),
-            stats: document.getElementById('stats'),
-            msgTemplate: document.getElementById('msg-template')
-        };
+        let currentStep = 0;
+        let answers = {};
 
-        el.dropZone.onclick = () => el.fileInput.click();
-        el.fileInput.onchange = (e) => loadFile(e.target.files[0]);
+        const questionBox = document.getElementById('question-box');
+        const progress = document.getElementById('progress');
+        const nextBtn = document.getElementById('next-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultBox = document.getElementById('result-box');
 
-        function loadFile(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                rawMatrix = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
-                
-                if (rawMatrix.length > 0) {
-                    el.fileLabel.innerText = file.name;
-                    el.fileLabel.classList.add('text-emerald-600');
-                    populateMapping();
-                    showToast("File Berhasil Dimuat");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
+        function renderQuestion() {
+            const q = questions[currentStep];
+            let html = `<h2 class="text-xs text-[#00f2ff] font-bold tracking-[0.3em] mb-4 uppercase">Data Point ${currentStep + 1}/20</h2>`;
+            html += `<p class="text-2xl font-orbitron font-bold mb-8">${q.q}</p>`;
 
-        function populateMapping() {
-            const firstRow = rawMatrix[0];
-            const selects = [el.mapName, el.mapPhone, el.mapExpiry];
-            
-            selects.forEach((sel, i) => {
-                sel.innerHTML = '';
-                firstRow.forEach((val, idx) => {
-                    const opt = document.createElement('option');
-                    opt.value = idx;
-                    opt.textContent = `Kolom ${idx + 1} (${String(val || 'Kosong').substring(0, 15)})`;
-                    
-                    if (i === 0 && idx === 0) opt.selected = true;
-                    if (i === 1 && idx === 1) opt.selected = true;
-                    if (i === 2 && idx === 2) opt.selected = true;
-                    
-                    sel.appendChild(opt);
-                });
-            });
-        }
-
-        /**
-         * Klik Tombol Variabel
-         */
-        window.insertTag = (tag) => {
-            const start = el.msgTemplate.selectionStart;
-            const end = el.msgTemplate.selectionEnd;
-            const text = el.msgTemplate.value;
-            el.msgTemplate.value = text.substring(0, start) + tag + text.substring(end);
-            el.msgTemplate.focus();
-            el.msgTemplate.setSelectionRange(start + tag.length, start + tag.length);
-        };
-
-        function parseDate(val) {
-            if (!val) return "-";
-            let d;
-            
-            if (typeof val === 'number') {
-                d = new Date((val - 25569) * 86400 * 1000);
-            } else {
-                const cleanStr = String(val).trim();
-                d = new Date(cleanStr);
-            }
-
-            if (isNaN(d.getTime())) return String(val);
-
-            const dd = String(d.getDate()).padStart(2, '0');
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const yyyy = d.getFullYear();
-            return `${dd}/${mm}/${yyyy}`;
-        }
-
-        function formatWA(num) {
-            let s = String(num).replace(/\D/g, '');
-            if (s.startsWith('8')) return '62' + s;
-            if (s.startsWith('08')) return '62' + s.substring(1);
-            return s;
-        }
-
-        /**
-         * OLAH DATA SEKARANG
-         */
-        el.btnProcess.onclick = () => {
-            if (rawMatrix.length === 0) {
-                showToast("Pilih file dulu!");
-                return;
-            }
-            
-            el.btnProcess.disabled = true;
-            el.btnProcess.innerHTML = '<div class="custom-loader"></div> MEMPROSES...';
-            
-            setTimeout(() => {
-                const skipHeader = el.hasHeader.checked;
-                const dataSlice = skipHeader ? rawMatrix.slice(1) : rawMatrix;
-                
-                const colN = parseInt(el.mapName.value);
-                const colP = parseInt(el.mapPhone.value);
-                const colE = parseInt(el.mapExpiry.value);
-
-                processedData = dataSlice.map((row, idx) => {
-                    const nama = row[colN] || "-";
-                    const hp = row[colP] || "";
-                    const fixedExp = parseDate(row[colE]);
-                    const cleanWA = formatWA(hp);
-                    
-                    const textChat = el.msgTemplate.value
-                        .replace(/{{Nama}}/g, nama)
-                        .replace(/{{Expired}}/g, fixedExp);
-
-                    return {
-                        id: idx,
-                        nama,
-                        hp,
-                        fixedExp,
-                        link: `https://wa.me/${cleanWA}?text=${encodeURIComponent(textChat)}`
-                    };
-                });
-
-                checklist.clear();
-                renderTable();
-                
-                el.btnProcess.disabled = false;
-                el.btnProcess.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> OLAH DATA SEKARANG`;
-                
-                el.stats.classList.remove('hidden');
-                el.btnExport.classList.remove('hidden');
-                showToast("Berhasil diolah!");
-            }, 600);
-        };
-
-        function renderTable() {
-            el.tableBody.innerHTML = '';
-            
-            if (processedData.length === 0) return;
-
-            const total = processedData.length;
-            const done = checklist.size;
-            el.progressText.innerText = `Progress: ${done}/${total}`;
-            el.progressBar.style.width = `${(done / total) * 100}%`;
-
-            processedData.forEach((item) => {
-                const isChecked = checklist.has(item.id);
-                const tr = document.createElement('tr');
-                tr.className = `transition-all duration-200 ${isChecked ? 'checked-row' : 'hover:bg-slate-50'}`;
-                
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-center">
-                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleCheck(${item.id})" class="w-4 h-4 rounded text-emerald-600 border-slate-300 cursor-pointer">
-                    </td>
-                    <td class="px-6 py-4 text-sm font-semibold text-slate-700">${item.nama}</td>
-                    <td class="px-6 py-4 text-sm font-mono text-slate-500">${item.hp}</td>
-                    <td class="px-6 py-4 text-sm font-bold text-emerald-600">${item.fixedExp}</td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end gap-2">
-                            <button onclick="copyLink('${item.link}')" class="p-2 text-slate-400 hover:text-emerald-600 bg-slate-100 rounded-lg transition-all" title="Salin Tautan">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            </button>
-                            <a href="${item.link}" target="_blank" onclick="markAsSent(${item.id})" class="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-lg shadow-emerald-100 transition-all active:scale-90" title="Kirim WA">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                            </a>
-                        </div>
-                    </td>
+            if (q.type === "range") {
+                html += `
+                    <div class="flex flex-col items-center">
+                        <span id="range-val" class="text-5xl font-bold text-[#00f2ff] mb-4">${q.min}${q.unit}</span>
+                        <input type="range" min="${q.min}" max="${q.max}" value="${q.min}" 
+                               oninput="document.getElementById('range-val').innerText = this.value + '${q.unit}'; answers['${q.id}'] = this.value;"
+                               class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#00f2ff]">
+                    </div>
                 `;
-                el.tableBody.appendChild(tr);
+                answers[q.id] = q.min; // default
+            } else {
+                html += `<div class="grid grid-cols-1 gap-3">`;
+                q.options.forEach(opt => {
+                    html += `
+                        <button onclick="selectOption('${q.id}', '${opt}')" 
+                                class="option-btn text-left p-4 rounded-xl border border-white/10 hover:border-[#00f2ff] hover:bg-[#00f2ff]/5 transition">
+                            ${opt}
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            questionBox.innerHTML = html;
+            progress.style.width = `${((currentStep + 1) / questions.length) * 100}%`;
+            
+            prevBtn.classList.toggle('hidden', currentStep === 0);
+            nextBtn.innerText = currentStep === questions.length - 1 ? 'LIHAT HASIL' : 'Lanjut';
+        }
+
+        window.selectOption = (id, val) => {
+            answers[id] = val;
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(b => {
+                if(b.innerText.trim() === val) {
+                    b.classList.add('border-[#00f2ff]', 'bg-[#00f2ff]/10');
+                } else {
+                    b.classList.remove('border-[#00f2ff]', 'bg-[#00f2ff]/10');
+                }
             });
+        };
+
+        nextBtn.onclick = () => {
+            if (currentStep < questions.length - 1) {
+                currentStep++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        };
+
+        prevBtn.onclick = () => {
+            if (currentStep > 0) {
+                currentStep--;
+                renderQuestion();
+            }
+        };
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultBox.classList.remove('hidden');
+            
+            // LOGIC CALCULATOR
+            let program = "Body Recomposition";
+            let desc = "Kombinasi pembakaran lemak dan pembentukan otot.";
+            let sessions = "3-4 Sesi/Minggu";
+
+            const bf = parseInt(answers['bf']);
+            const goal = answers['goal'];
+            const injury = answers['injury'];
+
+            if (bf > 30) {
+                program = "Intense Fat Burning";
+                desc = "Fokus pada pengaktifan metabolisme dan defisit kalori strategis.";
+                sessions = "4-5 Sesi/Minggu";
+            } else if (bf < 15 && goal === "Muscle Build") {
+                program = "Hypertrophy Mastery";
+                desc = "Fokus pada angkatan berat dan surplus nutrisi terkontrol.";
+                sessions = "4-5 Sesi/Minggu";
+            }
+
+            if (injury === "Ya") {
+                desc += " (Modifikasi khusus untuk pemulihan cedera)";
+                sessions = "2-3 Sesi/Minggu (High Recovery Focus)";
+            }
+
+            document.getElementById('res-program').innerText = program;
+            document.getElementById('res-desc').innerText = desc;
+            document.getElementById('res-session').innerText = sessions;
+
+            resultBox.scrollIntoView({ behavior: 'smooth' });
         }
 
-        window.toggleCheck = (id) => {
-            if (checklist.has(id)) checklist.delete(id);
-            else checklist.add(id);
-            renderTable();
-        };
-
-        window.markAsSent = (id) => {
-            checklist.add(id);
-            renderTable();
-        };
-
-        window.copyLink = (txt) => {
-            const temp = document.createElement('textarea');
-            temp.value = txt;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            showToast("Tautan Disalin!");
-        };
-
-        function showToast(msg) {
-            el.toastMsg.innerText = msg;
-            el.toast.classList.remove('opacity-0', 'translate-y-10');
-            setTimeout(() => el.toast.classList.add('opacity-0', 'translate-y-10'), 3000);
-        }
-
-        el.btnExport.onclick = () => {
-            const report = processedData.map(item => ({
-                Nama: item.nama,
-                Nomor: item.hp,
-                Expired: item.fixedExp,
-                Status: checklist.has(item.id) ? "TERKIRIM" : "BELUM"
-            }));
-            const ws = XLSX.utils.json_to_sheet(report);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "WillFitness_Report");
-            XLSX.writeFile(wb, "Laporan_WA.xlsx");
-        };
+        renderQuestion();
     </script>
 </body>
 </html>
