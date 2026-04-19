@@ -1,373 +1,276 @@
-```html
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WillFitness | Masa Depan Kebugaran Anda</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WillFitness | Transformasi Bareng Jan</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
         :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --bg-dark: #050505;
+            --will-blue: #0082D5;
+            --neon-purple: #6d28d9;
+            --dark-bg: #020617;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
+            background-color: var(--dark-bg);
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden; /* Mencegah layar bergeser */
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
 
-        .font-orbitron { font-family: 'Orbitron', sans-serif; }
-
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        .neon-text {
-            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
-        }
-
-        .neon-border {
-            border: 1px solid var(--neon-blue);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
-        }
-
-        .gradient-btn {
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+        .btn-main {
+            background: linear-gradient(135deg, var(--will-blue), var(--neon-purple));
+            box-shadow: 0 0 20px rgba(0, 130, 213, 0.3);
             transition: all 0.3s ease;
         }
 
-        .gradient-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 25px rgba(188, 19, 254, 0.5);
+        .btn-main:active {
+            transform: scale(0.96);
         }
 
-        .step-transition {
-            transition: all 0.5s ease;
+        .logo-glow {
+            filter: drop-shadow(0 0 8px rgba(0, 130, 213, 0.6));
         }
 
-        /* Hide Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
-
-        .bg-grid {
-            background-image: linear-gradient(to right, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+        /* Custom Slider Style */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            height: 6px;
+            border-radius: 5px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: var(--will-blue);
+            box-shadow: 0 0 10px var(--will-blue);
+            cursor: pointer;
         }
 
-        @keyframes pulse-neon {
-            0% { box-shadow: 0 0 5px var(--neon-blue); }
-            50% { box-shadow: 0 0 20px var(--neon-blue); }
-            100% { box-shadow: 0 0 5px var(--neon-blue); }
+        .section-view { display: flex !important; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .active-dot {
-            animation: pulse-neon 2s infinite;
-        }
+        .animate-content { animation: fadeInUp 0.5s ease-out forwards; }
     </style>
 </head>
-<body class="bg-grid">
+<body>
 
-    <!-- Navigation -->
-    <nav class="fixed w-full z-50 px-6 py-4 flex justify-between items-center glass m-0 rounded-none border-t-0 border-x-0">
-        <div class="text-2xl font-bold font-orbitron tracking-widest text-white">
-            WILL<span class="text-[#00f2ff]">FITNESS</span>
+    <!-- Header Section -->
+    <header class="w-full p-6 flex justify-between items-center z-50">
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
+             alt="WillFitness Logo" class="h-8 md:h-10 logo-glow">
+        <div class="text-[10px] font-extrabold tracking-[0.3em] text-blue-400/70 uppercase">Kalimalang Hub</div>
+    </header>
+
+    <main class="flex-grow relative overflow-hidden">
+        
+        <!-- Latar Belakang Estetik -->
+        <div class="absolute inset-0 pointer-events-none">
+            <div class="absolute top-1/4 -left-20 w-72 h-72 bg-blue-600/10 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 -right-20 w-72 h-72 bg-purple-600/10 rounded-full blur-[120px]"></div>
         </div>
-        <div class="hidden md:flex space-x-8 font-semibold text-sm uppercase tracking-widest">
-            <a href="#home" class="hover:text-[#00f2ff] transition">Home</a>
-            <a href="#analyzer" class="hover:text-[#00f2ff] transition">AI Analyzer</a>
-            <a href="#membership" class="hover:text-[#00f2ff] transition">Membership</a>
-        </div>
-        <button class="gradient-btn px-6 py-2 rounded-full text-xs font-bold uppercase tracking-tighter">Join Now</button>
-    </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20">
-        <div class="relative">
-            <div class="absolute -top-20 -left-20 w-64 h-64 bg-[#bc13fe] rounded-full filter blur-[120px] opacity-20"></div>
-            <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-[#00f2ff] rounded-full filter blur-[120px] opacity-20"></div>
-            
-            <h1 class="text-5xl md:text-8xl font-orbitron font-bold mb-6 tracking-tighter">
-                EVOLUSI <br> <span class="neon-text italic text-[#00f2ff]">FISIK ANDA</span>
-            </h1>
-            <p class="max-w-2xl text-gray-400 text-lg mb-10 leading-relaxed">
-                WillFitness bukan sekadar gym. Kami adalah ekosistem transformasi berbasis data untuk memaksimalkan potensi genetik Anda melalui sains dan teknologi.
-            </p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center">
-                <a href="#analyzer" class="gradient-btn px-10 py-4 rounded-xl font-bold text-lg">MULAI ANALISIS TUBUH</a>
-                <button class="border border-white/20 hover:bg-white/10 px-10 py-4 rounded-xl font-bold text-lg transition">JELAJAHI FASILITAS</button>
+        <!-- 1. HERO PAGE -->
+        <section id="hero" class="section-view hidden absolute inset-0 flex-col items-center justify-center p-6 text-center">
+            <div class="animate-content max-w-md">
+                <h1 class="text-4xl md:text-5xl font-black mb-4 leading-tight">
+                    GASIN <br> <span class="text-[#0082D5]">BADAN IDEALMU!</span>
+                </h1>
+                <p class="text-slate-400 mb-10 text-sm md:text-base leading-relaxed">
+                    Halo Sobat! Jan di sini. Yuk, kita bedah komposisi badan kamu biar program latihannya nggak asal-asalan.
+                </p>
+                <button onclick="goTo('quiz')" class="btn-main px-12 py-4 rounded-2xl font-extrabold tracking-widest uppercase text-sm">
+                    MULAI CEK SEKARANG
+                </button>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- AI Body Analyzer Section -->
-    <section id="analyzer" class="py-24 px-6">
-        <div class="max-w-4xl mx-auto">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-orbitron font-bold mb-4">AI FITNESS CONSULTANT</h2>
-                <p class="text-gray-400">Isi data di bawah ini untuk mendapatkan algoritma latihan personal Anda.</p>
-            </div>
-
-            <!-- Questionnaire Container -->
-            <div id="quiz-container" class="glass p-8 md:p-12 relative overflow-hidden">
-                <!-- Progress Bar -->
-                <div class="w-full bg-white/10 h-1 mb-10 rounded-full">
-                    <div id="progress" class="h-full bg-[#00f2ff] transition-all duration-500" style="width: 5%"></div>
-                </div>
-
-                <!-- Questions -->
-                <div id="question-box" class="min-h-[300px] flex flex-col justify-center">
-                    <!-- Questions will be injected here by JS -->
-                </div>
-
-                <!-- Navigation Buttons -->
-                <div class="flex justify-between mt-10">
-                    <button id="prev-btn" class="hidden text-gray-400 hover:text-white transition">
-                        <i class="fas fa-arrow-left mr-2"></i> Kembali
-                    </button>
-                    <button id="next-btn" class="gradient-btn px-8 py-3 rounded-xl font-bold ml-auto">
-                        Lanjut <i class="fas fa-chevron-right ml-2"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Result Box (Hidden initially) -->
-            <div id="result-box" class="hidden glass p-8 md:p-12 mt-10 border-[#00f2ff]/30 border shadow-2xl">
-                <div class="text-center mb-8">
-                    <div class="inline-block p-4 rounded-full bg-[#00f2ff]/10 mb-4">
-                        <i class="fas fa-microchip text-3xl text-[#00f2ff]"></i>
-                    </div>
-                    <h3 class="text-2xl font-orbitron font-bold">ANALISIS SELESAI</h3>
-                    <p class="text-gray-400">Berdasarkan algoritma WillFitness, berikut rekomendasi Anda:</p>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-8 mb-10">
-                    <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
-                        <p class="text-xs uppercase text-[#00f2ff] mb-2 font-bold tracking-widest">Program Utama</p>
-                        <h4 id="res-program" class="text-2xl font-bold">...</h4>
-                        <p id="res-desc" class="text-sm text-gray-400 mt-2">...</p>
-                    </div>
-                    <div class="p-6 bg-white/5 rounded-2xl border border-white/10">
-                        <p class="text-xs uppercase text-[#bc13fe] mb-2 font-bold tracking-widest">Komitmen Sesi</p>
-                        <h4 id="res-session" class="text-2xl font-bold">...</h4>
-                        <p class="text-sm text-gray-400 mt-2">Disesuaikan dengan jadwal pemulihan tubuh Anda.</p>
+        <!-- 2. QUIZ PAGE -->
+        <section id="quiz" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 animate-content flex flex-col h-auto">
+                <div class="flex items-center justify-between mb-8">
+                    <span id="step-txt" class="text-[10px] font-black text-[#0082D5] tracking-widest uppercase">Mulai Analisis</span>
+                    <div class="w-20 h-1 bg-white/5 rounded-full overflow-hidden">
+                        <div id="bar" class="h-full bg-[#0082D5] transition-all duration-300" style="width: 5%"></div>
                     </div>
                 </div>
 
-                <div class="text-center">
-                    <p class="mb-6 text-sm italic">Amankan slot latihan Anda dengan Personal Trainer ahli kami.</p>
-                    <button onclick="window.open('https://wa.me/yournumber')" class="gradient-btn w-full md:w-auto px-12 py-4 rounded-xl font-bold text-lg">
-                        KLAIM PROGRAM & FREE TRIAL
-                    </button>
+                <div id="q-box" class="flex-grow flex flex-col justify-center min-h-[220px]">
+                    <!-- Pertanyaan muncul di sini -->
+                </div>
+
+                <div class="flex justify-between items-center mt-8 pt-6 border-t border-white/5">
+                    <button id="back" onclick="prev()" class="text-slate-500 font-bold text-xs invisible uppercase tracking-widest">Balik</button>
+                    <button id="next" onclick="next()" class="btn-main px-10 py-3 rounded-xl font-bold text-sm">LANJUT</button>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Membership Pricing -->
-    <section id="membership" class="py-24 bg-black/50">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-orbitron font-bold mb-4">PRICING TIERS</h2>
-                <p class="text-gray-400">Pilih akses transformasi Anda.</p>
+        <!-- 3. RESULT PAGE -->
+        <section id="result" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[3rem] p-8 text-center animate-content">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#0082D5]/20 mb-4">
+                    <i class="fas fa-chart-line text-[#0082D5] text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold mb-1 uppercase italic">Hasil Diagnosa</h2>
+                <p class="text-slate-400 text-[11px] mb-8">Data kamu udah Jan olah, ini hasilnya:</p>
+
+                <div class="space-y-4 text-left mb-8">
+                    <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <span class="text-[9px] font-black text-[#0082D5] uppercase tracking-widest">Rekomendasi Program</span>
+                        <h3 id="res-name" class="text-lg font-bold text-white mt-1">---</h3>
+                        <p id="res-info" class="text-[11px] text-slate-400 mt-2 leading-relaxed">---</p>
+                    </div>
+                    <div class="p-5 bg-white/5 rounded-3xl border border-white/5">
+                        <span class="text-[9px] font-black text-purple-400 uppercase tracking-widest">Target Sesi</span>
+                        <h3 id="res-freq" class="text-lg font-bold text-white mt-1">---</h3>
+                    </div>
+                </div>
+
+                <button onclick="kontakJan()" class="btn-main w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest">
+                    <i class="fab fa-whatsapp text-xl"></i> KONSULTASI SAMA JAN
+                </button>
+                <p class="text-[9px] text-slate-500 mt-5 uppercase tracking-[0.2em]">WillFitness | No Excuses</p>
             </div>
+        </section>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Basic -->
-                <div class="glass p-8 flex flex-col hover:scale-105 transition">
-                    <h4 class="font-orbitron text-xl mb-4">MEMBER ONLY</h4>
-                    <div class="text-4xl font-bold mb-6">Rp 450k<span class="text-sm text-gray-500">/bln</span></div>
-                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Full Gym Access</li>
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Free Locker & Shower</li>
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> All Classes Access</li>
-                        <li class="opacity-30"><i class="fas fa-times mr-2"></i> Personal Trainer</li>
-                    </ul>
-                    <button class="border border-white/20 py-3 rounded-lg hover:bg-white/10">DAFTAR SEKARANG</button>
-                </div>
-                <!-- PT Focus (Best Seller) -->
-                <div class="glass p-8 flex flex-col border-[#bc13fe]/50 border-2 relative scale-110 z-10 bg-black/40">
-                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#bc13fe] text-xs font-bold px-4 py-1 rounded-full">POPULER</div>
-                    <h4 class="font-orbitron text-xl mb-4 text-[#bc13fe]">PT TRANSFORMATION</h4>
-                    <div class="text-4xl font-bold mb-6">Rp 2.5jt<span class="text-sm text-gray-500">/12 Sesi</span></div>
-                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
-                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Incl. Gym Membership</li>
-                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Nutrition Coaching</li>
-                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> Weekly InBody Check</li>
-                        <li><i class="fas fa-check text-[#bc13fe] mr-2"></i> VIP Recovery Session</li>
-                    </ul>
-                    <button class="gradient-btn py-3 rounded-lg font-bold">PILIH PAKET INI</button>
-                </div>
-                <!-- Elite -->
-                <div class="glass p-8 flex flex-col hover:scale-105 transition">
-                    <h4 class="font-orbitron text-xl mb-4">COACHING ELITE</h4>
-                    <div class="text-4xl font-bold mb-6">Rp 4.5jt<span class="text-sm text-gray-500">/24 Sesi</span></div>
-                    <ul class="space-y-4 text-sm text-gray-400 mb-8 flex-grow">
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> High Frequency Training</li>
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Supplementation Plan</li>
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> Private Training Zone</li>
-                        <li><i class="fas fa-check text-[#00f2ff] mr-2"></i> 24/7 Coach Support</li>
-                    </ul>
-                    <button class="border border-white/20 py-3 rounded-lg hover:bg-white/10">DAFTAR SEKARANG</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-12 border-t border-white/10 text-center">
-        <div class="text-xl font-orbitron font-bold mb-4">WILL<span class="text-[#00f2ff]">FITNESS</span></div>
-        <p class="text-gray-500 text-sm mb-6">Kalimalang, Jakarta | © 2024 Futurism Fitness.</p>
-        <div class="flex justify-center space-x-6">
-            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-instagram"></i></a>
-            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-tiktok"></i></a>
-            <a href="#" class="text-gray-400 hover:text-[#00f2ff]"><i class="fab fa-whatsapp"></i></a>
-        </div>
-    </footer>
+    </main>
 
     <script>
-        const questions = [
-            { q: "Berapa Persentase Lemak Tubuh (Body Fat %) Anda?", type: "range", min: 5, max: 50, unit: "%", id: "bf" },
-            { q: "Apa status Massa Otot Anda saat ini?", type: "select", options: ["Rendah", "Normal", "Tinggi"], id: "muscle" },
-            { q: "Level Lemak Visceral (skala 1-20)?", type: "range", min: 1, max: 20, unit: "", id: "visceral" },
-            { q: "Bagaimana status BMR Anda?", type: "select", options: ["Rendah", "Normal", "Tinggi"], id: "bmr" },
-            { q: "Ada ketimpangan massa otot kiri/kanan?", type: "select", options: ["Ya", "Tidak"], id: "imbalance" },
-            { q: "Ada riwayat cedera (Lutut/Pinggang/Bahu)?", type: "select", options: ["Ya", "Tidak"], id: "injury" },
-            { q: "Bisa melakukan deep squat tanpa rasa sakit?", type: "select", options: ["Bisa", "Terbatas", "Sakit"], id: "mobility" },
-            { q: "Rata-rata jam tidur per malam?", type: "range", min: 3, max: 10, unit: "Jam", id: "sleep" },
-            { q: "Memiliki riwayat Medis (HT/Gula)?", type: "select", options: ["Ada", "Tidak ada"], id: "medical" },
-            { q: "Liter air putih harian?", type: "range", min: 1, max: 5, unit: "Liter", id: "water" },
-            { q: "Frekuensi makan besar sehari?", type: "range", min: 1, max: 6, unit: "Kali", id: "meal" },
-            { q: "Sering makan olahan/minuman manis?", type: "select", options: ["Sering", "Kadang", "Jarang"], id: "junk" },
-            { q: "Asupan protein harian?", type: "select", options: ["Sangat Kurang", "Cukup", "Tinggi"], id: "protein" },
-            { q: "Merokok atau alkohol rutin?", type: "select", options: ["Ya", "Tidak"], id: "badhabit" },
-            { q: "Apa target utama 3 bulan ke depan?", type: "select", options: ["Fat Loss", "Muscle Build", "Stamina"], id: "goal" },
-            { q: "Berapa hari bisa ke gym seminggu?", type: "range", min: 1, max: 7, unit: "Hari", id: "days" },
-            { q: "Durasi maksimal per sesi?", type: "range", min: 30, max: 120, unit: "Menit", id: "duration" },
-            { q: "Jenis latihan yang disukai?", type: "select", options: ["Angkat Beban", "Kardio", "Campuran"], id: "pref" },
-            { q: "Tingkat stres harian (1-10)?", type: "range", min: 1, max: 10, unit: "", id: "stress" },
-            { q: "Motivasi Terbesar?", type: "select", options: ["Kesehatan", "Penampilan", "Performa"], id: "motive" }
+        const waJanNum = "6285157703110";
+        const daftarPertanyaan = [
+            { id: "bf", q: "Persentase Body Fat kamu kira-kira di angka berapa?", type: "range", min: 5, max: 50, unit: "%", def: 30 },
+            { id: "otot", q: "Kalo liat cermin, massa otot kamu gimana?", type: "select", opts: ["Masih Tipis", "Udah Lumayan", "Udah Gede"] },
+            { id: "vis", q: "Level lemak perut (visceral) kamu?", type: "range", min: 1, max: 20, unit: "", def: 8 },
+            { id: "bmr", q: "Metabolisme kamu biasanya...", type: "select", opts: ["Gampang Gemuk", "Normal-normal aja", "Makan banyak tetep kurus"] },
+            { id: "cek_simetris", q: "Ada otot yang keliatan gede sebelah?", type: "select", opts: ["Ada", "Enggak"] },
+            { id: "cedera", q: "Ada riwayat cedera (Lutut/Pinggang/Bahu)?", type: "select", opts: ["Ada nih", "Aman jaya"] },
+            { id: "fleksi", q: "Bisa squat dalem tanpa ngerasa kaku/sakit?", type: "select", opts: ["Bisa banget", "Agak kaku", "Sakit"] },
+            { id: "tidur", q: "Tidur sehari rata-rata berapa jam, Sob?", type: "range", min: 3, max: 10, unit: " jam", def: 7 },
+            { id: "medis", q: "Ada keluhan kesehatan (Tensi/Gula)?", type: "select", opts: ["Ada", "Aman"] },
+            { id: "air", q: "Minum air putih sehari berapa liter?", type: "range", min: 1, max: 5, unit: " liter", def: 2 },
+            { id: "makan", q: "Sehari makan besar berapa kali?", type: "range", min: 1, max: 6, unit: " kali", def: 3 },
+            { id: "junk", q: "Hobi makan gorengan / minuman manis?", type: "select", opts: ["Tiap Hari", "Kalo pengen aja", "Jarang banget"] },
+            { id: "pro", q: "Asupan protein (ayam/telur) tiap hari gimana?", type: "select", opts: ["Kurang", "Cukup", "Banyak"] },
+            { id: "hab", q: "Kamu ngerokok atau minum alkohol?", type: "select", opts: ["Ya", "Enggak"] },
+            { id: "goal", q: "Fokus utama kamu 3 bulan kedepan?", type: "select", opts: ["Turunin Berat", "Bikin Otot", "Sehat & Bugar"] },
+            { id: "days", q: "Seminggu bisa ke gym berapa hari?", type: "range", min: 1, max: 7, unit: " hari", def: 3 },
+            { id: "dur", q: "Sekali latihan sanggup berapa menit?", type: "range", min: 30, max: 120, unit: " mnt", def: 60 },
+            { id: "type", q: "Tipe latihan yang kamu suka?", type: "select", opts: ["Angkat Beban", "Kardio/Lari", "Campur"] },
+            { id: "stres", q: "Tingkat stres harian kamu (1-10)?", type: "range", min: 1, max: 10, unit: "", def: 5 },
+            { id: "vibe", q: "Apa yang paling bikin kamu semangat?", type: "select", opts: ["Body Goals", "Sehat", "Kesehatan Mental"] }
         ];
 
-        let currentStep = 0;
-        let answers = {};
+        let indexQ = 0;
+        let hasilData = {};
 
-        const questionBox = document.getElementById('question-box');
-        const progress = document.getElementById('progress');
-        const nextBtn = document.getElementById('next-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const quizContainer = document.getElementById('quiz-container');
-        const resultBox = document.getElementById('result-box');
+        function goTo(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('section-view');
+        }
 
-        function renderQuestion() {
-            const q = questions[currentStep];
-            let html = `<h2 class="text-xs text-[#00f2ff] font-bold tracking-[0.3em] mb-4 uppercase">Data Point ${currentStep + 1}/20</h2>`;
-            html += `<p class="text-2xl font-orbitron font-bold mb-8">${q.q}</p>`;
+        function tampilQ() {
+            const dataQ = daftarPertanyaan[indexQ];
+            const box = document.getElementById('q-box');
+            document.getElementById('step-txt').innerText = `Step ${indexQ + 1} / 20`;
+            document.getElementById('bar').style.width = `${((indexQ + 1) / 20) * 100}%`;
 
-            if (q.type === "range") {
+            let html = `<p class="text-xl font-bold mb-8 leading-snug">${dataQ.q}</p>`;
+
+            if (dataQ.type === 'range') {
+                const val = hasilData[dataQ.id] || dataQ.def;
                 html += `
                     <div class="flex flex-col items-center">
-                        <span id="range-val" class="text-5xl font-bold text-[#00f2ff] mb-4">${q.min}${q.unit}</span>
-                        <input type="range" min="${q.min}" max="${q.max}" value="${q.min}" 
-                               oninput="document.getElementById('range-val').innerText = this.value + '${q.unit}'; answers['${q.id}'] = this.value;"
-                               class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#00f2ff]">
+                        <span id="range-v" class="text-5xl font-black text-[#0082D5] mb-6 italic">${val}${dataQ.unit}</span>
+                        <input type="range" min="${dataQ.min}" max="${dataQ.max}" value="${val}" 
+                               class="w-full" oninput="updateR(this, '${dataQ.id}', '${dataQ.unit}')">
                     </div>
                 `;
-                answers[q.id] = q.min; // default
+                hasilData[dataQ.id] = val;
             } else {
-                html += `<div class="grid grid-cols-1 gap-3">`;
-                q.options.forEach(opt => {
-                    html += `
-                        <button onclick="selectOption('${q.id}', '${opt}')" 
-                                class="option-btn text-left p-4 rounded-xl border border-white/10 hover:border-[#00f2ff] hover:bg-[#00f2ff]/5 transition">
-                            ${opt}
-                        </button>
-                    `;
+                html += `<div class="grid gap-3">`;
+                dataQ.opts.forEach(o => {
+                    const sel = hasilData[dataQ.id] === o ? 'border-[#0082D5] bg-[#0082D5]/10 shadow-lg shadow-blue-500/10' : 'border-white/5';
+                    html += `<button onclick="setO('${dataQ.id}', '${o}')" class="p-4 rounded-2xl border ${sel} text-left text-sm transition-all">${o}</button>`;
                 });
                 html += `</div>`;
             }
-
-            questionBox.innerHTML = html;
-            progress.style.width = `${((currentStep + 1) / questions.length) * 100}%`;
-            
-            prevBtn.classList.toggle('hidden', currentStep === 0);
-            nextBtn.innerText = currentStep === questions.length - 1 ? 'LIHAT HASIL' : 'Lanjut';
+            box.innerHTML = html;
+            document.getElementById('back').style.visibility = indexQ === 0 ? 'hidden' : 'visible';
+            document.getElementById('next').innerText = indexQ === 19 ? 'CEK HASIL' : 'LANJUT';
         }
 
-        window.selectOption = (id, val) => {
-            answers[id] = val;
-            const btns = document.querySelectorAll('.option-btn');
-            btns.forEach(b => {
-                if(b.innerText.trim() === val) {
-                    b.classList.add('border-[#00f2ff]', 'bg-[#00f2ff]/10');
-                } else {
-                    b.classList.remove('border-[#00f2ff]', 'bg-[#00f2ff]/10');
-                }
-            });
-        };
+        function updateR(el, id, u) {
+            document.getElementById('range-v').innerText = el.value + u;
+            hasilData[id] = el.value;
+        }
 
-        nextBtn.onclick = () => {
-            if (currentStep < questions.length - 1) {
-                currentStep++;
-                renderQuestion();
-            } else {
-                showResults();
-            }
-        };
+        function setO(id, v) {
+            hasilData[id] = v;
+            tampilQ();
+        }
 
-        prevBtn.onclick = () => {
-            if (currentStep > 0) {
-                currentStep--;
-                renderQuestion();
-            }
-        };
+        function next() {
+            if (!hasilData[daftarPertanyaan[indexQ].id]) return;
+            if (indexQ < 19) { indexQ++; tampilQ(); }
+            else { selesai(); }
+        }
 
-        function showResults() {
-            quizContainer.classList.add('hidden');
-            resultBox.classList.remove('hidden');
-            
-            // LOGIC CALCULATOR
-            let program = "Body Recomposition";
-            let desc = "Kombinasi pembakaran lemak dan pembentukan otot.";
-            let sessions = "3-4 Sesi/Minggu";
+        function prev() {
+            if (indexQ > 0) { indexQ--; tampilQ(); }
+        }
 
-            const bf = parseInt(answers['bf']);
-            const goal = answers['goal'];
-            const injury = answers['injury'];
+        function selesai() {
+            goTo('result');
+            const bf = parseInt(hasilData.bf);
+            const target = hasilData.goal;
+
+            let namaP = "Body Recomposition";
+            let infoP = "Fokus buat kamu yang mau nurunin lemak tapi otot tetep kenceng. Jan bakal dampingin biar progresnya keliatan!";
+            let freqP = `${hasilData.days} Sesi / Minggu`;
 
             if (bf > 30) {
-                program = "Intense Fat Burning";
-                desc = "Fokus pada pengaktifan metabolisme dan defisit kalori strategis.";
-                sessions = "4-5 Sesi/Minggu";
-            } else if (bf < 15 && goal === "Muscle Build") {
-                program = "Hypertrophy Mastery";
-                desc = "Fokus pada angkatan berat dan surplus nutrisi terkontrol.";
-                sessions = "4-5 Sesi/Minggu";
+                namaP = "Fat Loss Advanced";
+                infoP = "Prioritas kita buang cadangan lemak dulu dengan latihan intensitas moderat. Tenang, Jan pastiin metabolisme kamu tetep terjaga.";
+            } else if (target === "Bikin Otot") {
+                namaP = "Muscle Hypertrophy";
+                infoP = "Waktunya gedein otot! Kita fokus di latihan beban progresif. Jan siap bantu jaga form latihan kamu biar aman.";
             }
 
-            if (injury === "Ya") {
-                desc += " (Modifikasi khusus untuk pemulihan cedera)";
-                sessions = "2-3 Sesi/Minggu (High Recovery Focus)";
-            }
-
-            document.getElementById('res-program').innerText = program;
-            document.getElementById('res-desc').innerText = desc;
-            document.getElementById('res-session').innerText = sessions;
-
-            resultBox.scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('res-name').innerText = namaP;
+            document.getElementById('res-info').innerText = infoP;
+            document.getElementById('res-freq').innerText = freqP;
         }
 
-        renderQuestion();
+        function kontakJan() {
+            const teks = `Halo Jan! Saya abis cek spek badan di WillFitness nih.%0A%0A- Program: ${document.getElementById('res-name').innerText}%0A- Target Sesi: ${document.getElementById('res-freq').innerText}%0A- Body Fat: ${hasilData.bf}%25%0A%0AMau nanya detail harga membership sama jadwal latihan dong!`;
+            window.open(`https://wa.me/${waJanNum}?text=${teks}`, '_blank');
+        }
+
+        tampilQ();
     </script>
 </body>
 </html>
