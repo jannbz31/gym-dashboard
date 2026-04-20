@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WillFitness | Konsultasi Bareng Jan</title>
+    <title>WillFitness | Body Blueprint Audit</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +11,7 @@
     <style>
         :root {
             --will-blue: #0082D5;
-            --neon-purple: #6d28d9;
+            --neon-purple: #7c3aed;
             --dark-bg: #020617;
         }
 
@@ -26,23 +25,40 @@
             margin: 0;
             display: flex;
             flex-direction: column;
+            -webkit-font-smoothing: antialiased;
         }
 
         .glass-card {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8);
         }
 
         .btn-gradient {
             background: linear-gradient(135deg, var(--will-blue), var(--neon-purple));
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 25px rgba(0, 130, 213, 0.3);
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-gradient:active { transform: scale(0.95); }
+        .btn-gradient:active { transform: scale(0.96); }
 
-        .logo-glow { filter: drop-shadow(0 0 10px rgba(0, 130, 213, 0.5)); }
+        .input-futuristic {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            padding: 1rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-futuristic:focus {
+            border-color: var(--will-blue);
+            background: rgba(0, 130, 213, 0.1);
+        }
+
+        .logo-shadow { filter: drop-shadow(0 0 12px rgba(0, 130, 213, 0.6)); }
 
         input[type=range] {
             -webkit-appearance: none;
@@ -52,229 +68,285 @@
         }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 24px; width: 24px; border-radius: 50%;
+            height: 26px; width: 26px; border-radius: 50%;
             background: var(--will-blue);
             box-shadow: 0 0 15px var(--will-blue);
             cursor: pointer;
         }
 
-        .section-active { display: flex !important; }
+        .section-view { display: flex !important; }
 
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInSlide {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+        .animate-main { animation: fadeInSlide 0.5s ease-out forwards; }
 
-        /* Mencegah highlight teks berlebih di mobile */
-        * { -webkit-tap-highlight-color: transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 3px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: var(--will-blue); border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- Header / Logo -->
-    <header class="w-full p-6 flex justify-between items-center z-50">
+    <!-- Static Header -->
+    <header class="w-full p-6 flex justify-between items-center z-50 fixed top-0">
         <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
-             alt="WillFitness Logo" class="h-8 md:h-10 logo-glow">
-        <div class="hidden md:block text-[10px] font-bold tracking-[0.4em] text-blue-400/40 uppercase italic">Elevate Your Potential</div>
+             alt="WillFitness" class="h-8 md:h-10 logo-shadow">
+        <div class="text-[9px] font-black tracking-[0.4em] text-blue-400/40 uppercase italic">Digital Identity v3</div>
     </header>
 
-    <main class="flex-grow relative overflow-hidden">
+    <main class="flex-grow relative overflow-hidden h-full">
         
-        <!-- Background Ornaments -->
+        <!-- BG Decor -->
         <div class="absolute inset-0 pointer-events-none">
-            <div class="absolute top-1/4 -left-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[120px]"></div>
-            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-600/10 rounded-full blur-[120px]"></div>
+            <div class="absolute top-1/4 -left-20 w-80 h-80 bg-blue-600/10 rounded-full blur-[100px]"></div>
+            <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-600/10 rounded-full blur-[100px]"></div>
         </div>
 
         <!-- 1. HERO SECTION -->
-        <section id="hero" class="section-active hidden absolute inset-0 flex-col items-center justify-center p-6 text-center">
-            <div class="animate-in max-w-sm">
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-5 leading-tight italic uppercase">
-                    HALO <span class="text-[#0082D5]">SOBAT!</span><br>SIAP BERUBAH?
+        <section id="hero" class="section-view hidden absolute inset-0 flex-col items-center justify-center p-6 text-center">
+            <div class="animate-main max-w-sm">
+                <h1 class="text-4xl md:text-5xl font-black mb-5 leading-tight italic uppercase">
+                    WILLFITNESS <br> <span class="text-[#0082D5]">BODY BLUEPRINT</span>
                 </h1>
-                <p class="text-slate-400 mb-10 text-sm md:text-base leading-relaxed">
-                    Jan di sini! Yuk, kita cek kondisi badan Kakak sekarang biar kita bisa susun program yang paling efektif dan nyaman buat dijalanin.
+                <p class="text-slate-400 mb-10 text-sm leading-relaxed">
+                    Halo Kak! Jan di sini. Yuk, kita mulai audit fisik digital Kakak untuk menentukan program yang paling presisi.
                 </p>
-                <button onclick="nav('quiz')" class="btn-gradient px-12 py-5 rounded-[2rem] font-black tracking-widest uppercase text-xs shadow-2xl">
-                    MULAI KONSULTASI GRATIS
+                <button onclick="changePage('profiling')" class="btn-gradient px-12 py-5 rounded-2xl font-black tracking-widest uppercase text-xs">
+                    MULAI AUDIT
                 </button>
             </div>
         </section>
 
-        <!-- 2. QUIZ SECTION -->
-        <section id="quiz" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
-            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 animate-in flex flex-col h-auto">
-                <div class="flex items-center justify-between mb-6">
-                    <span id="step-label" class="text-[10px] font-black text-[#0082D5] tracking-widest uppercase">Analyzing Body...</span>
-                    <div class="w-16 h-1 bg-white/5 rounded-full overflow-hidden">
-                        <div id="bar" class="h-full bg-[#0082D5] transition-all duration-300" style="width: 5%"></div>
+        <!-- 2. PROFILING SECTION -->
+        <section id="profiling" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 animate-main flex flex-col">
+                <h2 class="text-xl font-black mb-1 italic uppercase text-[#0082D5]">BIODATA</h2>
+                <p class="text-slate-400 text-[10px] mb-8">Kenalan dulu yuk biar Jan makin akrab!</p>
+                
+                <div class="space-y-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                        <input type="text" id="user-name" placeholder="Siapa nama Kakak?" class="input-futuristic text-sm">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Usia (Tahun)</label>
+                        <input type="number" id="user-age" placeholder="Contoh: 25" class="input-futuristic text-sm">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">Domisili</label>
+                        <input type="text" id="user-city" placeholder="Tinggal di mana, Kak?" class="input-futuristic text-sm">
                     </div>
                 </div>
 
-                <div id="q-container" class="flex-grow flex flex-col justify-center min-h-[260px]">
-                    <!-- Questions & Explanations injected here -->
+                <button onclick="validateProfile()" class="btn-gradient mt-10 py-4 rounded-xl font-black text-xs tracking-widest uppercase shadow-xl">
+                    KONFIRMASI DATA
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. QUIZ SECTION -->
+        <section id="quiz" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 animate-main flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex flex-col">
+                        <span id="theme-tag" class="text-[8px] font-black text-blue-400 uppercase tracking-widest">KATEGORI: ---</span>
+                        <span id="step-tag" class="text-[10px] font-bold text-white uppercase mt-1">Audit 01 / 15</span>
+                    </div>
+                    <div class="text-[10px] font-black text-[#0082D5] bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                        <span id="prog-txt">0%</span>
+                    </div>
                 </div>
+
+                <div id="quiz-area" class="flex-grow flex flex-col justify-center min-h-[280px]"></div>
 
                 <div class="flex justify-between items-center mt-6 pt-6 border-t border-white/5">
-                    <button id="btn-prev" onclick="prevQ()" class="text-slate-500 font-bold text-xs invisible uppercase tracking-widest">Kembali</button>
-                    <button id="btn-next" onclick="nextQ()" class="btn-gradient px-10 py-3.5 rounded-xl font-bold text-sm">LANJUT</button>
+                    <button id="back-btn" onclick="goBack()" class="text-slate-500 font-bold text-[10px] invisible uppercase tracking-[0.2em]">KEMBALI</button>
+                    <button id="next-btn" onclick="goNext()" class="btn-gradient px-10 py-4 rounded-xl font-bold text-sm tracking-widest">LANJUT</button>
                 </div>
             </div>
         </section>
 
-        <!-- 3. RESULT SECTION -->
+        <!-- 4. RESULT SECTION -->
         <section id="result" class="hidden absolute inset-0 flex-col items-center justify-center p-4">
-            <div class="glass-card w-full max-w-md rounded-[3rem] p-6 text-center animate-in overflow-y-auto max-h-[95vh]">
-                <h2 class="text-xl font-black mb-1 italic uppercase text-[#0082D5]">HASIL DIAGNOSA</h2>
-                <p class="text-slate-400 text-[10px] mb-4">Strategi latihan Kakak sudah siap dihitung:</p>
+            <div class="glass-card w-full max-w-md rounded-[3rem] p-6 text-center animate-main overflow-y-auto custom-scroll max-h-[94vh]">
+                <h2 class="text-xl font-black mb-1 italic uppercase text-[#0082D5]">STRATEGI BERHASIL</h2>
+                <p id="result-intro" class="text-slate-400 text-[10px] mb-6 italic">---</p>
 
-                <!-- SPIDERWEB CHART -->
-                <div class="w-full aspect-square max-w-[250px] mx-auto mb-6 bg-white/5 rounded-3xl p-3 border border-white/10">
-                    <canvas id="radarChart"></canvas>
+                <div class="w-full aspect-square max-w-[230px] mx-auto mb-6 bg-white/5 rounded-[2.5rem] p-3 border border-white/10">
+                    <canvas id="radarOutput"></canvas>
                 </div>
 
-                <div class="text-left space-y-4 mb-8">
+                <div class="text-left space-y-3 mb-8">
                     <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
-                        <span class="text-[9px] font-black text-[#0082D5] uppercase tracking-widest">Rekomendasi Program</span>
-                        <h3 id="res-title" class="text-base font-bold text-white leading-tight mt-1">---</h3>
-                        <p id="res-body" class="text-[11px] text-slate-400 mt-2 leading-relaxed">---</p>
+                        <span class="text-[8px] font-black text-[#0082D5] uppercase tracking-widest">DIAGNOSA BLUEPRINT</span>
+                        <h3 id="final-program" class="text-base font-bold text-white mt-1 uppercase italic leading-tight">---</h3>
+                        <p id="final-desc" class="text-[10px] text-slate-400 mt-2 leading-relaxed">---</p>
                     </div>
                 </div>
 
-                <button onclick="waJanLink()" class="btn-gradient w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-xl">
-                    <i class="fab fa-whatsapp text-xl"></i> CHAT JAN DI WILLFITNESS
+                <button onclick="sendWA()" class="btn-gradient w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-xl">
+                    <i class="fab fa-whatsapp text-xl"></i> CHAT JAN SEKARANG
                 </button>
-                <p class="text-[8px] text-slate-600 mt-5 uppercase tracking-[0.2em] font-bold">WillFitness Kalimalang • No Excuses</p>
+                <p class="text-[8px] text-slate-600 mt-5 uppercase tracking-[0.3em] font-bold">WillFitness • Kalimalang Hub</p>
             </div>
         </section>
 
     </main>
 
     <script>
-        const janWA = "6285157703110";
-        const quizData = [
-            { id: "bf", q: "Persentase Body Fat Kakak saat ini?", type: "range", min: 5, max: 50, unit: "%", def: 30, hint: "Total persentase lemak di seluruh badan Kakak." },
-            { id: "muscle", q: "Bagaimana massa otot Kakak?", type: "select", opts: ["Masih Tipis", "Sudah Normal", "Sudah Berisi"], vals: [30, 60, 90], hint: "Volume otot Kakak saat ini." },
-            { id: "visceral", q: "Level Visceral Fat Kakak?", type: "range", min: 1, max: 20, unit: "", def: 7, hint: "Lemak berbahaya yang membungkus organ dalam perut." },
-            { id: "bmr", q: "Bagaimana kondisi metabolisme Kakak?", type: "select", opts: ["Lambat (Gampang Gemuk)", "Normal", "Cepat (Susah Gemuk)"], vals: [30, 60, 90], hint: "Kemampuan tubuh membakar kalori saat diam." },
-            { id: "sym", q: "Ada otot yang terasa besar sebelah?", type: "select", opts: ["Ada Kak", "Enggak, Seimbang"], vals: [40, 90], hint: "Ketidakseimbangan otot kiri vs kanan." },
-            { id: "injury", q: "Ada riwayat cedera sendi/otot?", type: "select", opts: ["Ada riwayat", "Aman jaya"], vals: [20, 90], hint: "Penting agar latihan tidak memperparah kondisi." },
-            { id: "sqt", q: "Bisa jongkok (Squat) tanpa kaku?", type: "select", opts: ["Kaku/Sakit", "Bisa tapi berat", "Sangat Lentur"], vals: [30, 60, 90], hint: "Indikator mobilitas panggul dan lutut Kakak." },
-            { id: "sleep", q: "Tidur rata-rata berapa jam sehari?", type: "range", min: 3, max: 10, unit: " jam", def: 7, hint: "Waktu krusial untuk regenerasi sel otot." },
-            { id: "med", q: "Ada riwayat Tensi Tinggi atau Gula?", type: "select", opts: ["Ada", "Alhamdulillah Aman"], vals: [30, 90], hint: "Agar Jan bisa sesuaikan intensitas jantung." },
-            { id: "h2o", q: "Minum air putih sehari berapa liter?", type: "range", min: 1, max: 5, unit: " liter", def: 2, hint: "Hidrasi sel sangat berpengaruh ke performa." },
-            { id: "eat", q: "Frekuensi makan besar dalam sehari?", type: "range", min: 1, max: 6, unit: " kali", def: 3, hint: "Pola makan harian Kakak." },
-            { id: "junk", q: "Suka makan gorengan atau manis?", type: "select", opts: ["Hampir tiap hari", "Kadang-kadang", "Sudah jarang"], vals: [20, 50, 90], hint: "Sumber kalori kosong yang menghambat progres." },
-            { id: "pro", q: "Asupan protein (ayam/telur) harian?", type: "select", opts: ["Masih kurang", "Sudah cukup", "Tinggi sekali"], vals: [30, 70, 100], hint: "Bahan baku utama untuk memperbaiki otot." },
-            { id: "habit", q: "Merokok atau konsumsi alkohol?", type: "select", opts: ["Ya, rutin", "Jarang", "Enggak sama sekali"], vals: [20, 60, 100], hint: "Faktor gaya hidup yang mempengaruhi stamina." },
-            { id: "goal", q: "Apa target utama Kakak 3 bulan ini?", type: "select", opts: ["Nurunin Berat", "Bikin Otot", "Sehat & Stamina"], vals: [100, 100, 100], hint: "Arah tujuan transformasi Kakak." },
-            { id: "days", q: "Bisa komitmen latihan berapa hari?", type: "range", min: 1, max: 7, unit: " hari", def: 3, hint: "Jumlah hari Kakak datang ke WillFitness." },
-            { id: "dur", q: "Sekali latihan sanggup berapa lama?", type: "range", min: 30, max: 120, unit: " mnt", def: 60, hint: "Durasi per sesi yang Kakak alokasikan." },
-            { id: "pref", q: "Lebih suka tipe latihan yang mana?", type: "select", opts: ["Angkat Beban", "Kardio", "Kombinasi"], vals: [100, 100, 100], hint: "Agar latihan Kakak tetap menyenangkan." },
-            { id: "stress", q: "Tingkat stres harian Kakak (1-10)?", type: "range", min: 1, max: 10, unit: "", def: 5, hint: "Stres tinggi menghambat pembakaran lemak." },
-            { id: "why", q: "Apa motivasi terkuat Kakak?", type: "select", opts: ["Penampilan", "Kesehatan", "Tuntutan"], vals: [100, 100, 100], hint: "Bahan bakar mental Kakak saat lelah." }
+        const janPhoneNumber = "6285157703110";
+        let chartInstance = null;
+        let userData = { name: '', age: '', city: '' };
+        
+        const auditSteps = [
+            // Theme: Visual Mapping
+            { theme: "PROFIL VISUAL", id: "fat_area", q: "Area mana yang menurut Kakak paling banyak menyimpan lemak?", type: "select", opts: ["Perut & Pinggang", "Lengan & Paha", "Seluruh Tubuh"], vals: [30, 70, 50], info: "Membantu Jan menentukan fokus cardio Kakak." },
+            { theme: "PROFIL VISUAL", id: "muscle_tone", q: "Bagaimana kondisi otot Kakak saat ini?", type: "select", opts: ["Masih Lunak", "Sudah Kenyal", "Sudah Padat"], vals: [30, 60, 90], info: "Melihat basis massa otot dasar Kakak." },
+            { theme: "PROFIL VISUAL", id: "body_frame", q: "Bagaimana struktur tulang/frame badan Kakak?", type: "select", opts: ["Kecil (Ectomorph)", "Sedang (Mesomorph)", "Lebar (Endomorph)"], vals: [50, 80, 40], info: "Penting untuk menentukan target berat ideal." },
+
+            // Theme: Power & Mobility
+            { theme: "POWER & MOBILITY", id: "injury_log", q: "Pernah punya riwayat cedera kronis, Kak?", type: "select", opts: ["Ada Kak", "Alhamdulillah Aman"], vals: [10, 100], info: "Biar Jan bisa modifikasi gerakan latihan Kakak." },
+            { theme: "POWER & MOBILITY", id: "mobility_sq", q: "Bisa jongkok (Squat) lurus tanpa tumit naik?", type: "select", opts: ["Kaku Sekali", "Agak Kaku", "Bisa & Lentur"], vals: [20, 60, 100], info: "Indikator mobilitas panggul & sendi." },
+            { theme: "POWER & MOBILITY", id: "strength_base", q: "Sanggup push-up berapa kali (form benar)?", type: "select", opts: ["0-5 Kali", "6-15 Kali", "> 15 Kali"], vals: [30, 60, 100], info: "Mengukur kekuatan dasar badan Kakak." },
+
+            // Theme: Nutrition
+            { theme: "NUTRISI", id: "meal_pattern", q: "Frekuensi makan besar dalam sehari?", type: "range", min: 1, max: 6, unit: " kali", def: 3, info: "Penting untuk pengaturan kalori harian." },
+            { theme: "NUTRISI", id: "sugar_addict", q: "Seberapa sering konsumsi manis / junk food?", type: "select", opts: ["Tiap Hari", "Weekend Saja", "Jarang Sekali"], vals: [20, 60, 100], info: "Mengukur disiplin nutrisi Kakak." },
+            { theme: "NUTRISI", id: "protein_intake", q: "Selalu ada protein (ayam/ikan) tiap makan?", type: "select", opts: ["Jarang", "Cukup", "Sangat Rutin"], vals: [30, 70, 100], info: "Bahan baku utama untuk perbaikan otot." },
+
+            // Theme: Recovery
+            { theme: "RECOVERY", id: "sleep_log", q: "Rata-rata tidur nyenyak tiap malam?", type: "range", min: 3, max: 10, unit: " jam", def: 7, info: "Otot tumbuh optimal saat Kakak tidur." },
+            { theme: "RECOVERY", id: "stress_lvl", q: "Tingkat stres harian (Skala 1-10)?", type: "range", min: 1, max: 10, unit: "", def: 5, info: "Hormon stres bisa hambat pembakaran lemak." },
+            { theme: "RECOVERY", id: "step_count", q: "Keseharian Kakak banyak duduk atau gerak?", type: "select", opts: ["Banyak Duduk", "Banyak Gerak"], vals: [30, 90], info: "Melihat pengeluaran energi harian Kakak." },
+
+            // Theme: Intent
+            { theme: "KOMITMEN", id: "gym_freq", q: "Bisa komitmen ke WillFitness berapa hari?", type: "range", min: 1, max: 7, unit: " hari", def: 3, info: "Jan akan menyesuaikan volume latihan Kakak." },
+            { theme: "KOMITMEN", id: "main_goal", q: "Hasil akhir apa yang paling Kakak mau?", type: "select", opts: ["Turun Berat", "Bentuk Otot", "Sehat & Stamina"], vals: [100, 100, 100], info: "Menentukan arah blueprint latihan Kakak." },
+            { theme: "KOMITMEN", id: "style_pref", q: "Tipe latihan apa yang paling Kakak suka?", type: "select", opts: ["Angkat Beban", "Kardio Intens", "Kombinasi"], vals: [100, 100, 100], info: "Kesenangan bikin Kakak makin konsisten." }
         ];
 
         let curStep = 0;
-        let userAns = {};
-        let scoreData = {};
+        let ansValues = {};
+        let scoreMap = {};
 
-        function nav(id) {
+        function changePage(pageId) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById(id).classList.add('section-active');
+            const target = document.getElementById(pageId);
+            target.classList.remove('hidden');
+            target.classList.add('section-view');
+            if (pageId === 'quiz') renderStep();
         }
 
-        function renderQ() {
-            const step = quizData[curStep];
-            const box = document.getElementById('q-container');
-            document.getElementById('step-label').innerText = `Analisis Data ${curStep + 1}/20`;
-            document.getElementById('bar').style.width = `${((curStep + 1) / 20) * 100}%`;
+        function validateProfile() {
+            const name = document.getElementById('user-name').value.trim();
+            const age = document.getElementById('user-age').value.trim();
+            const city = document.getElementById('user-city').value.trim();
 
-            let html = `<p class="text-xl font-bold mb-3 leading-snug italic">${step.q}</p>`;
-            html += `<p class="text-[10px] text-slate-500 mb-8 flex items-start gap-2 bg-white/5 p-3 rounded-xl border border-white/5">
-                        <i class="fas fa-info-circle text-[#0082D5] mt-0.5"></i>
-                        <span><b>Info:</b> ${step.hint}</span>
-                     </p>`;
+            if (!name || !age || !city) {
+                // Sederhana: ubah warna border jika kosong
+                document.querySelectorAll('.input-futuristic').forEach(i => {
+                    if (!i.value) i.style.borderColor = 'red';
+                    else i.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                });
+                return;
+            }
+
+            userData = { name, age, city };
+            changePage('quiz');
+        }
+
+        function renderStep() {
+            const step = auditSteps[curStep];
+            const area = document.getElementById('quiz-area');
+            document.getElementById('theme-tag').innerText = `KATEGORI: ${step.theme}`;
+            document.getElementById('step-tag').innerText = `Audit ${String(curStep + 1).padStart(2, '0')} / 15`;
+            document.getElementById('prog-txt').innerText = Math.round(((curStep + 1) / 15) * 100) + "%";
+
+            let content = `<p class="text-xl font-bold mb-3 leading-tight italic">${step.q}</p>`;
+            content += `<p class="text-[10px] text-slate-400 mb-6 bg-white/5 p-3 rounded-xl border border-white/5 italic">
+                            <i class="fas fa-lightbulb text-blue-400 mr-2"></i><b>Insight Jan:</b> ${step.info}
+                         </p>`;
 
             if (step.type === 'range') {
-                const v = userAns[step.id] || step.def;
-                html += `
-                    <div class="flex flex-col items-center animate-in">
-                        <span id="v-show" class="text-5xl font-black text-[#0082D5] mb-6 italic">${v}${step.unit}</span>
-                        <input type="range" min="${step.min}" max="${step.max}" value="${v}" 
-                               class="w-full" oninput="updateRange(this, '${step.id}', '${step.unit}')">
+                const val = ansValues[step.id] || step.def;
+                content += `
+                    <div class="flex flex-col items-center animate-main">
+                        <span id="v-render" class="text-5xl font-black text-[#0082D5] mb-5 italic">${val}${step.unit}</span>
+                        <input type="range" min="${step.min}" max="${step.max}" value="${val}" 
+                               class="w-full" oninput="updRange(this, '${step.id}', '${step.unit}')">
                     </div>
                 `;
-                userAns[step.id] = v;
+                ansValues[step.id] = val;
             } else {
-                html += `<div class="grid gap-2.5 animate-in">`;
+                content += `<div class="grid gap-2 animate-main">`;
                 step.opts.forEach((o, i) => {
-                    const active = userAns[step.id] === o ? 'border-[#0082D5] bg-[#0082D5]/10 shadow-lg shadow-blue-500/10' : 'border-white/5';
-                    html += `<button onclick="setOpt('${step.id}', '${o}', ${step.vals[i]})" class="p-4 rounded-xl border ${active} text-left text-xs transition-all font-semibold hover:bg-white/5">${o}</button>`;
+                    const activeClass = ansValues[step.id] === o ? 'border-[#0082D5] bg-blue-500/10' : 'border-white/5';
+                    content += `<button onclick="setAns('${step.id}', '${o}', ${step.vals[i]})" 
+                                class="p-4 rounded-xl border ${activeClass} text-left text-[11px] font-semibold transition-all hover:bg-white/5">${o}</button>`;
                 });
-                html += `</div>`;
+                content += `</div>`;
             }
-            box.innerHTML = html;
-            document.getElementById('btn-prev').style.visibility = curStep === 0 ? 'hidden' : 'visible';
-            document.getElementById('btn-next').innerText = curStep === 19 ? 'HASIL SCAN' : 'LANJUT';
+            area.innerHTML = content;
+            document.getElementById('back-btn').style.visibility = curStep === 0 ? 'hidden' : 'visible';
+            document.getElementById('next-btn').innerText = curStep === 14 ? 'LIHAT BLUEPRINT' : 'LANJUT';
         }
 
-        function updateRange(el, id, u) {
-            document.getElementById('v-show').innerText = el.value + u;
-            userAns[id] = el.value;
+        function updRange(el, id, u) {
+            document.getElementById('v-render').innerText = el.value + u;
+            ansValues[id] = el.value;
         }
 
-        function setOpt(id, val, s) {
-            userAns[id] = val;
-            scoreData[id] = s;
-            renderQ();
+        function setAns(id, val, sc) {
+            ansValues[id] = val;
+            scoreMap[id] = sc;
+            renderStep();
         }
 
-        function nextQ() {
-            if (!userAns[quizData[curStep].id]) return;
-            if (curStep < 19) { curStep++; renderQ(); }
-            else { finish(); }
+        function goNext() {
+            if (!ansValues[auditSteps[curStep].id]) return;
+            if (curStep < 14) { curStep++; renderStep(); }
+            else { showFinal(); }
         }
 
-        function prevQ() { if (curStep > 0) { curStep--; renderQ(); } }
+        function goBack() { if (curStep > 0) { curStep--; renderStep(); } }
 
-        function finish() {
-            nav('result');
-            const bf = parseInt(userAns.bf);
-            const target = userAns.goal;
-
-            let title = "Body Recomposition";
-            let desc = "Program ideal buat Kakak yang mau buang lemak tapi tetep mau otot kenceng. Jan bakal kawal ketat progresnya!";
+        function showFinal() {
+            changePage('result');
+            const goal = ansValues['main_goal'];
             
-            if (bf > 30) {
-                title = "Fat Loss Advanced";
-                desc = "Kita prioritaskan buang cadangan lemak dulu ya Kak. Tenang, Jan buatkan pola yang metabolisme Kakak tetep tinggi & nggak lemas.";
-            } else if (target === "Bikin Otot") {
-                title = "Muscle Hypertrophy";
-                desc = "Waktunya bikin badan lebih berisi dan atletis! Kita fokus di latihan beban yang terukur. Jan siap bantu benerin teknik latihannya.";
+            document.getElementById('result-intro').innerText = `Halo Kak ${userData.name}, hasil audit Kakak sudah siap:`;
+
+            let progTitle = "Body Recomposition Blueprint";
+            let progDesc = "Fokus membakar lemak sekaligus membentuk otot. Sangat pas buat Kakak yang mau transformasi menyeluruh.";
+            
+            if (goal === "Turun Berat") {
+                progTitle = "Metabolic Fat Destroyer";
+                progDesc = "Program khusus untuk membakar kalori tinggi dan meningkatkan metabolisme Kakak secara aman.";
+            } else if (goal === "Bentuk Otot") {
+                progTitle = "Hypertrophy Muscle Builder";
+                progDesc = "Strategi fokus beban untuk mempertebal otot. Jan akan dampingi Kakak buat jaga teknik angkatan.";
             }
 
-            document.getElementById('res-title').innerText = title;
-            document.getElementById('res-body').innerText = desc;
+            document.getElementById('final-program').innerText = progTitle;
+            document.getElementById('final-desc').innerText = progDesc;
 
-            // Compute Radar Stats
-            const bcomp = 100 - (parseInt(userAns.bf) * 1.5);
-            const nutri = (scoreData['junk'] || 50 + scoreData['pro'] || 50) / 2;
-            const recov = (parseInt(userAns.sleep) * 10 + (100 - (parseInt(userAns.stress) * 10))) / 2;
-            const commit = (parseInt(userAns.days) * 14 + (parseInt(userAns.dur) / 1.2)) / 2;
-            const mobi = (scoreData['injury'] || 50 + scoreData['sqt'] || 50) / 2;
+            const phys = (scoreMap['fat_area'] || 50 + scoreMap['muscle_tone'] || 50 + scoreMap['body_frame'] || 50) / 3;
+            const mob = (scoreMap['injury_log'] || 50 + scoreMap['mobility_sq'] || 50 + scoreMap['strength_base'] || 50) / 3;
+            const nut = (parseInt(ansValues['meal_pattern']) * 12 + scoreMap['sugar_addict'] || 50 + scoreMap['protein_intake'] || 50) / 3;
+            const rec = (parseInt(ansValues['sleep_log']) * 10 + (100 - parseInt(ansValues['stress_lvl']) * 10) + scoreMap['step_count'] || 50) / 3;
+            const comm = (parseInt(ansValues['gym_freq']) * 14.5) > 100 ? 100 : (parseInt(ansValues['gym_freq']) * 14.5);
 
-            drawRadar([bcomp, nutri, recov, commit, mobi]);
+            initRadar([phys, nut, rec, comm, mob]);
         }
 
-        function drawRadar(vals) {
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            new Chart(ctx, {
+        function initRadar(vals) {
+            const ctx = document.getElementById('radarOutput').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Body Comp', 'Nutrition', 'Recovery', 'Commitment', 'Mobility'],
+                    labels: ['FISIK', 'NUTRISI', 'RECOVERY', 'KOMITMEN', 'MOBILITAS'],
                     datasets: [{
                         data: vals,
                         backgroundColor: 'rgba(0, 130, 213, 0.25)',
@@ -282,14 +354,14 @@
                         borderWidth: 2,
                         pointBackgroundColor: '#0082D5',
                         pointBorderColor: '#fff',
-                        pointRadius: 3
+                        pointRadius: 4
                     }]
                 },
                 options: {
                     scales: {
                         r: {
-                            angleLines: { color: 'rgba(255,255,255,0.08)' },
-                            grid: { color: 'rgba(255,255,255,0.08)' },
+                            angleLines: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
                             pointLabels: { color: '#94a3b8', font: { size: 9, weight: 'bold' } },
                             ticks: { display: false },
                             min: 0, max: 100
@@ -300,12 +372,10 @@
             });
         }
 
-        function waJanLink() {
-            const t = `Halo Jan! Hasil scan badan saya di WillFitness sudah keluar.%0A%0A- Program: ${document.getElementById('res-title').innerText}%0A- Body Fat: ${userAns.bf}%25%0A- Target: ${userAns.goal}%0A%0ASaya mau atur jadwal konsultasi & trial dong, Jan!`;
-            window.open(`https://wa.me/${janWA}?text=${t}`, '_blank');
+        function sendWA() {
+            const msg = `Halo Jan! Saya sudah menyelesaikan Audit Body Blueprint.%0A%0A--- DATA DIRI ---%0ANama: ${userData.name}%0AUsia: ${userData.age} Tahun%0ADomisili: ${userData.city}%0A%0A--- HASIL AUDIT ---%0ADiagnosa: ${document.getElementById('final-program').innerText}%0ATujuan: ${ansValues['main_goal']}%0AKomitmen: ${ansValues['gym_freq']} Hari/Minggu%0A%0AJan, bantu saya atur jadwal trial dan konsultasinya ya!`;
+            window.open(`https://wa.me/${janPhoneNumber}?text=${msg}`, '_blank');
         }
-
-        renderQ();
     </script>
 </body>
 </html>
