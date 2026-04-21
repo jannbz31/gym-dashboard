@@ -1,283 +1,459 @@
-```react
-import React, { useState } from 'react';
-import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend } from 'chart.js';
-import { Radar } from 'react-chartjs-2';
 
-ChartJS.register(RadialLinearScale, PointElement, LineElement, Filler, Tooltip, Legend);
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WillFitness | Body Blueprint Scanner</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --will-blue: #0082D5;
+            --neon-purple: #7c3aed;
+            --dark-bg: #020617;
+        }
 
-const App = () => {
-  const [page, setPage] = useState('hero');
-  const [profile, setProfile] = useState({ name: '', age: '', city: '' });
-  const [curIdx, setCurIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [scores, setScores] = useState({});
+        body {
+            background-color: var(--dark-bg);
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden; /* Prevent scrolling on body */
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
 
-  const janPhone = "6285157703110";
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
 
-  const auditSteps = [
-    { id: "fat", q: "Kalo diliat di cermin, tumpukan lemak Kakak gimana?", type: "select", opts: ["Lumayan Tebal (Buncit/Melebar)", "Sedang/Normal", "Sangat Dikit/Kering"], vals: [30, 60, 90], hint: "Mengukur tingkat resistensi insulin & cadangan kalori." },
-    { id: "mus", q: "Pas Kakak pegang/pencet, otot Kakak rasanya...", type: "select", opts: ["Lembek/Lunak (Kurang Otot)", "Kenyal/Padat", "Keras & Berisi"], vals: [20, 50, 90], hint: "Mendeteksi BMR dasar. Otot keras = metabolisme tinggi." },
-    { id: "met", q: "Badan Kakak gampang gemuk nggak?", type: "select", opts: ["Gampang Banget (Minum Air Aja Gemuk)", "Biasa Aja", "Makan Banyak Tetep Kurus"], vals: [30, 60, 100], hint: "Menentukan tipe metabolisme (Endomorph/Ectomorph)." },
-    { id: "inj", q: "Pernah cedera atau ada bagian sendi yang sering sakit?", type: "select", opts: ["Ada Kak (Lutut/Pinggang/dll)", "Alhamdulillah Aman"], vals: [10, 100], hint: "CRITICAL DATA: Menentukan keamanan form latihan Kakak." },
-    { id: "sqt", q: "Bisa squat (jongkok) dalem tanpa tumit naik?", type: "select", opts: ["Kaku Banget/Sakit", "Bisa tapi Susah", "Lancar & Lentur"], vals: [20, 60, 100], hint: "Cek mobilitas panggul dan lutut. Kaku = gampang cedera." },
-    { id: "act", q: "Keseharian Kakak (kerja/kampus) lebih banyak apa?", type: "select", opts: ["Duduk Terus (Kantoran)", "Banyak Gerak (Aktif)"], vals: [30, 90], hint: "Menghitung tingkat energi (NEAT) yang terbakar di luar gym." },
-    { id: "slp", q: "Tidur nyenyak rata-rata berapa jam semalam?", type: "range", min: 3, max: 10, def: 7, unit: " jam", hint: "Fase anabolik utama. Kurang tidur = lemak susah turun." },
-    { id: "gym", q: "Bisa luangin waktu ke gym berapa hari seminggu?", type: "range", min: 1, max: 7, def: 3, unit: " hari", hint: "Jan akan menyesuaikan volume program biar Kakak gak overtired." },
-    { id: "xp", q: "Sebelumnya udah pernah rutin nge-gym belum?", type: "select", opts: ["Belum Pernah Sama Sekali", "Udah Pernah Tapi Berhenti", "Lagi Aktif Rutin"], vals: [40, 70, 100], hint: "Menentukan butuh panduan dari nol atau tinggal poles teknik." },
-    { id: "aim", q: "Target paling utama Kakak 3 bulan ini?", type: "select", opts: ["Hajar Lemak (Turunin Berat)", "Bentuk Otot & Postur", "Stamina & Kesehatan"], vals: [100, 100, 100], hint: "Ini kompas utama kita buat blueprint ke depan." }
-  ];
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--will-blue), var(--neon-purple));
+            box-shadow: 0 0 25px rgba(0, 130, 213, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-  const handleNext = () => {
-    if (curIdx < auditSteps.length - 1) setCurIdx(curIdx + 1);
-    else setPage('result');
-  };
+        .btn-gradient:active { transform: scale(0.96); }
 
-  // LOGIKA ANALISA TAJAM (TANPA HARGA)
-  const getRecommendation = () => {
-    const age = parseInt(profile.age) || 25;
-    const goal = answers['aim'] || "";
-    const xp = answers['xp'] || "";
-    const injury = answers['inj'] || "";
-    const squat = answers['sqt'] || "";
-    const fat = answers['fat'] || "";
-    const muscle = answers['mus'] || "";
+        .logo-glow { filter: drop-shadow(0 0 10px rgba(0, 130, 213, 0.5)); }
 
-    let programName = "";
-    let painPoints = [];
-    let logicExplanation = "Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada beberapa hambatan serius yang harus dibongkar:\n\n";
+        /* Custom Range Input */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            height: 8px;
+            border-radius: 10px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px; width: 24px; border-radius: 50%;
+            background: var(--will-blue);
+            box-shadow: 0 0 15px var(--will-blue);
+            cursor: pointer;
+        }
 
-    // MENGGALI PAIN POINTS (Masalah Utama Member)
-    if (injury.includes("Ada Kak")) {
-      painPoints.push("⚠️ **Riwayat Cedera:** Ini *red flag*. Mencoba latihan sendiri dengan modal liat YouTube bisa berakibat fatal buat sendi Kakak. Biaya pemulihan jauh lebih merepotkan.");
-    } else if (squat.includes("Kaku Banget") || age > 45) {
-      painPoints.push("⚠️ **Mobilitas Terkunci:** Rentang gerak sendi Kakak sangat terbatas. Kalo dipaksa angkat beban tanpa dibenerin dulu posturnya, pinggang & lutut bisa cedera.");
-    }
+        /* View Management */
+        .section-view { display: flex !important; }
+        .hidden-view { display: none !important; }
 
-    if (fat.includes("Lumayan Tebal") && goal.includes("Hajar Lemak")) {
-      painPoints.push("🔥 **Metabolisme Pasif:** Lemak tubuh udah masuk fase nyaman. Kakak butuh *metabolic shock* (latihan intensitas khusus) yang dirancang buat maksa badan bongkar cadangan kalori.");
-    }
-
-    if (xp.includes("Belum Pernah")) {
-      painPoints.push("🛑 **Blind Spot Pemula:** 90% pemula gagal di bulan ke-2 karena *trial & error* tanpa arah. Dateng ke gym bingung mau main alat apa, akhirnya cuma lari di treadmill lalu bosan.");
-    } else if (xp.includes("Udah Pernah")) {
-      painPoints.push("🔄 **Siklus Yo-Yo:** Kakak pernah nge-gym tapi berhenti karena *stuck* (plateau). Badan udah terbiasa sama gerakan yang itu-itu aja, butuh 'Siksaan Baru' dengan teknik yang benar.");
-    }
-
-    if (painPoints.length > 0) {
-      logicExplanation += painPoints.join("\n\n") + "\n\n";
-    } else {
-      logicExplanation = "Secara keseluruhan, fisik Kakak dalam kondisi yang sangat siap untuk ditempa! Tidak ada hambatan mobilitas yang berarti.\n\n";
-    }
-
-    // PENCOCOKAN PROGRAM (Bukan Harga)
-    if (injury.includes("Ada Kak") || squat.includes("Kaku Banget") || age > 50) {
-      programName = "REHAB & STRENGTHENING PROGRAM";
-      logicExplanation += `💡 **SOLUSI JAN:** Kakak WAJIB diawasi ketat. Fokus awal kita adalah merehabilitasi postur, melenturkan sendi, dan membangun fondasi otot pelindung tanpa membebani area cedera. Jan sangat menyarankan Kakak mengambil **Program dengan Personal Trainer (PT)** agar latihan 100% aman dan terukur.`;
-    } 
-    else if (xp.includes("Belum Pernah") || (muscle.includes("Lembek") && fat.includes("Lumayan Tebal"))) {
-      programName = "METABOLIC ACCELERATOR (PT + MEMBERSHIP)";
-      logicExplanation += `💡 **SOLUSI JAN:** Jangan buang waktu coba-coba sendiri, Kak. Selama bulan-bulan pertama, Kakak butuh dibimbing langsung sampai bener-bener paham otot mana yang bekerja. Program **Bundling Membership + PT** adalah jalan pintas tercepat menuju Body Goals tanpa buang waktu dan tenaga sia-sia.`;
-    }
-    else if (xp.includes("Udah Pernah")) {
-      programName = "HYPERTROPHY RESET PROGRAM";
-      logicExplanation += `💡 **SOLUSI JAN:** Badan Kakak butuh di-reset. Kita perlu *shock therapy* dengan teknik-teknik baru yang lebih *advanced* untuk mendobrak batas mentok (plateau) Kakak. Ambil **Beberapa Sesi Pendampingan PT** di awal untuk evaluasi teknik, sisanya Kakak bisa gas mandiri pakai ilmu dari Jan.`;
-    }
-    else {
-      programName = "LONE WOLF PROGRAM (MEMBERSHIP MANDIRI)";
-      logicExplanation += `💡 **SOLUSI JAN:** Kakak ini tipe Petarung Mandiri. Secara fondasi teknik, Kakak udah aman. Nggak perlu buang uang buat pendampingan intensif dari nol. Cukup ambil **Membership Gym Bulanan/Tahunan**, dan buktikan konsistensi Kakak di WillFitness!`;
-    }
-
-    return { programName, reason: logicExplanation };
-  };
-
-  const resultData = page === 'result' ? getRecommendation() : null;
-
-  const radarData = {
-    labels: ['FISIK', 'NUTRISI', 'STAMINA', 'DISIPLIN', 'MOBILITAS'],
-    datasets: [{
-      label: 'Blueprint Score',
-      data: [
-        (scores['fat'] || 50 + scores['mus'] || 50) / 2,
-        (scores['met'] || 50 + 60) / 1.2,
-        (parseInt(answers['act']?.includes("Banyak Gerak") ? 90 : 40) + (parseInt(answers['slp']) || 7) * 10) / 2,
-        (parseInt(answers['gym']) || 3) * 14.5,
-        scores['sqt'] || 50
-      ],
-      backgroundColor: 'rgba(0, 130, 213, 0.25)',
-      borderColor: '#0082D5',
-      borderWidth: 2,
-      pointBackgroundColor: '#0082D5',
-    }]
-  };
-
-  const chartOptions = {
-    scales: {
-      r: {
-        angleLines: { color: 'rgba(255,255,255,0.05)' },
-        grid: { color: 'rgba(255,255,255,0.05)' },
-        pointLabels: { color: '#94a3b8', font: { size: 9, weight: 'bold' } },
-        ticks: { display: false },
-        min: 0, max: 100
-      }
-    },
-    plugins: { legend: { display: false } }
-  };
-
-  return (
-    <div className="bg-[#020617] text-[#f8fafc] font-['Plus_Jakarta_Sans'] min-h-screen w-full flex flex-col overflow-hidden relative">
-      {/* BG Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-80 h-80 bg-blue-600/15 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-600/15 rounded-full blur-[120px]"></div>
-      </div>
-
-      <header className="p-6 flex justify-between items-center z-10">
-        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
-             alt="WillFitness" className="h-8 logo-glow" />
-        <div className="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v8.1</div>
-      </header>
-
-      {/* HERO PAGE */}
-      {page === 'hero' && (
-        <main className="flex-grow flex flex-col items-center justify-center p-6 text-center z-10 animate-up">
-          <div className="bg-[#0f172a]/40 p-3 rounded-2xl border border-white/5 mb-6 inline-block">
-            <span className="text-xs font-bold text-blue-400 tracking-widest uppercase">WillFitness Kalimalang</span>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black mb-4 italic uppercase leading-tight drop-shadow-lg">
-            BODY BLUEPRINT <br/><span className="text-[#0082D5]">SCANNER</span>
-          </h1>
-          <p className="text-slate-400 mb-10 text-sm max-w-sm leading-relaxed">
-            Nggak ada lagi latihan ngasal. Jawab 10 pertanyaan ini, dan algoritma Jan bakal bongkar "kelemahan" fisik Kakak dan ngasih solusi program yang tepat.
-          </p>
-          <button onClick={() => setPage('profile')} className="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] px-14 py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)] transition active:scale-95">MULAI ANALISIS</button>
-        </main>
-      )}
-
-      {/* PROFILE PAGE */}
-      {page === 'profile' && (
-        <main className="flex-grow flex flex-col items-center justify-center p-4 z-10 animate-up">
-          <div className="bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl">
-            <h2 className="text-2xl font-black mb-1 uppercase text-[#0082D5] italic">IDENTITAS</h2>
-            <p className="text-slate-400 text-[10px] mb-8 uppercase tracking-widest">Data ini digunakan untuk kalkulasi algoritma.</p>
-            <div className="space-y-5">
-              <input type="text" placeholder="Nama Lengkap/Panggilan" className="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-600 transition" onChange={(e) => setProfile({...profile, name: e.target.value})} />
-              <input type="number" placeholder="Usia Saat Ini (Angka)" className="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-600 transition" onChange={(e) => setProfile({...profile, age: e.target.value})} />
-              <input type="text" placeholder="Domisili (Cth: Kalimalang)" className="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-600 transition" onChange={(e) => setProfile({...profile, city: e.target.value})} />
-            </div>
-            <button onClick={() => profile.name && profile.age && profile.city ? setPage('quiz') : null} className={`bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-10 py-4 rounded-xl font-black text-xs uppercase tracking-widest transition active:scale-95 shadow-xl ${(!profile.name || !profile.age || !profile.city) ? 'opacity-50 grayscale' : ''}`}>PROSES DATA</button>
-          </div>
-        </main>
-      )}
-
-      {/* QUIZ PAGE */}
-      {page === 'quiz' && (
-        <main className="flex-grow flex flex-col items-center justify-center p-4 z-10 animate-up">
-          <div className="bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 h-1 bg-[#0082D5] transition-all duration-300" style={{width: `${((curIdx + 1)/10)*100}%`}}></div>
-            
-            <div className="flex justify-between items-center mb-6 mt-2">
-              <span className="text-[9px] font-black text-blue-400 uppercase tracking-widest italic animate-pulse">Menyelaraskan Data...</span>
-              <span className="text-[10px] font-black text-white bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">{curIdx + 1} / 10</span>
-            </div>
-            
-            <div className="min-h-[220px] flex flex-col justify-center">
-              <p className="text-xl font-bold mb-4 italic leading-tight">{auditSteps[curIdx].q}</p>
-              
-              <div className="bg-blue-900/20 p-3 rounded-xl border border-blue-500/20 mb-6 text-[10px] text-blue-200/80 italic flex gap-2 items-start">
-                <i className="fas fa-microchip mt-0.5 text-blue-400"></i>
-                <span><b>Logika Sistem:</b> {auditSteps[curIdx].hint}</span>
-              </div>
-
-              {auditSteps[curIdx].type === 'range' ? (
-                <div className="flex flex-col items-center py-4">
-                  <span className="text-6xl font-black text-[#0082D5] mb-6 italic drop-shadow-md">{answers[auditSteps[curIdx].id] || auditSteps[curIdx].def}<span className="text-2xl text-blue-400/50">{auditSteps[curIdx].unit}</span></span>
-                  <input type="range" min={auditSteps[curIdx].min} max={auditSteps[curIdx].max} value={answers[auditSteps[curIdx].id] || auditSteps[curIdx].def} 
-                         onChange={(e) => setAnswers({...answers, [auditSteps[curIdx].id]: e.target.value})} 
-                         className="w-full accent-[#0082D5] h-2 bg-white/10 rounded-full appearance-none cursor-pointer" />
-                </div>
-              ) : (
-                <div className="grid gap-3">
-                  {auditSteps[curIdx].opts.map((o, i) => (
-                    <button key={i} onClick={() => {
-                      setAnswers({...answers, [auditSteps[curIdx].id]: o});
-                      setScores({...scores, [auditSteps[curIdx].id]: auditSteps[curIdx].vals[i]});
-                    }} className={`p-4 rounded-xl border text-left text-xs font-bold transition-all ${answers[auditSteps[curIdx].id] === o ? 'border-[#0082D5] bg-[#0082D5]/20 shadow-[0_0_15px_rgba(0,130,213,0.3)] text-white' : 'border-white/5 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white'}`}>
-                      {o}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-white/5">
-              <button onClick={() => curIdx > 0 && setCurIdx(curIdx - 1)} className={`text-slate-500 hover:text-white transition font-bold text-[10px] uppercase tracking-widest ${curIdx === 0 ? 'invisible' : ''}`}>KEMBALI</button>
-              <button onClick={handleNext} className="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] px-10 py-4 rounded-xl font-black text-xs tracking-widest uppercase shadow-lg transition active:scale-95">
-                {curIdx === 9 ? 'GENERATE HASIL' : 'LANJUT'}
-              </button>
-            </div>
-          </div>
-        </main>
-      )}
-
-      {/* RESULT PAGE (TANPA PRICING) */}
-      {page === 'result' && (
-        <main className="flex-grow flex flex-col items-center justify-center p-4 z-10 animate-up overflow-y-auto max-h-screen custom-scrollbar">
-          <div className="bg-[#0a0f1d]/95 backdrop-blur-3xl border border-white/10 w-full max-w-md rounded-[3rem] p-6 text-center mt-20 mb-10 shadow-2xl relative">
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-[#0082D5] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,130,213,0.6)]">
-               <i className="fas fa-check text-white text-xl"></i>
-            </div>
-
-            <h2 className="text-2xl font-black mb-1 mt-4 italic uppercase text-white drop-shadow-md">DIAGNOSA SELESAI</h2>
-            <p className="text-blue-400 text-[10px] mb-6 font-bold tracking-widest uppercase">Target: Kak {profile.name} ({profile.age} th)</p>
-
-            {/* Radar Chart */}
-            <div className="w-full aspect-square max-w-[180px] mx-auto mb-6 bg-[#020617]/50 rounded-[2rem] p-2 border border-white/5 shadow-inner">
-              <Radar data={radarData} options={{...chartOptions, maintainAspectRatio: true}} />
-            </div>
-
-            {/* Rekomendasi Program Header */}
-            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 mb-4 shadow-md">
-                <span className="text-[8px] font-black text-purple-400 uppercase tracking-widest block mb-1">PROGRAM REKOMENDASI</span>
-                <h3 className="text-base font-bold text-white uppercase italic leading-tight text-center">{resultData.programName}</h3>
-            </div>
-
-            {/* Dynamic Reasoning Box */}
-            <div className="text-left bg-white/5 rounded-3xl border border-white/10 p-5 mb-8 relative">
-              <div className="absolute -top-3 -left-2 bg-[#0082D5] text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex gap-2 items-center">
-                <i className="fas fa-brain"></i> Analisa Tajam Jan
-              </div>
-              <div className="mt-2 text-[11px] text-slate-300 leading-relaxed font-medium">
-                {resultData.reason.split('\n\n').map((paragraph, idx) => (
-                  <p key={idx} className="mb-3" dangerouslySetInnerHTML={{ __html: paragraph.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }}></p>
-                ))}
-              </div>
-            </div>
-
-            <button onClick={() => {
-                const msg = `Halo Jan! Wah, hasil analisa algoritma badannya dalem banget.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- HASIL DIAGNOSA ---%0AProgram Disarankan: ${resultData.programName}%0ATarget: ${answers['aim']}%0A%0AJan, tolong jelaskan detail harga membership/paketnya dong, sekalian saya mau atur jadwal trial!`;
-                window.open(`https://wa.me/${janPhone}?text=${msg}`, '_blank');
-            }} className="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-[0_10px_25px_rgba(0,130,213,0.5)] hover:scale-[1.02] transition-transform active:scale-95">
-              <i className="fab fa-whatsapp text-2xl"></i> TANYA HARGA & JADWAL TRIAL
-            </button>
-            <p className="text-[8px] text-slate-600 mt-5 uppercase font-bold tracking-[0.3em]">WillFitness Kalimalang</p>
-          </div>
-        </main>
-      )}
-
-      <style>{`
+        /* Animations */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
         .animate-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .logo-glow { filter: drop-shadow(0 0 10px rgba(0,130,213,0.5)); }
-        
+
+        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 130, 213, 0.5); border-radius: 10px; }
-      `}</style>
-    </div>
-  );
-};
+    </style>
+</head>
+<body>
 
-export default App;
+    <!-- Background Effects -->
+    <div class="absolute inset-0 pointer-events-none z-0">
+        <div class="absolute top-1/4 -left-20 w-80 h-80 bg-blue-600/15 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-600/15 rounded-full blur-[120px]"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="p-6 flex justify-between items-center z-10 w-full fixed top-0">
+        <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
+             alt="WillFitness" class="h-8 logo-glow">
+        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v8.5</div>
+    </header>
+
+    <main class="flex-grow relative overflow-hidden h-full z-10 pt-16">
+        
+        <!-- ================= HERO PAGE ================= -->
+        <section id="page-hero" class="section-view absolute inset-0 flex-col items-center justify-center p-6 text-center animate-up">
+            <div class="bg-[#0f172a]/40 p-3 rounded-2xl border border-white/5 mb-6 inline-block">
+                <span class="text-xs font-bold text-blue-400 tracking-widest uppercase">WillFitness Kalimalang</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black mb-4 italic uppercase leading-tight drop-shadow-lg">
+                BODY BLUEPRINT <br/><span class="text-[#0082D5]">SCANNER</span>
+            </h1>
+            <p class="text-slate-400 mb-10 text-sm max-w-sm leading-relaxed">
+                Nggak ada lagi latihan ngasal. Jawab 10 pertanyaan ini, dan algoritma Jan bakal bongkar "kelemahan" fisik Kakak dan ngasih solusi program yang tepat.
+            </p>
+            <button onclick="goToPage('page-profile')" class="btn-gradient px-14 py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)]">
+                MULAI ANALISIS
+            </button>
+        </section>
+
+        <!-- ================= PROFILE PAGE ================= -->
+        <section id="page-profile" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-up">
+                <h2 class="text-2xl font-black mb-1 uppercase text-[#0082D5] italic">IDENTITAS</h2>
+                <p class="text-slate-400 text-[10px] mb-8 uppercase tracking-widest">Data ini digunakan untuk kalkulasi algoritma.</p>
+                <div class="space-y-5">
+                    <input type="text" id="input-name" placeholder="Nama Lengkap/Panggilan" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                    <input type="number" id="input-age" placeholder="Usia Saat Ini (Angka)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                    <input type="text" id="input-city" placeholder="Domisili (Cth: Kalimalang)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                </div>
+                <button onclick="validateProfile()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-10 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:brightness-110 active:scale-95">
+                    PROSES DATA
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= QUIZ PAGE ================= -->
+        <section id="page-quiz" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-up flex flex-col h-auto max-h-full">
+                <!-- Progress Bar -->
+                <div class="absolute top-0 left-0 h-1 bg-[#0082D5] transition-all duration-300" id="progress-bar" style="width: 10%"></div>
+                
+                <div class="flex justify-between items-center mb-4 mt-2">
+                    <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest italic animate-pulse">Menyelaraskan Data...</span>
+                    <span class="text-[10px] font-black text-white bg-white/10 px-3 py-1.5 rounded-lg border border-white/5" id="step-counter">1 / 10</span>
+                </div>
+                
+                <!-- Dynamic Content Area -->
+                <div id="quiz-content" class="flex-grow flex flex-col justify-center min-h-[250px]">
+                    <!-- Injected via JS -->
+                </div>
+
+                <div class="flex justify-between items-center mt-6 pt-6 border-t border-white/5">
+                    <button onclick="goBack()" id="btn-back" class="text-slate-500 hover:text-white transition font-bold text-[10px] uppercase tracking-widest invisible">KEMBALI</button>
+                    <button onclick="goNext()" id="btn-next" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] px-10 py-4 rounded-xl font-black text-xs tracking-widest uppercase shadow-lg transition hover:brightness-110 active:scale-95">
+                        LANJUT
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= RESULT PAGE ================= -->
+        <section id="page-result" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
+            <div class="glass-card w-full max-w-md rounded-[3rem] p-6 text-center shadow-2xl relative overflow-y-auto custom-scrollbar max-h-[92vh] animate-up mt-8">
+                
+                <div class="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-[#0082D5] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,130,213,0.6)]">
+                   <i class="fas fa-check text-white text-xl"></i>
+                </div>
+
+                <h2 class="text-2xl font-black mb-1 mt-4 italic uppercase text-white drop-shadow-md">DIAGNOSA SELESAI</h2>
+                <p class="text-blue-400 text-[10px] mb-6 font-bold tracking-widest uppercase" id="res-target-name">Target: ---</p>
+
+                <!-- Radar Chart Container -->
+                <div class="w-full aspect-square max-w-[180px] mx-auto mb-6 bg-[#020617]/50 rounded-[2rem] p-2 border border-white/5 shadow-inner">
+                    <canvas id="radarChart"></canvas>
+                </div>
+
+                <!-- Program Name Box -->
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 mb-6 shadow-md">
+                    <span class="text-[8px] font-black text-purple-400 uppercase tracking-widest block mb-1">PROGRAM REKOMENDASI</span>
+                    <h3 class="text-base font-bold text-white uppercase italic leading-tight text-center" id="res-program-name">---</h3>
+                </div>
+
+                <!-- Dynamic Reasoning Box -->
+                <div class="text-left bg-white/5 rounded-3xl border border-white/10 p-5 mb-8 relative">
+                    <div class="absolute -top-3 -left-2 bg-[#0082D5] text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex gap-2 items-center">
+                        <i class="fas fa-brain"></i> Analisa Tajam Jan
+                    </div>
+                    <div class="mt-2 text-[11px] text-slate-300 leading-relaxed font-medium" id="res-reasoning">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <button onclick="sendWhatsApp()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-[0_10px_25px_rgba(0,130,213,0.5)] transition hover:brightness-110 active:scale-95">
+                    <i class="fab fa-whatsapp text-2xl"></i> TANYA HARGA & JADWAL
+                </button>
+                <p class="text-[8px] text-slate-600 mt-5 uppercase font-bold tracking-[0.3em]">WillFitness Kalimalang</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Global
+        const janPhone = "6285157703110";
+        let curIdx = 0;
+        let profile = { name: '', age: '', city: '' };
+        let answers = {};
+        let scores = {};
+        let chartInstance = null;
+
+        // Data Pertanyaan Audit
+        const auditSteps = [
+            { id: "fat", q: "Kalo diliat di cermin, tumpukan lemak Kakak gimana?", type: "select", opts: ["Lumayan Tebal (Buncit/Melebar)", "Sedang/Normal", "Sangat Dikit/Kering"], vals: [30, 60, 90], hint: "Mengukur tingkat resistensi insulin & cadangan kalori." },
+            { id: "mus", q: "Pas Kakak pegang/pencet, otot Kakak rasanya...", type: "select", opts: ["Lembek/Lunak (Kurang Otot)", "Kenyal/Padat", "Keras & Berisi"], vals: [20, 50, 90], hint: "Mendeteksi BMR dasar. Otot keras = metabolisme tinggi." },
+            { id: "met", q: "Badan Kakak gampang gemuk nggak?", type: "select", opts: ["Gampang Banget (Minum Air Aja Gemuk)", "Biasa Aja", "Makan Banyak Tetep Kurus"], vals: [30, 60, 100], hint: "Menentukan tipe metabolisme (Endomorph/Ectomorph)." },
+            { id: "inj", q: "Pernah cedera atau ada bagian sendi yang sering sakit?", type: "select", opts: ["Ada Kak (Lutut/Pinggang/dll)", "Alhamdulillah Aman"], vals: [10, 100], hint: "CRITICAL DATA: Menentukan keamanan form latihan Kakak." },
+            { id: "sqt", q: "Bisa squat (jongkok) dalem tanpa tumit naik?", type: "select", opts: ["Kaku Banget/Sakit", "Bisa tapi Susah", "Lancar & Lentur"], vals: [20, 60, 100], hint: "Cek mobilitas panggul dan lutut. Kaku = gampang cedera." },
+            { id: "act", q: "Keseharian Kakak (kerja/kampus) lebih banyak apa?", type: "select", opts: ["Duduk Terus (Kantoran)", "Banyak Gerak (Aktif)"], vals: [30, 90], hint: "Menghitung tingkat energi (NEAT) yang terbakar di luar gym." },
+            { id: "slp", q: "Tidur nyenyak rata-rata berapa jam semalam?", type: "range", min: 3, max: 10, def: 7, unit: " jam", hint: "Fase anabolik utama. Kurang tidur = lemak susah turun." },
+            { id: "gym", q: "Bisa luangin waktu ke gym berapa hari seminggu?", type: "range", min: 1, max: 7, def: 3, unit: " hari", hint: "Jan akan menyesuaikan volume program biar Kakak gak overtired." },
+            { id: "xp", q: "Sebelumnya udah pernah rutin nge-gym belum?", type: "select", opts: ["Belum Pernah Sama Sekali", "Udah Pernah Tapi Berhenti", "Lagi Aktif Rutin"], vals: [40, 70, 100], hint: "Menentukan butuh panduan dari nol atau tinggal poles teknik." },
+            { id: "aim", q: "Target paling utama Kakak 3 bulan ini?", type: "select", opts: ["Hajar Lemak (Turunin Berat)", "Bentuk Otot & Postur", "Stamina & Kesehatan"], vals: [100, 100, 100], hint: "Ini kompas utama kita buat blueprint ke depan." }
+        ];
+
+        // Navigasi Halaman
+        function goToPage(pageId) {
+            document.querySelectorAll('section').forEach(sec => {
+                sec.classList.remove('section-view');
+                sec.classList.add('hidden-view');
+            });
+            document.getElementById(pageId).classList.remove('hidden-view');
+            document.getElementById(pageId).classList.add('section-view');
+            
+            if(pageId === 'page-quiz') renderStep();
+        }
+
+        // Validasi Profil
+        function validateProfile() {
+            const name = document.getElementById('input-name').value.trim();
+            const age = document.getElementById('input-age').value.trim();
+            const city = document.getElementById('input-city').value.trim();
+
+            if (!name || !age || !city) {
+                alert("Mohon isi semua data Kakak ya biar Jan bisa hitung algoritmanya.");
+                return;
+            }
+
+            profile = { name, age, city };
+            goToPage('page-quiz');
+        }
+
+        // Render Pertanyaan Quiz
+        function renderStep() {
+            const step = auditSteps[curIdx];
+            const contentArea = document.getElementById('quiz-content');
+            
+            // Update UI Counters
+            document.getElementById('step-counter').innerText = `${curIdx + 1} / 10`;
+            document.getElementById('progress-bar').style.width = `${((curIdx + 1) / 10) * 100}%`;
+            document.getElementById('btn-back').style.visibility = curIdx > 0 ? 'visible' : 'hidden';
+            document.getElementById('btn-next').innerText = curIdx === 9 ? 'GENERATE HASIL' : 'LANJUT';
+
+            let html = `
+                <p class="text-xl font-bold mb-4 italic leading-tight">${step.q}</p>
+                <div class="bg-blue-900/20 p-3 rounded-xl border border-blue-500/20 mb-6 text-[10px] text-blue-200/80 italic flex gap-2 items-start">
+                    <i class="fas fa-microchip mt-0.5 text-blue-400"></i>
+                    <span><b>Logika Sistem:</b> ${step.hint}</span>
+                </div>
+            `;
+
+            if (step.type === 'range') {
+                const val = answers[step.id] || step.def;
+                html += `
+                    <div class="flex flex-col items-center py-4">
+                        <span class="text-6xl font-black text-[#0082D5] mb-6 italic drop-shadow-md">
+                            <span id="range-val-disp">${val}</span><span class="text-2xl text-blue-400/50">${step.unit}</span>
+                        </span>
+                        <input type="range" min="${step.min}" max="${step.max}" value="${val}" 
+                               oninput="updateRange('${step.id}', this.value)"
+                               class="w-full accent-[#0082D5] h-2 bg-white/10 rounded-full appearance-none cursor-pointer">
+                    </div>
+                `;
+                answers[step.id] = val; // Set default
+            } else {
+                html += `<div class="grid gap-3">`;
+                step.opts.forEach((opt, idx) => {
+                    const isSelected = answers[step.id] === opt;
+                    const btnClass = isSelected 
+                        ? 'border-[#0082D5] bg-[#0082D5]/20 shadow-[0_0_15px_rgba(0,130,213,0.3)] text-white' 
+                        : 'border-white/5 bg-white/5 text-slate-400 hover:border-white/20 hover:text-white';
+                    
+                    html += `
+                        <button onclick="setAnswer('${step.id}', '${opt}', ${step.vals[idx]})" 
+                                class="p-4 rounded-xl border text-left text-xs font-bold transition-all ${btnClass}">
+                            ${opt}
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            contentArea.innerHTML = html;
+        }
+
+        // Interaksi Input
+        window.updateRange = function(id, val) {
+            document.getElementById('range-val-disp').innerText = val;
+            answers[id] = val;
+        }
+
+        window.setAnswer = function(id, val, score) {
+            answers[id] = val;
+            scores[id] = score;
+            renderStep(); // Re-render to show selection
+        }
+
+        window.goNext = function() {
+            if (!answers[auditSteps[curIdx].id]) return; // Cegah next jika kosong
+            
+            if (curIdx < 9) {
+                curIdx++;
+                renderStep();
+            } else {
+                generateFinalResult();
+            }
+        }
+
+        window.goBack = function() {
+            if (curIdx > 0) {
+                curIdx--;
+                renderStep();
+            }
+        }
+
+        // ================= LOGIKA ANALISA TAJAM =================
+        function generateFinalResult() {
+            goToPage('page-result');
+
+            document.getElementById('res-target-name').innerText = `Target: Kak ${profile.name} (${profile.age} th)`;
+
+            const age = parseInt(profile.age) || 25;
+            const goal = answers['aim'] || "";
+            const xp = answers['xp'] || "";
+            const injury = answers['inj'] || "";
+            const squat = answers['sqt'] || "";
+            const fat = answers['fat'] || "";
+            const muscle = answers['mus'] || "";
+
+            let programName = "";
+            let painPoints = [];
+            let logicText = "Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada beberapa hambatan serius yang harus dibongkar:<br><br>";
+
+            // Menggali Pain Points
+            if (injury.includes("Ada Kak")) {
+                painPoints.push("⚠️ <b>Riwayat Cedera:</b> Ini <i>red flag</i>. Mencoba latihan sendiri dengan modal liat YouTube bisa berakibat fatal buat sendi Kakak. Biaya pemulihan jauh lebih merepotkan.");
+            } else if (squat.includes("Kaku Banget") || age > 45) {
+                painPoints.push("⚠️ <b>Mobilitas Terkunci:</b> Rentang gerak sendi Kakak sangat terbatas. Kalo dipaksa angkat beban tanpa dibenerin dulu posturnya, pinggang & lutut bisa cedera.");
+            }
+
+            if (fat.includes("Lumayan Tebal") && goal.includes("Hajar Lemak")) {
+                painPoints.push("🔥 <b>Metabolisme Pasif:</b> Lemak tubuh udah masuk fase nyaman. Kakak butuh <i>metabolic shock</i> (latihan intensitas khusus) yang dirancang buat maksa badan bongkar cadangan kalori.");
+            }
+
+            if (xp.includes("Belum Pernah")) {
+                painPoints.push("🛑 <b>Blind Spot Pemula:</b> 90% pemula gagal di bulan ke-2 karena <i>trial & error</i> tanpa arah. Dateng ke gym bingung mau main alat apa, akhirnya cuma lari di treadmill lalu bosan.");
+            } else if (xp.includes("Udah Pernah")) {
+                painPoints.push("🔄 <b>Siklus Yo-Yo:</b> Kakak pernah nge-gym tapi berhenti karena <i>stuck</i> (plateau). Badan udah terbiasa sama gerakan yang itu-itu aja, butuh 'Siksaan Baru' dengan teknik yang benar.");
+            }
+
+            if (painPoints.length > 0) {
+                logicText += painPoints.join("<br><br>") + "<br><br>";
+            } else {
+                logicText = "Secara keseluruhan, fisik Kakak dalam kondisi yang sangat siap untuk ditempa! Tidak ada hambatan mobilitas yang berarti.<br><br>";
+            }
+
+            // Menentukan Program
+            if (injury.includes("Ada Kak") || squat.includes("Kaku Banget") || age > 50) {
+                programName = "REHAB & STRENGTHENING PROGRAM";
+                logicText += `💡 <b>SOLUSI JAN:</b> Kakak WAJIB diawasi ketat. Fokus awal kita adalah merehabilitasi postur, melenturkan sendi, dan membangun fondasi otot pelindung tanpa membebani area cedera. Jan sangat menyarankan Kakak mengambil <b>Program dengan Personal Trainer (PT)</b> agar latihan 100% aman dan terukur.`;
+            } 
+            else if (xp.includes("Belum Pernah") || (muscle.includes("Lembek") && fat.includes("Lumayan Tebal"))) {
+                programName = "METABOLIC ACCELERATOR (PT + MEMBERSHIP)";
+                logicText += `💡 <b>SOLUSI JAN:</b> Jangan buang waktu coba-coba sendiri, Kak. Selama bulan-bulan pertama, Kakak butuh dibimbing langsung sampai bener-bener paham otot mana yang bekerja. Program <b>Bundling Membership + PT</b> adalah jalan pintas tercepat menuju Body Goals tanpa buang waktu dan tenaga sia-sia.`;
+            }
+            else if (xp.includes("Udah Pernah")) {
+                programName = "HYPERTROPHY RESET PROGRAM";
+                logicText += `💡 <b>SOLUSI JAN:</b> Badan Kakak butuh di-reset. Kita perlu <i>shock therapy</i> dengan teknik-teknik baru yang lebih <i>advanced</i> untuk mendobrak batas mentok (plateau) Kakak. Ambil <b>Beberapa Sesi Pendampingan PT</b> di awal untuk evaluasi teknik, sisanya Kakak bisa gas mandiri pakai ilmu dari Jan.`;
+            }
+            else {
+                programName = "LONE WOLF PROGRAM (MEMBERSHIP MANDIRI)";
+                logicText += `💡 <b>SOLUSI JAN:</b> Kakak ini tipe Petarung Mandiri. Secara fondasi teknik, Kakak udah aman. Nggak perlu buang uang buat pendampingan intensif dari nol. Cukup ambil <b>Membership Gym Bulanan/Tahunan</b>, dan buktikan konsistensi Kakak di WillFitness!`;
+            }
+
+            document.getElementById('res-program-name').innerText = programName;
+            document.getElementById('res-reasoning').innerHTML = logicText;
+
+            // Generate Radar Chart
+            const vFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
+            const vNutrisi = (scores['met'] || 50 + 60) / 1.2;
+            const isAktif = answers['act'] && answers['act'].includes("Banyak Gerak");
+            const vStamina = ((isAktif ? 90 : 40) + (parseInt(answers['slp']) || 7) * 10) / 2;
+            const vDisiplin = (parseInt(answers['gym']) || 3) * 14.5;
+            const vLentur = scores['sqt'] || 50;
+
+            initChart([vFisik, vNutrisi, vStamina, vDisiplin, vLentur]);
+        }
+
+        // Render Radar Chart
+        function initChart(dataVals) {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['FISIK', 'NUTRISI', 'STAMINA', 'DISIPLIN', 'MOBILITAS'],
+                    datasets: [{
+                        label: 'Blueprint Score',
+                        data: dataVals,
+                        backgroundColor: 'rgba(0, 130, 213, 0.25)',
+                        borderColor: '#0082D5',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0082D5',
+                        pointBorderColor: '#fff'
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            pointLabels: { color: '#94a3b8', font: { size: 9, weight: 'bold' } },
+                            ticks: { display: false },
+                            min: 0, max: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // Aksi WhatsApp
+        window.sendWhatsApp = function() {
+            const programName = document.getElementById('res-program-name').innerText;
+            const goal = answers['aim'] || 'Tidak ditentukan';
+            
+            const msg = `Halo Jan! Wah, hasil analisa algoritma badannya dalem banget.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- HASIL DIAGNOSA ---%0AProgram Disarankan: ${programName}%0ATarget Utama: ${goal}%0A%0AJan, tolong jelaskan detail harga membership/paketnya dong, sekalian saya mau atur jadwal trial!`;
+            
+            window.open(`https://wa.me/${janPhone}?text=${msg}`, '_blank');
+        }
+    </script>
+</body>
+</html>
 
 
 ```
