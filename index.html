@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,7 +25,7 @@
             background-color: var(--dark-bg);
             color: #f8fafc;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            overflow: hidden; /* Prevent scrolling on body */
+            overflow: hidden; 
             height: 100vh;
             width: 100vw;
             margin: 0;
@@ -50,7 +51,6 @@
 
         .logo-glow { filter: drop-shadow(0 0 10px rgba(0, 130, 213, 0.5)); }
 
-        /* Custom Range Input */
         input[type=range] {
             -webkit-appearance: none;
             background: rgba(255, 255, 255, 0.1);
@@ -65,18 +65,15 @@
             cursor: pointer;
         }
 
-        /* View Management */
         .section-view { display: flex !important; }
         .hidden-view { display: none !important; }
 
-        /* Animations */
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(30px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
         .animate-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 130, 213, 0.5); border-radius: 10px; }
@@ -96,7 +93,7 @@
             <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
                  alt="WillFitness" class="h-6 object-contain">
         </div>
-        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">FitnessGoals v2</div>
+        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v9.0</div>
     </header>
 
     <main class="flex-grow relative overflow-hidden h-full z-10 pt-16">
@@ -121,13 +118,14 @@
         <section id="page-profile" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
             <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-up">
                 <h2 class="text-2xl font-black mb-1 uppercase text-[#0082D5] italic">IDENTITAS</h2>
-                <p class="text-slate-400 text-[10px] mb-8 uppercase tracking-widest">Data ini digunakan untuk kalkulasi algoritma.</p>
-                <div class="space-y-5">
+                <p class="text-slate-400 text-[10px] mb-6 uppercase tracking-widest">Data ini digunakan untuk kalkulasi algoritma.</p>
+                <div class="space-y-4">
                     <input type="text" id="input-name" placeholder="Nama Lengkap/Panggilan" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                     <input type="number" id="input-age" placeholder="Usia Saat Ini (Angka)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                     <input type="text" id="input-city" placeholder="Domisili (Cth: Kalimalang)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                    <input type="tel" id="input-phone" placeholder="No. HP / WhatsApp" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                 </div>
-                <button onclick="validateProfile()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-10 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:brightness-110 active:scale-95">
+                <button onclick="validateProfile()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:brightness-110 active:scale-95">
                     PROSES DATA
                 </button>
             </div>
@@ -136,7 +134,6 @@
         <!-- ================= QUIZ PAGE ================= -->
         <section id="page-quiz" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
             <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden animate-up flex flex-col h-auto max-h-full">
-                <!-- Progress Bar -->
                 <div class="absolute top-0 left-0 h-1 bg-[#0082D5] transition-all duration-300" id="progress-bar" style="width: 10%"></div>
                 
                 <div class="flex justify-between items-center mb-4 mt-2">
@@ -144,7 +141,6 @@
                     <span class="text-[10px] font-black text-white bg-white/10 px-3 py-1.5 rounded-lg border border-white/5" id="step-counter">1 / 10</span>
                 </div>
                 
-                <!-- Dynamic Content Area -->
                 <div id="quiz-content" class="flex-grow flex flex-col justify-center min-h-[250px]">
                     <!-- Injected via JS -->
                 </div>
@@ -169,18 +165,15 @@
                 <h2 class="text-2xl font-black mb-1 italic uppercase text-white drop-shadow-md">DIAGNOSA SELESAI</h2>
                 <p class="text-blue-400 text-[10px] mb-6 font-bold tracking-widest uppercase" id="res-target-name">Target: ---</p>
 
-                <!-- Radar Chart Container -->
                 <div class="w-[85%] max-w-[220px] aspect-square mx-auto mb-6 bg-[#020617]/60 rounded-[2rem] p-4 border border-white/10 shadow-inner flex items-center justify-center">
                     <canvas id="radarChart" class="w-full h-full"></canvas>
                 </div>
 
-                <!-- Program Name Box -->
                 <div class="p-5 bg-gradient-to-br from-[#0082D5]/10 to-transparent rounded-2xl border border-[#0082D5]/30 mb-6 shadow-md">
                     <span class="text-[8px] font-black text-[#0082D5] uppercase tracking-widest block mb-1">PROGRAM REKOMENDASI</span>
                     <h3 class="text-base font-bold text-white uppercase italic leading-tight text-center" id="res-program-name">---</h3>
                 </div>
 
-                <!-- Dynamic Reasoning Box -->
                 <div class="text-left bg-white/5 rounded-3xl border border-white/10 p-6 mb-8 relative">
                     <div class="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
                         <i class="fas fa-brain text-[#0082D5] text-sm"></i>
@@ -191,7 +184,8 @@
                     </div>
                 </div>
 
-                <button onclick="sendWhatsApp()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-[0_10px_25px_rgba(0,130,213,0.5)] transition hover:brightness-110 active:scale-95 mb-2">
+                <!-- Tombol WhatsApp dengan ID untuk manipulasi loading -->
+                <button id="btn-whatsapp" onclick="sendWhatsApp()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-[0_10px_25px_rgba(0,130,213,0.5)] transition hover:brightness-110 active:scale-95 mb-2">
                     <i class="fab fa-whatsapp text-2xl"></i> TANYA HARGA & JADWAL
                 </button>
                 <p class="text-[8px] text-slate-600 mt-3 mb-2 uppercase font-bold tracking-[0.3em]">WillFitness Kalimalang</p>
@@ -199,17 +193,18 @@
         </section>
     </main>
 
-    <!-- JavaScript Logic -->
     <script>
-        // Data Global
+        // ================= PENGATURAN GLOBAL =================
         const janPhone = "6285157703110";
+        // URL WEB APP GOOGLE SCRIPT SUDAH DIMASUKKAN
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzsUz5FKi6Qbo_AWeb5_bjdlkRWGvXz59nXluYjeUALaWN7y0BskNPJGn5no1NkvNyy/exec'; 
+
         let curIdx = 0;
-        let profile = { name: '', age: '', city: '' };
+        let profile = { name: '', age: '', city: '', phone: '' };
         let answers = {};
         let scores = {};
         let chartInstance = null;
 
-        // Data Pertanyaan Audit
         const auditSteps = [
             { id: "fat", q: "Kalo diliat di cermin, tumpukan lemak Kakak gimana?", type: "select", opts: ["Lumayan Tebal (Buncit/Melebar)", "Sedang/Normal", "Sangat Dikit/Kering"], vals: [30, 60, 90], hint: "Mengukur tingkat resistensi insulin & cadangan kalori." },
             { id: "mus", q: "Pas Kakak pegang/pencet, otot Kakak rasanya...", type: "select", opts: ["Lembek/Lunak (Kurang Otot)", "Kenyal/Padat", "Keras & Berisi"], vals: [20, 50, 90], hint: "Mendeteksi BMR dasar. Otot keras = metabolisme tinggi." },
@@ -223,7 +218,6 @@
             { id: "aim", q: "Target paling utama Kakak 3 bulan ini?", type: "select", opts: ["Hajar Lemak (Turunin Berat)", "Bentuk Otot & Postur", "Stamina & Kesehatan"], vals: [100, 100, 100], hint: "Ini kompas utama kita buat blueprint ke depan." }
         ];
 
-        // Navigasi Halaman
         function goToPage(pageId) {
             document.querySelectorAll('section').forEach(sec => {
                 sec.classList.remove('section-view');
@@ -235,27 +229,25 @@
             if(pageId === 'page-quiz') renderStep();
         }
 
-        // Validasi Profil
         function validateProfile() {
             const name = document.getElementById('input-name').value.trim();
             const age = document.getElementById('input-age').value.trim();
             const city = document.getElementById('input-city').value.trim();
+            const phone = document.getElementById('input-phone').value.trim();
 
-            if (!name || !age || !city) {
+            if (!name || !age || !city || !phone) {
                 alert("Mohon isi semua data Kakak ya biar Jan bisa hitung algoritmanya.");
                 return;
             }
 
-            profile = { name, age, city };
+            profile = { name, age, city, phone };
             goToPage('page-quiz');
         }
 
-        // Render Pertanyaan Quiz
         function renderStep() {
             const step = auditSteps[curIdx];
             const contentArea = document.getElementById('quiz-content');
             
-            // Update UI Counters
             document.getElementById('step-counter').innerText = `${curIdx + 1} / 10`;
             document.getElementById('progress-bar').style.width = `${((curIdx + 1) / 10) * 100}%`;
             document.getElementById('btn-back').style.visibility = curIdx > 0 ? 'visible' : 'hidden';
@@ -281,7 +273,7 @@
                                class="w-full accent-[#0082D5] h-2 bg-white/10 rounded-full appearance-none cursor-pointer">
                     </div>
                 `;
-                answers[step.id] = val; // Set default
+                answers[step.id] = val; 
             } else {
                 html += `<div class="grid gap-3">`;
                 step.opts.forEach((opt, idx) => {
@@ -303,7 +295,6 @@
             contentArea.innerHTML = html;
         }
 
-        // Interaksi Input
         window.updateRange = function(id, val) {
             document.getElementById('range-val-disp').innerText = val;
             answers[id] = val;
@@ -312,12 +303,11 @@
         window.setAnswer = function(id, val, score) {
             answers[id] = val;
             scores[id] = score;
-            renderStep(); // Re-render to show selection
+            renderStep();
         }
 
         window.goNext = function() {
-            if (!answers[auditSteps[curIdx].id]) return; // Cegah next jika kosong
-            
+            if (!answers[auditSteps[curIdx].id]) return; 
             if (curIdx < 9) {
                 curIdx++;
                 renderStep();
@@ -333,7 +323,6 @@
             }
         }
 
-        // ================= LOGIKA ANALISA TAJAM =================
         function generateFinalResult() {
             goToPage('page-result');
 
@@ -351,7 +340,6 @@
             let painPoints = [];
             let logicText = "Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada beberapa hambatan serius yang harus dibongkar:<br><br>";
 
-            // Menggali Pain Points
             if (injury.includes("Ada Kak")) {
                 painPoints.push("⚠️ <b>Riwayat Cedera:</b> Ini <i>red flag</i>. Mencoba latihan sendiri dengan modal liat YouTube bisa berakibat fatal buat sendi Kakak. Biaya pemulihan jauh lebih merepotkan.");
             } else if (squat.includes("Kaku Banget") || age > 45) {
@@ -374,7 +362,6 @@
                 logicText = "Secara keseluruhan, fisik Kakak dalam kondisi yang sangat siap untuk ditempa! Tidak ada hambatan mobilitas yang berarti.<br><br>";
             }
 
-            // Menentukan Program
             if (injury.includes("Ada Kak") || squat.includes("Kaku Banget") || age > 50) {
                 programName = "REHAB & STRENGTHENING PROGRAM";
                 logicText += `💡 <b>SOLUSI JAN:</b> Kakak WAJIB diawasi ketat. Fokus awal kita adalah merehabilitasi postur, melenturkan sendi, dan membangun fondasi otot pelindung tanpa membebani area cedera. Jan sangat menyarankan Kakak mengambil <b>Program dengan Personal Trainer (PT)</b> agar latihan 100% aman dan terukur.`;
@@ -395,7 +382,6 @@
             document.getElementById('res-program-name').innerText = programName;
             document.getElementById('res-reasoning').innerHTML = logicText;
 
-            // Generate Radar Chart
             const vFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
             const vNutrisi = (scores['met'] || 50 + 60) / 1.2;
             const isAktif = answers['act'] && answers['act'].includes("Banyak Gerak");
@@ -406,7 +392,6 @@
             initChart([vFisik, vNutrisi, vStamina, vDisiplin, vLentur]);
         }
 
-        // Render Radar Chart
         function initChart(dataVals) {
             const ctx = document.getElementById('radarChart').getContext('2d');
             
@@ -430,17 +415,12 @@
                 },
                 options: {
                     maintainAspectRatio: true,
-                    layout: {
-                        padding: 10 // Memberi ruang ekstra agar label tidak terpotong
-                    },
+                    layout: { padding: 10 },
                     scales: {
                         r: {
                             angleLines: { color: 'rgba(255,255,255,0.05)' },
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            pointLabels: { 
-                                color: '#94a3b8', 
-                                font: { size: 8, weight: 'bold' } 
-                            },
+                            pointLabels: { color: '#94a3b8', font: { size: 8, weight: 'bold' } },
                             ticks: { display: false },
                             min: 0, max: 100
                         }
@@ -450,19 +430,55 @@
             });
         }
 
-        // Aksi WhatsApp
+        // ================= AKSI KIRIM DATA KE GOOGLE SHEETS & WHATSAPP =================
         window.sendWhatsApp = function() {
+            const btn = document.getElementById('btn-whatsapp');
+            const originalText = btn.innerHTML;
+            
             const programName = document.getElementById('res-program-name').innerText;
             const goal = answers['aim'] || 'Tidak ditentukan';
+
+            const waMsg = `Halo Jan! Wah, hasil analisa algoritma badannya dalem banget.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0ANo HP: ${profile.phone}%0A%0A--- HASIL DIAGNOSA ---%0AProgram Disarankan: ${programName}%0ATarget Utama: ${goal}%0A%0AJan, tolong jelaskan detail harga membership/paketnya dong, sekalian saya mau atur jadwal trial!`;
+
+            // Ubah tombol jadi status loading
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> MENGIRIM DATA...';
+            btn.disabled = true;
+
+            // Siapkan data untuk dikirim ke Google Sheets
+            const formData = new FormData();
+            formData.append('Nama', profile.name);
+            formData.append('Usia', profile.age);
+            formData.append('Domisili', profile.city);
+            formData.append('No_HP', profile.phone);
+            formData.append('Goal', goal);
+            formData.append('Program_Rekomendasi', programName);
             
-            const msg = `Halo Jan! Wah, hasil analisa algoritma badannya dalem banget.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- HASIL DIAGNOSA ---%0AProgram Disarankan: ${programName}%0ATarget Utama: ${goal}%0A%0AJan, tolong jelaskan detail harga membership/paketnya dong, sekalian saya mau atur jadwal trial!`;
-            
-            window.open(`https://wa.me/${janPhone}?text=${msg}`, '_blank');
+            const skorFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
+            const skorNutrisi = (scores['met'] || 50 + 60) / 1.2;
+            formData.append('Skor_Fisik', skorFisik);
+            formData.append('Skor_Nutrisi', skorNutrisi);
+
+            // Kirim ke Google Sheets
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => {
+                    // Berhasil dikirim -> Buka WhatsApp
+                    window.open(`https://wa.me/${janPhone}?text=${waMsg}`, '_blank');
+                    // Reset Tombol
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error saat simpan data!', error.message);
+                    // Tetap buka WA meskipun gagal menyimpan ke sheet
+                    window.open(`https://wa.me/${janPhone}?text=${waMsg}`, '_blank');
+                    // Reset Tombol
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
         }
     </script>
 </body>
 </html>
-
 
 
 ```
