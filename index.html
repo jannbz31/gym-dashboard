@@ -74,6 +74,13 @@
         }
         .animate-up { animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
+        @keyframes floatPulse {
+            0% { transform: translateY(0px) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.3); }
+            50% { transform: translateY(-5px) scale(1.02); box-shadow: 0 0 25px rgba(124, 58, 237, 0.6); }
+            100% { transform: translateY(0px) scale(1); box-shadow: 0 0 15px rgba(124, 58, 237, 0.3); }
+        }
+        .animate-gift { animation: floatPulse 2.5s infinite ease-in-out; }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 130, 213, 0.5); border-radius: 10px; }
@@ -93,24 +100,31 @@
             <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
                  alt="WillFitness" class="h-6 object-contain">
         </div>
-        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v9.5</div>
+        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v10.0</div>
     </header>
 
     <main class="flex-grow relative overflow-hidden h-full z-10 pt-16">
         
-        <!-- ================= HERO PAGE ================= -->
+        <!-- ================= HERO PAGE (REVISED FOR HOOK) ================= -->
         <section id="page-hero" class="section-view absolute inset-0 flex-col items-center justify-center p-6 text-center animate-up">
-            <div class="bg-[#0f172a]/40 p-3 rounded-2xl border border-white/5 mb-6 inline-block">
-                <span class="text-xs font-bold text-blue-400 tracking-widest uppercase">WillFitness Kalimalang</span>
+            
+            <!-- Lead Magnet Hook Banner -->
+            <div class="bg-gradient-to-br from-[#7c3aed]/30 to-[#0082D5]/20 border border-[#7c3aed]/50 rounded-2xl p-4 mb-6 inline-flex flex-col items-center max-w-[300px] animate-gift">
+                <div class="bg-[#7c3aed] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest mb-2 shadow-lg">
+                    🎁 HADIAH SPESIAL HARI INI
+                </div>
+                <h3 class="text-sm font-bold text-white leading-tight">FREE 1-Day Gym Pass <br> & Konsultasi Body-Comp</h3>
+                <p class="text-[9px] text-blue-200 mt-1 italic">Selesaikan 10 kuisioner ini untuk klaim hadiahnya!</p>
             </div>
-            <h1 class="text-4xl md:text-5xl font-black mb-4 italic uppercase leading-tight drop-shadow-lg">
+
+            <h1 class="text-3xl md:text-5xl font-black mb-4 italic uppercase leading-tight drop-shadow-lg">
                 BODY BLUEPRINT <br/><span class="text-[#0082D5]">SCANNER</span>
             </h1>
-            <p class="text-slate-400 mb-10 text-sm max-w-sm leading-relaxed">
-                Nggak ada lagi latihan ngasal. Jawab 10 pertanyaan ini, dan algoritma Jan bakal bongkar "kelemahan" fisik Kakak dan ngasih solusi program yang tepat.
+            <p class="text-slate-400 mb-8 text-xs md:text-sm max-w-sm leading-relaxed px-4">
+                Halo Sobat! Jan di sini. Yuk bedah "kelemahan" fisik Kakak dan dapetin solusi program yang tepat, sekalian ambil tiket Gym Pass Gratisnya!
             </p>
-            <button onclick="goToPage('page-profile')" class="btn-gradient px-14 py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)]">
-                MULAI ANALISIS
+            <button onclick="goToPage('page-profile')" class="btn-gradient px-10 py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)] hover:brightness-110">
+                <i class="fas fa-ticket-alt mr-2 text-base"></i> KLAIM PASS & MULAI ANALISIS
             </button>
         </section>
 
@@ -118,12 +132,12 @@
         <section id="page-profile" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
             <div class="glass-card w-full max-w-md rounded-[2.5rem] p-8 shadow-2xl animate-up">
                 <h2 class="text-2xl font-black mb-1 uppercase text-[#0082D5] italic">IDENTITAS</h2>
-                <p class="text-slate-400 text-[10px] mb-6 uppercase tracking-widest">Data ini digunakan untuk kalkulasi algoritma.</p>
+                <p class="text-slate-400 text-[10px] mb-6 uppercase tracking-widest">Masukkan data valid untuk klaim e-Voucher 1-Day Pass Kakak.</p>
                 <div class="space-y-4">
-                    <input type="text" id="input-name" placeholder="Nama Lengkap/Panggilan" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                    <input type="text" id="input-name" placeholder="Nama Lengkap" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                     <input type="number" id="input-age" placeholder="Usia Saat Ini (Angka)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                     <input type="text" id="input-city" placeholder="Domisili (Cth: Kalimalang)" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
-                    <input type="tel" id="input-phone" placeholder="No. HP / WhatsApp" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
+                    <input type="tel" id="input-phone" placeholder="No. WhatsApp Aktif" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                 </div>
                 <button onclick="validateProfile()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:brightness-110 active:scale-95">
                     PROSES DATA
@@ -158,19 +172,19 @@
         <section id="page-result" class="hidden-view absolute inset-0 flex-col items-center justify-center p-4">
             <div class="glass-card w-full max-w-md rounded-[3rem] p-6 text-center shadow-2xl relative overflow-y-auto custom-scrollbar max-h-[92vh] animate-up mt-12">
                 
-                <div class="mx-auto w-12 h-12 bg-[#0082D5] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,130,213,0.6)] mb-4 mt-2">
-                   <i class="fas fa-check text-white text-xl"></i>
+                <div class="mx-auto w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(34,197,94,0.6)] mb-3 mt-2">
+                   <i class="fas fa-gift text-white text-xl"></i>
                 </div>
 
-                <h2 class="text-2xl font-black mb-1 italic uppercase text-white drop-shadow-md">DIAGNOSA SELESAI</h2>
-                <p class="text-blue-400 text-[10px] mb-6 font-bold tracking-widest uppercase" id="res-target-name">Target: ---</p>
+                <h2 class="text-2xl font-black mb-1 italic uppercase text-white drop-shadow-md">TUKAR TIKET KAKAK</h2>
+                <p class="text-blue-400 text-[10px] mb-5 font-bold tracking-widest uppercase" id="res-target-name">Target: ---</p>
 
-                <div class="w-[85%] max-w-[220px] aspect-square mx-auto mb-6 bg-[#020617]/60 rounded-[2rem] p-4 border border-white/10 shadow-inner flex items-center justify-center">
+                <div class="w-[85%] max-w-[220px] aspect-square mx-auto mb-6 bg-[#020617]/60 rounded-[2rem] p-4 border border-white/10 shadow-inner flex items-center justify-center relative">
                     <canvas id="radarChart" class="w-full h-full"></canvas>
                 </div>
 
                 <div class="p-5 bg-gradient-to-br from-[#0082D5]/10 to-transparent rounded-2xl border border-[#0082D5]/30 mb-6 shadow-md">
-                    <span class="text-[8px] font-black text-[#0082D5] uppercase tracking-widest block mb-1">PROGRAM REKOMENDASI</span>
+                    <span class="text-[8px] font-black text-[#0082D5] uppercase tracking-widest block mb-1">PROGRAM REKOMENDASI SEMENTARA</span>
                     <h3 class="text-base font-bold text-white uppercase italic leading-tight text-center" id="res-program-name">---</h3>
                 </div>
 
@@ -184,15 +198,16 @@
                     </div>
                 </div>
 
-                <!-- Tombol WhatsApp -->
-                <button id="btn-whatsapp" onclick="sendWhatsApp()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-sm shadow-[0_10px_25px_rgba(0,130,213,0.5)] transition hover:brightness-110 active:scale-95 mb-2">
-                    <i class="fab fa-whatsapp text-2xl"></i> KONSULTASI SAMA JAN
+                <!-- Tombol WhatsApp Claim Prize -->
+                <button id="btn-whatsapp" onclick="sendWhatsApp()" class="bg-gradient-to-r from-green-500 to-[#0082D5] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-[11px] md:text-sm shadow-[0_10px_25px_rgba(34,197,94,0.4)] transition hover:brightness-110 active:scale-95 mb-2">
+                    <i class="fab fa-whatsapp text-2xl"></i> AMBIL 1-DAY PASS & KONSULTASI
                 </button>
                 <p class="text-[8px] text-slate-600 mt-3 mb-2 uppercase font-bold tracking-[0.3em]">WillFitness Kalimalang</p>
             </div>
         </section>
     </main>
 
+    <!-- JavaScript Logic -->
     <script>
         // ================= PENGATURAN GLOBAL =================
         const janPhone = "6285157703110";
@@ -204,7 +219,6 @@
         let answers = {};
         let scores = {};
         let chartInstance = null;
-        let finalData = {};
 
         const auditSteps = [
             { id: "fat", q: "Kalo diliat di cermin, tumpukan lemak Kakak gimana?", type: "select", opts: ["Lumayan Tebal (Buncit/Melebar)", "Sedang/Normal", "Sangat Dikit/Kering"], vals: [30, 60, 90], hint: "Mengukur tingkat resistensi insulin & cadangan kalori." },
@@ -237,7 +251,7 @@
             const phone = document.getElementById('input-phone').value.trim();
 
             if (!name || !age || !city || !phone) {
-                alert("Mohon isi semua data Kakak ya biar Jan bisa hitung algoritmanya.");
+                alert("Mohon isi semua data Kakak ya biar Jan bisa ngirim e-Vouchernya.");
                 return;
             }
 
@@ -328,7 +342,7 @@
         function generateFinalResult() {
             goToPage('page-result');
 
-            document.getElementById('res-target-name').innerText = `Target: Kak ${profile.name} (${profile.age} th)`;
+            document.getElementById('res-target-name').innerText = `Data Siap: Kak ${profile.name} (${profile.age} th)`;
 
             const age = parseInt(profile.age) || 25;
             const goal = answers['aim'] || "";
@@ -339,24 +353,23 @@
             const muscle = answers['mus'] || "";
 
             let programName = "";
-            let specificPackage = "";
             let painPoints = [];
-            let logicText = "Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada beberapa hambatan serius yang harus dibongkar:<br><br>";
+            let logicText = "Selamat! Kakak berhak mendapatkan <b>1-Day Gym Pass + Cek InBody Gratis!</b><br><br>Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada hambatan yang harus dibongkar sebelum latihan:<br><br>";
 
             if (injury.includes("Ada Kak")) {
-                painPoints.push("⚠️ <b>Riwayat Cedera:</b> Ini <i>red flag</i>. Mencoba latihan sendiri dengan modal liat YouTube bisa berakibat fatal buat sendi Kakak. Biaya pemulihan jauh lebih merepotkan.");
+                painPoints.push("⚠️ <b>Riwayat Cedera:</b> Ini <i>red flag</i>. Coba-coba alat gym sendiri bisa bahaya. Pas nanti klaim 1-Day Pass, bilang ke Jan biar diawasin gerakannya.");
             } else if (squat.includes("Kaku Banget") || age > 45) {
-                painPoints.push("⚠️ <b>Mobilitas Terkunci:</b> Rentang gerak sendi Kakak sangat terbatas. Kalo dipaksa angkat beban tanpa dibenerin dulu posturnya, pinggang & lutut bisa cedera.");
+                painPoints.push("⚠️ <b>Mobilitas Terkunci:</b> Rentang gerak sendi Kakak sangat terbatas. Nanti saat Konsultasi Gratis, kita cek bagian mana yang kaku biar nggak cedera.");
             }
 
             if (fat.includes("Lumayan Tebal") && goal.includes("Hajar Lemak")) {
-                painPoints.push("🔥 <b>Metabolisme Pasif:</b> Lemak tubuh udah masuk fase nyaman. Kakak butuh <i>metabolic shock</i> (latihan intensitas khusus) yang dirancang buat maksa badan bongkar cadangan kalori.");
+                painPoints.push("🔥 <b>Metabolisme Pasif:</b> Kakak butuh <i>metabolic shock</i> (latihan intensitas khusus) buat maksa badan bongkar kalori. Kita atur plan-nya waktu cek Body-Comp nanti.");
             }
 
             if (xp.includes("Belum Pernah")) {
-                painPoints.push("🛑 <b>Blind Spot Pemula:</b> 90% pemula gagal di bulan ke-2 karena <i>trial & error</i> tanpa arah. Dateng ke gym bingung mau main alat apa, akhirnya cuma lari di treadmill lalu bosan.");
+                painPoints.push("🛑 <b>Blind Spot Pemula:</b> 90% pemula gagal karena <i>trial & error</i> tanpa arah. Makanya Gym Pass gratis ini wajib Kakak pake buat ngobrol formasi latihan sama Jan.");
             } else if (xp.includes("Udah Pernah")) {
-                painPoints.push("🔄 <b>Siklus Yo-Yo:</b> Kakak pernah nge-gym tapi berhenti karena <i>stuck</i> (plateau). Badan udah terbiasa sama gerakan yang itu-itu aja, butuh 'Siksaan Baru' dengan teknik yang benar.");
+                painPoints.push("🔄 <b>Siklus Yo-Yo:</b> Kakak butuh 'Siksaan Baru' dengan teknik yang benar. Kita reset mindset latihannya bareng-bareng.");
             }
 
             if (painPoints.length > 0) {
@@ -367,31 +380,20 @@
 
             if (injury.includes("Ada Kak") || squat.includes("Kaku Banget") || age > 50) {
                 programName = "REHAB & STRENGTHENING PROGRAM";
-                specificPackage = goal.includes("Bentuk Otot") ? "Bundling (12 Bulan + 24 Sesi PT)" : "Bundling (6 Bulan + 32 Sesi PT)";
-                logicText += `💡 <b>SOLUSI JAN:</b> Kakak WAJIB diawasi ketat. Fokus awal kita adalah merehabilitasi postur, melenturkan sendi, dan membangun fondasi otot pelindung tanpa membebani area cedera. Jan sangat menyarankan Kakak mengambil <b>Program dengan Personal Trainer (PT)</b> agar latihan 100% aman dan terukur.`;
+                logicText += `💡 <b>SOLUSI JAN:</b> Jan sangat menyarankan Kakak mengambil <b>Program dengan Personal Trainer (PT)</b> agar latihan 100% aman. Klik tombol di bawah buat ambil Pass Gratisnya!`;
             } 
             else if (xp.includes("Belum Pernah") || (muscle.includes("Lembek") && fat.includes("Lumayan Tebal"))) {
                 programName = "METABOLIC ACCELERATOR (PT + MEMBERSHIP)";
-                specificPackage = goal.includes("Bentuk Otot") ? "Bundling (12 Bulan + 24 Sesi PT)" : "Bundling (6 Bulan + 24 Sesi PT)";
-                logicText += `💡 <b>SOLUSI JAN:</b> Jangan buang waktu coba-coba sendiri, Kak. Selama bulan-bulan pertama, Kakak butuh dibimbing langsung sampai bener-bener paham otot mana yang bekerja. Program <b>Bundling Membership + PT</b> adalah jalan pintas tercepat menuju Body Goals tanpa buang waktu dan tenaga sia-sia.`;
+                logicText += `💡 <b>SOLUSI JAN:</b> Program <b>Bundling Membership + PT</b> adalah jalan pintas tercepat Kakak. Segera klik tombol di bawah untuk atur jadwal ambil Body-Comp Gratisnya sama Jan!`;
             }
             else if (xp.includes("Udah Pernah")) {
                 programName = "HYPERTROPHY RESET PROGRAM";
-                specificPackage = goal.includes("Bentuk Otot") ? "Bundling (12 Bulan + 16 Sesi PT)" : "16 Sesi Personal Trainer";
-                logicText += `💡 <b>SOLUSI JAN:</b> Badan Kakak butuh di-reset. Kita perlu <i>shock therapy</i> dengan teknik-teknik baru yang lebih <i>advanced</i> untuk mendobrak batas mentok (plateau) Kakak. Ambil <b>Beberapa Sesi Pendampingan PT</b> di awal untuk evaluasi teknik, sisanya Kakak bisa gas mandiri pakai ilmu dari Jan.`;
+                logicText += `💡 <b>SOLUSI JAN:</b> Ambil <b>Beberapa Sesi Pendampingan PT</b> di awal untuk evaluasi teknik Kakak. Klik tombol di bawah sekarang buat klaim Gym Pass-nya, Jan tunggu di klub!`;
             }
             else {
                 programName = "LONE WOLF PROGRAM (MEMBERSHIP MANDIRI)";
-                const gymDays = parseInt(answers['gym']) || 3;
-                specificPackage = (gymDays >= 4 || goal.includes("Bentuk Otot")) ? "Membership 12 Bulan" : "Membership 6 Bulan";
-                logicText += `💡 <b>SOLUSI JAN:</b> Kakak ini tipe Petarung Mandiri. Secara fondasi teknik, Kakak udah aman. Nggak perlu buang uang buat pendampingan intensif dari nol. Cukup ambil <b>Membership Gym Bulanan/Tahunan</b>, dan buktikan konsistensi Kakak di WillFitness!`;
+                logicText += `💡 <b>SOLUSI JAN:</b> Cukup ambil <b>Membership Gym Bulanan/Tahunan</b>, dan buktikan konsistensi Kakak! Klik tombol WhatsApp di bawah untuk janjian ambil tiket Gratisnya ya!`;
             }
-
-            finalData = {
-                programName: programName,
-                specificPackage: specificPackage,
-                goal: goal
-            };
 
             document.getElementById('res-program-name').innerText = programName;
             document.getElementById('res-reasoning').innerHTML = logicText;
@@ -411,7 +413,7 @@
             formData.append('Domisili', profile.city);
             formData.append('No_HP', profile.phone);
             formData.append('Goal', goal);
-            formData.append('Program_Rekomendasi', `${programName} (${specificPackage})`);
+            formData.append('Program_Rekomendasi', programName);
             
             const skorFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
             const skorNutrisi = (scores['met'] || 50 + 60) / 1.2;
@@ -465,15 +467,37 @@
             const btn = document.getElementById('btn-whatsapp');
             const originalText = btn.innerHTML;
             
-            const programName = finalData.programName || document.getElementById('res-program-name').innerText;
+            const programName = document.getElementById('res-program-name').innerText;
+            const goal = answers['aim'] || 'Tidak ditentukan';
 
-            // PESAN WHATSAPP (Sesuai Format yang Diminta Jan)
-            const waMsg = `Halo Jan! Wah, hasil analisa algoritma badannya dalem banget.%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0ANo HP: ${profile.phone}%0A--- HASIL DIAGNOSA ---%0ATema Program: ${programName}`;
-            
-            window.open(`https://wa.me/${janPhone}?text=${waMsg}`, '_blank');
+            // Pesan WA diubah jadi fokus klaim tiket gratis
+            const waMsg = `Halo Jan! Saya sudah isi Body Blueprint Scanner dan mau klaim *1-Day Gym Pass Gratis & Cek Body-Composition* nih.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- DATA SISTEM ---%0ATema Program: ${programName}%0A%0AJan, kabari ya jadwal trialnya kapan!`;
+
+            // Ubah tombol jadi status loading
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> MENGIRIM DATA...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('Nama', profile.name);
+            formData.append('Usia', profile.age);
+            formData.append('Domisili', profile.city);
+            formData.append('No_HP', profile.phone);
+            formData.append('Goal', goal);
+            formData.append('Program_Rekomendasi', programName);
+
+            fetch(scriptURL, { method: 'POST', body: formData })
+                .then(response => {
+                    window.open(`https://wa.me/${janPhone}?text=${waMsg}`, '_blank');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    console.error('Error saat simpan data!', error.message);
+                    window.open(`https://wa.me/${janPhone}?text=${waMsg}`, '_blank');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
         }
     </script>
 </body>
 </html>
-
-
