@@ -84,6 +84,14 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 130, 213, 0.5); border-radius: 10px; }
+        
+        /* Glass effect for promo badges */
+        .promo-badge {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
     </style>
 </head>
 <body>
@@ -100,31 +108,47 @@
             <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
                  alt="WillFitness" class="h-6 object-contain">
         </div>
-        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v10.0</div>
+        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Algoritma Jan v10.5</div>
     </header>
 
     <main class="flex-grow relative overflow-hidden h-full z-10 pt-16">
         
-        <!-- ================= HERO PAGE (REVISED FOR HOOK) ================= -->
+        <!-- ================= HERO PAGE ================= -->
         <section id="page-hero" class="section-view absolute inset-0 flex-col items-center justify-center p-6 text-center animate-up">
             
             <!-- Lead Magnet Hook Banner -->
-            <div class="bg-gradient-to-br from-[#7c3aed]/30 to-[#0082D5]/20 border border-[#7c3aed]/50 rounded-2xl p-4 mb-6 inline-flex flex-col items-center max-w-[300px] animate-gift">
+            <div class="bg-gradient-to-br from-[#7c3aed]/30 to-[#0082D5]/20 border border-[#7c3aed]/50 rounded-2xl p-4 mb-5 inline-flex flex-col items-center max-w-[320px] animate-gift">
                 <div class="bg-[#7c3aed] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest mb-2 shadow-lg">
                     🎁 HADIAH SPESIAL HARI INI
                 </div>
                 <h3 class="text-sm font-bold text-white leading-tight">FREE 1-Day Gym Pass <br> & Konsultasi Body-Comp</h3>
-                <p class="text-[9px] text-blue-200 mt-1 italic">Selesaikan 10 kuisioner ini untuk klaim hadiahnya!</p>
+                <p class="text-[9px] text-blue-200 mt-1 italic">Selesaikan 10 langkah cepat ini untuk klaim!</p>
             </div>
 
-            <h1 class="text-3xl md:text-5xl font-black mb-4 italic uppercase leading-tight drop-shadow-lg">
+            <!-- Promo Badges (Pill Tags) -->
+            <div class="flex flex-wrap justify-center gap-2 mb-6 max-w-sm">
+                <span class="promo-badge text-[9px] px-3 py-1.5 rounded-full flex items-center font-medium">
+                    <i class="far fa-comment-dots mr-1.5 text-blue-400"></i> Free Consultation
+                </span>
+                <span class="promo-badge text-[9px] px-3 py-1.5 rounded-full flex items-center font-medium">
+                    <i class="fas fa-dumbbell mr-1.5 text-purple-400"></i> All Facilities
+                </span>
+                <span class="promo-badge text-[9px] px-3 py-1.5 rounded-full flex items-center font-medium">
+                    <i class="fas fa-heartbeat mr-1.5 text-red-400"></i> Body Measurement
+                </span>
+                <span class="promo-badge text-[9px] px-3 py-1.5 rounded-full flex items-center font-medium">
+                    <i class="fas fa-gift mr-1.5 text-green-400"></i> Special Offers!
+                </span>
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-black mb-3 italic uppercase leading-tight drop-shadow-lg">
                 BODY BLUEPRINT <br/><span class="text-[#0082D5]">SCANNER</span>
             </h1>
-            <p class="text-slate-400 mb-8 text-xs md:text-sm max-w-sm leading-relaxed px-4">
-                Halo Sobat! Jan di sini. Yuk bedah "kelemahan" fisik Kakak dan dapetin solusi program yang tepat, sekalian ambil tiket Gym Pass Gratisnya!
+            <p class="text-slate-400 mb-8 text-xs max-w-xs mx-auto leading-relaxed">
+                Halo Sobat! Yuk bedah potensi fisik Kakak dan dapetin solusi program yang tepat dari Jan.
             </p>
-            <button onclick="goToPage('page-profile')" class="btn-gradient px-10 py-5 rounded-2xl font-black tracking-widest uppercase text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)] hover:brightness-110">
-                <i class="fas fa-ticket-alt mr-2 text-base"></i> KLAIM PASS & MULAI ANALISIS
+            <button onclick="goToPage('page-profile')" class="btn-gradient px-10 py-5 rounded-2xl font-black tracking-widest uppercase text-[11px] md:text-xs shadow-[0_0_30px_rgba(0,130,213,0.4)] hover:brightness-110">
+                <i class="fas fa-ticket-alt mr-2 text-base"></i> MULAI & KLAIM PASS GRATIS
             </button>
         </section>
 
@@ -140,7 +164,7 @@
                     <input type="tel" id="input-phone" placeholder="No. WhatsApp Aktif" class="bg-white/5 border border-white/10 w-full p-4 rounded-xl outline-none focus:border-[#0082D5] text-sm text-white placeholder-slate-500 transition">
                 </div>
                 <button onclick="validateProfile()" class="bg-gradient-to-r from-[#0082D5] to-[#7c3aed] w-full mt-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl transition hover:brightness-110 active:scale-95">
-                    PROSES DATA
+                    LANJUT KE ANALISIS
                 </button>
             </div>
         </section>
@@ -177,7 +201,14 @@
                 </div>
 
                 <h2 class="text-2xl font-black mb-1 italic uppercase text-white drop-shadow-md">TUKAR TIKET KAKAK</h2>
-                <p class="text-blue-400 text-[10px] mb-5 font-bold tracking-widest uppercase" id="res-target-name">Target: ---</p>
+                
+                <!-- Target Klien & Goal yang Diperjelas -->
+                <div class="flex flex-col items-center justify-center mb-5 gap-1.5">
+                    <p class="text-slate-300 text-[10px] font-bold tracking-widest uppercase" id="res-target-name">KLIEN: ---</p>
+                    <div class="bg-blue-500/20 border border-blue-500/30 px-3 py-1 rounded-full inline-block">
+                        <p class="text-[#00f2ff] text-[9px] font-black tracking-widest uppercase" id="res-target-goal">GOAL: ---</p>
+                    </div>
+                </div>
 
                 <div class="w-[85%] max-w-[220px] aspect-square mx-auto mb-6 bg-[#020617]/60 rounded-[2rem] p-4 border border-white/10 shadow-inner flex items-center justify-center relative">
                     <canvas id="radarChart" class="w-full h-full"></canvas>
@@ -322,6 +353,7 @@
         }
 
         window.goNext = function() {
+            // Harus pilih jawaban sebelum lanjut
             if (!answers[auditSteps[curIdx].id]) return; 
             if (curIdx < 9) {
                 curIdx++;
@@ -342,10 +374,14 @@
         function generateFinalResult() {
             goToPage('page-result');
 
-            document.getElementById('res-target-name').innerText = `Data Siap: Kak ${profile.name} (${profile.age} th)`;
+            // Tangkap Data Goal/Target
+            const goal = answers['aim'] || "BELUM DITENTUKAN";
+
+            // Update UI Profil & Goal (Lebih spesifik)
+            document.getElementById('res-target-name').innerText = `KLIEN: KAK ${profile.name} (${profile.age} TH)`;
+            document.getElementById('res-target-goal').innerText = `GOAL: ${goal}`;
 
             const age = parseInt(profile.age) || 25;
-            const goal = answers['aim'] || "";
             const xp = answers['xp'] || "";
             const injury = answers['inj'] || "";
             const squat = answers['sqt'] || "";
@@ -468,7 +504,6 @@
             const originalText = btn.innerHTML;
             
             const programName = document.getElementById('res-program-name').innerText;
-            const goal = answers['aim'] || 'Tidak ditentukan';
 
             // Pesan WA diubah jadi fokus klaim tiket gratis
             const waMsg = `Halo Jan! Saya sudah isi Body Blueprint Scanner dan mau klaim *1-Day Gym Pass Gratis & Cek Body-Composition* nih.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- DATA SISTEM ---%0ATema Program: ${programName}%0A%0AJan, kabari ya jadwal trialnya kapan!`;
@@ -477,12 +512,13 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> MENGIRIM DATA...';
             btn.disabled = true;
 
+            // Kirim data ekstra (sebagai fail-safe)
             const formData = new FormData();
             formData.append('Nama', profile.name);
             formData.append('Usia', profile.age);
             formData.append('Domisili', profile.city);
             formData.append('No_HP', profile.phone);
-            formData.append('Goal', goal);
+            formData.append('Goal', answers['aim'] || 'Tidak ditentukan');
             formData.append('Program_Rekomendasi', programName);
 
             fetch(scriptURL, { method: 'POST', body: formData })
