@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -65,6 +65,13 @@
             cursor: pointer;
         }
 
+        /* Hilangkan panah spinner di input number (Chrome/Safari) */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
         .section-view { display: flex !important; }
         .hidden-view { display: none !important; }
 
@@ -85,7 +92,6 @@
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 130, 213, 0.5); border-radius: 10px; }
         
-        /* Glass effect for promo badges */
         .promo-badge {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -108,7 +114,7 @@
             <img src="https://blogger.googleusercontent.com/img/a/AVvXsEgsxwUWQ2dEVuuofFXZH99c2b_RMH3vZ6aN1ihSMie7Q_L7gYwsH3gyt2ey--8fqAlRQEMb9BITFLtDju7MHAwuwGeqjmLUC_RmwD3ASmSS26HPAM4STxYyaGdqoPrTGQiFOwWZROeefsasd5t9zjLtBws0wuWQ5dmXEmoS50VhQQhkpwWGSipmR3nLkJ4" 
                  alt="WillFitness" class="h-6 object-contain">
         </div>
-        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">FITNESS GOALS</div>
+        <div class="text-[9px] font-black tracking-widest text-blue-500/60 uppercase italic">Fitness Goal v2.0</div>
     </header>
 
     <main class="flex-grow relative overflow-hidden h-full z-10 pt-16">
@@ -116,7 +122,6 @@
         <!-- ================= HERO PAGE ================= -->
         <section id="page-hero" class="section-view absolute inset-0 flex-col items-center justify-center p-6 text-center animate-up">
             
-            <!-- Lead Magnet Hook Banner -->
             <div class="bg-gradient-to-br from-[#7c3aed]/30 to-[#0082D5]/20 border border-[#7c3aed]/50 rounded-2xl p-4 mb-5 inline-flex flex-col items-center max-w-[320px] animate-gift">
                 <div class="bg-[#7c3aed] text-white text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest mb-2 shadow-lg">
                     🎁 HADIAH SPESIAL HARI INI
@@ -125,7 +130,6 @@
                 <p class="text-[9px] text-blue-200 mt-1 italic">Selesaikan 10 langkah cepat ini untuk klaim!</p>
             </div>
 
-            <!-- Promo Badges (Pill Tags) -->
             <div class="flex flex-wrap justify-center gap-2 mb-6 max-w-sm">
                 <span class="promo-badge text-[9px] px-3 py-1.5 rounded-full flex items-center font-medium">
                     <i class="far fa-comment-dots mr-1.5 text-blue-400"></i> Free Consultation
@@ -202,11 +206,15 @@
 
                 <h2 class="text-2xl font-black mb-1 italic uppercase text-white drop-shadow-md">TUKAR TIKET KAKAK</h2>
                 
-                <!-- Target Klien & Goal yang Diperjelas -->
-                <div class="flex flex-col items-center justify-center mb-5 gap-1.5">
+                <div class="flex flex-col items-center justify-center mb-5 gap-2">
                     <p class="text-slate-300 text-[10px] font-bold tracking-widest uppercase" id="res-target-name">KLIEN: ---</p>
-                    <div class="bg-blue-500/20 border border-blue-500/30 px-3 py-1 rounded-full inline-block">
-                        <p class="text-[#00f2ff] text-[9px] font-black tracking-widest uppercase" id="res-target-goal">GOAL: ---</p>
+                    <div class="flex gap-2">
+                        <div class="bg-blue-500/20 border border-blue-500/30 px-3 py-1 rounded-full inline-block">
+                            <p class="text-[#00f2ff] text-[9px] font-black tracking-widest uppercase" id="res-target-goal">GOAL: ---</p>
+                        </div>
+                        <div class="bg-purple-500/20 border border-purple-500/30 px-3 py-1 rounded-full inline-block">
+                            <p class="text-[#c084fc] text-[9px] font-black tracking-widest uppercase" id="res-bmi-score">BMI: ---</p>
+                        </div>
                     </div>
                 </div>
 
@@ -229,7 +237,6 @@
                     </div>
                 </div>
 
-                <!-- Tombol WhatsApp Claim Prize -->
                 <button id="btn-whatsapp" onclick="sendWhatsApp()" class="bg-gradient-to-r from-green-500 to-[#0082D5] w-full py-5 rounded-2xl font-black flex items-center justify-center gap-3 tracking-widest text-[11px] md:text-sm shadow-[0_10px_25px_rgba(34,197,94,0.4)] transition hover:brightness-110 active:scale-95 mb-2">
                     <i class="fab fa-whatsapp text-2xl"></i> AMBIL 1-DAY PASS & KONSULTASI
                 </button>
@@ -240,9 +247,8 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // ================= PENGATURAN GLOBAL =================
         const janPhone = "6285157703110";
-        // URL SCRIPT GOOGLE SHEETS
+        // MASUKKAN URL GOOGLE SCRIPT DI SINI:
         const scriptURL = 'https://script.google.com/macros/s/AKfycbzsUz5FKi6Qbo_AWeb5_bjdlkRWGvXz59nXluYjeUALaWN7y0BskNPJGn5no1NkvNyy/exec'; 
 
         let curIdx = 0;
@@ -250,11 +256,16 @@
         let answers = {};
         let scores = {};
         let chartInstance = null;
+        let finalBMI = 0;
+        let finalBMICategory = "";
 
         const auditSteps = [
             { id: "fat", q: "Kalo diliat di cermin, tumpukan lemak Kakak gimana?", type: "select", opts: ["Lumayan Tebal (Buncit/Melebar)", "Sedang/Normal", "Sangat Dikit/Kering"], vals: [30, 60, 90], hint: "Mengukur tingkat resistensi insulin & cadangan kalori." },
             { id: "mus", q: "Pas Kakak pegang/pencet, otot Kakak rasanya...", type: "select", opts: ["Lembek/Lunak (Kurang Otot)", "Kenyal/Padat", "Keras & Berisi"], vals: [20, 50, 90], hint: "Mendeteksi BMR dasar. Otot keras = metabolisme tinggi." },
-            { id: "met", q: "Badan Kakak gampang gemuk nggak?", type: "select", opts: ["Gampang Banget (Minum Air Aja Gemuk)", "Biasa Aja", "Makan Banyak Tetep Kurus"], vals: [30, 60, 100], hint: "Menentukan tipe metabolisme (Endomorph/Ectomorph)." },
+            
+            // Pertanyaan ke-3 DIGANTI menjadi input Tinggi & Berat Badan
+            { id: "measurements", q: "Berapa Tinggi dan Berat Badan Kakak saat ini?", type: "measurements", hint: "Data krusial untuk menghitung Body Mass Index (BMI) Kakak." },
+            
             { id: "inj", q: "Pernah cedera atau ada bagian sendi yang sering sakit?", type: "select", opts: ["Ada Kak (Lutut/Pinggang/dll)", "Alhamdulillah Aman"], vals: [10, 100], hint: "CRITICAL DATA: Menentukan keamanan form latihan Kakak." },
             { id: "sqt", q: "Bisa squat (jongkok) dalem tanpa tumit naik?", type: "select", opts: ["Kaku Banget/Sakit", "Bisa tapi Susah", "Lancar & Lentur"], vals: [20, 60, 100], hint: "Cek mobilitas panggul dan lutut. Kaku = gampang cedera." },
             { id: "act", q: "Keseharian Kakak (kerja/kampus) lebih banyak apa?", type: "select", opts: ["Duduk Terus (Kantoran)", "Banyak Gerak (Aktif)"], vals: [30, 90], hint: "Menghitung tingkat energi (NEAT) yang terbakar di luar gym." },
@@ -271,7 +282,6 @@
             });
             document.getElementById(pageId).classList.remove('hidden-view');
             document.getElementById(pageId).classList.add('section-view');
-            
             if(pageId === 'page-quiz') renderStep();
         }
 
@@ -320,7 +330,25 @@
                     </div>
                 `;
                 answers[step.id] = val; 
-            } else {
+            } 
+            else if (step.type === 'measurements') {
+                // UI Khusus untuk Tinggi dan Berat Badan
+                const hVal = answers['height'] || '';
+                const wVal = answers['weight'] || '';
+                html += `
+                    <div class="flex gap-4 mb-4">
+                        <div class="flex-col w-1/2">
+                            <label class="text-[10px] text-slate-400 uppercase font-bold tracking-widest pl-2">Tinggi (cm)</label>
+                            <input type="number" id="input-height" value="${hVal}" oninput="updateMeasurement('height', this.value)" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-center text-2xl font-bold text-white mt-2 outline-none focus:border-[#0082D5] transition">
+                        </div>
+                        <div class="flex-col w-1/2">
+                            <label class="text-[10px] text-slate-400 uppercase font-bold tracking-widest pl-2">Berat (kg)</label>
+                            <input type="number" id="input-weight" value="${wVal}" oninput="updateMeasurement('weight', this.value)" class="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-center text-2xl font-bold text-white mt-2 outline-none focus:border-[#0082D5] transition">
+                        </div>
+                    </div>
+                `;
+            } 
+            else {
                 html += `<div class="grid gap-3">`;
                 step.opts.forEach((opt, idx) => {
                     const isSelected = answers[step.id] === opt;
@@ -346,6 +374,10 @@
             answers[id] = val;
         }
 
+        window.updateMeasurement = function(type, val) {
+            answers[type] = val;
+        }
+
         window.setAnswer = function(id, val, score) {
             answers[id] = val;
             scores[id] = score;
@@ -353,8 +385,18 @@
         }
 
         window.goNext = function() {
-            // Harus pilih jawaban sebelum lanjut
-            if (!answers[auditSteps[curIdx].id]) return; 
+            const step = auditSteps[curIdx];
+            
+            // Validasi khusus untuk input Tinggi dan Berat
+            if (step.type === 'measurements') {
+                if (!answers['height'] || !answers['weight']) {
+                    alert("Mohon isi lengkap Tinggi dan Berat Badan Kakak.");
+                    return;
+                }
+            } else if (!answers[step.id]) {
+                return; // Validasi pertanyaan lain
+            }
+
             if (curIdx < 9) {
                 curIdx++;
                 renderStep();
@@ -370,36 +412,53 @@
             }
         }
 
-        // ================= FUNGSI UTAMA: GENERATE HASIL & AUTO-SYNC KE SHEET =================
+        function calculateBMI() {
+            const h_meters = parseFloat(answers['height']) / 100;
+            const w_kg = parseFloat(answers['weight']);
+            const bmi = w_kg / (h_meters * h_meters);
+            finalBMI = bmi.toFixed(1);
+            
+            if (bmi < 18.5) finalBMICategory = "Underweight";
+            else if (bmi < 25) finalBMICategory = "Normal";
+            else if (bmi < 30) finalBMICategory = "Overweight";
+            else finalBMICategory = "Obese";
+        }
+
         function generateFinalResult() {
             goToPage('page-result');
 
-            // Tangkap Data Goal/Target
+            // Kalkulasi BMI
+            calculateBMI();
+
+            // Tangkap Data Goal
             const goal = answers['aim'] || "BELUM DITENTUKAN";
 
-            // Update UI Profil & Goal (Lebih spesifik)
+            // Update UI Profil, Goal, dan BMI
             document.getElementById('res-target-name').innerText = `KLIEN: KAK ${profile.name} (${profile.age} TH)`;
             document.getElementById('res-target-goal').innerText = `GOAL: ${goal}`;
+            document.getElementById('res-bmi-score').innerText = `BMI: ${finalBMI} (${finalBMICategory})`;
 
             const age = parseInt(profile.age) || 25;
             const xp = answers['xp'] || "";
             const injury = answers['inj'] || "";
             const squat = answers['sqt'] || "";
             const fat = answers['fat'] || "";
-            const muscle = answers['mus'] || "";
 
             let programName = "";
             let painPoints = [];
             let logicText = "Selamat! Kakak berhak mendapatkan <b>1-Day Gym Pass + Cek InBody Gratis!</b><br><br>Berdasarkan data algoritma, fisik Kakak punya potensi besar, tapi ada hambatan yang harus dibongkar sebelum latihan:<br><br>";
 
+            // --- BMI PAIN POINTS LOGIC ---
+            if (finalBMICategory === "Overweight" || finalBMICategory === "Obese") {
+                painPoints.push(`⚖️ <b>Data BMI (${finalBMI}):</b> Berat badan Kakak saat ini (Status: ${finalBMICategory}) membebani kinerja sendi lutut dan jantung. Penurunan persentase lemak (Fat-loss) adalah prioritas mutlak sebelum otot bisa terbentuk maksimal.`);
+            } else if (finalBMICategory === "Underweight") {
+                painPoints.push(`⚖️ <b>Data BMI (${finalBMI}):</b> Tubuh Kakak kekurangan massa dasar (Status: ${finalBMICategory}). Kardio berlebihan justru merugikan. Fokus kita harus beralih ke surplus nutrisi terukur dan latihan angkat beban padat.`);
+            }
+
             if (injury.includes("Ada Kak")) {
                 painPoints.push("⚠️ <b>Riwayat Cedera:</b> Ini <i>red flag</i>. Coba-coba alat gym sendiri bisa bahaya. Pas nanti klaim 1-Day Pass, bilang ke Jan biar diawasin gerakannya.");
             } else if (squat.includes("Kaku Banget") || age > 45) {
                 painPoints.push("⚠️ <b>Mobilitas Terkunci:</b> Rentang gerak sendi Kakak sangat terbatas. Nanti saat Konsultasi Gratis, kita cek bagian mana yang kaku biar nggak cedera.");
-            }
-
-            if (fat.includes("Lumayan Tebal") && goal.includes("Hajar Lemak")) {
-                painPoints.push("🔥 <b>Metabolisme Pasif:</b> Kakak butuh <i>metabolic shock</i> (latihan intensitas khusus) buat maksa badan bongkar kalori. Kita atur plan-nya waktu cek Body-Comp nanti.");
             }
 
             if (xp.includes("Belum Pernah")) {
@@ -408,17 +467,17 @@
                 painPoints.push("🔄 <b>Siklus Yo-Yo:</b> Kakak butuh 'Siksaan Baru' dengan teknik yang benar. Kita reset mindset latihannya bareng-bareng.");
             }
 
-            if (painPoints.length > 0) {
-                logicText += painPoints.join("<br><br>") + "<br><br>";
+            if (painPoints.length === 0) {
+                logicText = "Secara keseluruhan, fisik Kakak dan rasio BMI sangat sehat! Tidak ada hambatan mobilitas yang berarti. Tinggal di-push dikit lagi.<br><br>";
             } else {
-                logicText = "Secara keseluruhan, fisik Kakak dalam kondisi yang sangat siap untuk ditempa! Tidak ada hambatan mobilitas yang berarti.<br><br>";
+                logicText += painPoints.join("<br><br>") + "<br><br>";
             }
 
             if (injury.includes("Ada Kak") || squat.includes("Kaku Banget") || age > 50) {
                 programName = "REHAB & STRENGTHENING PROGRAM";
                 logicText += `💡 <b>SOLUSI JAN:</b> Jan sangat menyarankan Kakak mengambil <b>Program dengan Personal Trainer (PT)</b> agar latihan 100% aman. Klik tombol di bawah buat ambil Pass Gratisnya!`;
             } 
-            else if (xp.includes("Belum Pernah") || (muscle.includes("Lembek") && fat.includes("Lumayan Tebal"))) {
+            else if (xp.includes("Belum Pernah") || finalBMICategory === "Obese" || finalBMICategory === "Overweight") {
                 programName = "METABOLIC ACCELERATOR (PT + MEMBERSHIP)";
                 logicText += `💡 <b>SOLUSI JAN:</b> Program <b>Bundling Membership + PT</b> adalah jalan pintas tercepat Kakak. Segera klik tombol di bawah untuk atur jadwal ambil Body-Comp Gratisnya sama Jan!`;
             }
@@ -434,8 +493,14 @@
             document.getElementById('res-program-name').innerText = programName;
             document.getElementById('res-reasoning').innerHTML = logicText;
 
+            // Generate skor nutrisi berbasis BMI
+            let bmiScore = 50;
+            if(finalBMICategory === 'Normal') bmiScore = 100;
+            else if(finalBMICategory === 'Overweight' || finalBMICategory === 'Underweight') bmiScore = 60;
+            else if(finalBMICategory === 'Obese') bmiScore = 30;
+
             const vFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
-            const vNutrisi = (scores['met'] || 50 + 60) / 1.2;
+            const vNutrisi = (bmiScore + 60) / 1.2;
             const isAktif = answers['act'] && answers['act'].includes("Banyak Gerak");
             const vStamina = ((isAktif ? 90 : 40) + (parseInt(answers['slp']) || 7) * 10) / 2;
             const vDisiplin = (parseInt(answers['gym']) || 3) * 14.5;
@@ -448,13 +513,13 @@
             formData.append('Usia', profile.age);
             formData.append('Domisili', profile.city);
             formData.append('No_HP', profile.phone);
+            formData.append('Tinggi', answers['height']);
+            formData.append('Berat', answers['weight']);
+            formData.append('BMI', finalBMI);
             formData.append('Goal', goal);
             formData.append('Program_Rekomendasi', programName);
-            
-            const skorFisik = (scores['fat'] || 50 + scores['mus'] || 50) / 2;
-            const skorNutrisi = (scores['met'] || 50 + 60) / 1.2;
-            formData.append('Skor_Fisik', skorFisik);
-            formData.append('Skor_Nutrisi', skorNutrisi);
+            formData.append('Skor_Fisik', vFisik.toFixed(0));
+            formData.append('Skor_Nutrisi', vNutrisi.toFixed(0));
 
             fetch(scriptURL, { method: 'POST', body: formData })
                 .then(res => console.log("Data auto-synced to Sheet successfully."))
@@ -463,10 +528,7 @@
 
         function initChart(dataVals) {
             const ctx = document.getElementById('radarChart').getContext('2d');
-            
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
+            if (chartInstance) chartInstance.destroy();
 
             chartInstance = new Chart(ctx, {
                 type: 'radar',
@@ -502,22 +564,21 @@
         window.sendWhatsApp = function() {
             const btn = document.getElementById('btn-whatsapp');
             const originalText = btn.innerHTML;
-            
             const programName = document.getElementById('res-program-name').innerText;
 
-            // Pesan WA diubah jadi fokus klaim tiket gratis
-            const waMsg = `Halo Jan! Saya sudah isi Body Blueprint Scanner dan mau klaim *1-Day Gym Pass Gratis & Cek Body-Composition* nih.%0A%0A--- DATA DIRI ---%0ANama: ${profile.name}%0AUmur: ${profile.age} th%0ADomisili: ${profile.city}%0A%0A--- DATA SISTEM ---%0ATema Program: ${programName}%0A%0AJan, kabari ya jadwal trialnya kapan!`;
+            const waMsg = `Halo Jan! Saya sudah isi Body Blueprint Scanner dan mau klaim *1-Day Gym Pass Gratis & Konsultasi* nih.%0A%0A--- DATA FISIK ---%0ANama: ${profile.name}%0ATinggi: ${answers['height']} cm%0ABerat: ${answers['weight']} kg%0ABMI: ${finalBMI} (${finalBMICategory})%0A%0A--- HASIL DIAGNOSA ---%0ATema Program: ${programName}%0A%0AJan, kabari ya jadwal bisa visit dan ambil vouchernya kapan!`;
 
-            // Ubah tombol jadi status loading
             btn.innerHTML = '<i class="fas fa-spinner fa-spin text-2xl"></i> MENGIRIM DATA...';
             btn.disabled = true;
 
-            // Kirim data ekstra (sebagai fail-safe)
             const formData = new FormData();
             formData.append('Nama', profile.name);
             formData.append('Usia', profile.age);
             formData.append('Domisili', profile.city);
             formData.append('No_HP', profile.phone);
+            formData.append('Tinggi', answers['height']);
+            formData.append('Berat', answers['weight']);
+            formData.append('BMI', finalBMI);
             formData.append('Goal', answers['aim'] || 'Tidak ditentukan');
             formData.append('Program_Rekomendasi', programName);
 
@@ -537,3 +598,5 @@
     </script>
 </body>
 </html>
+
+
